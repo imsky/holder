@@ -1,16 +1,16 @@
 Holder
 ======
 
-Holder is a client-side image placeholder library that uses HTML5 canvas and the data URI scheme to render placeholders entirely in browser.
+Holder is a client-side image placeholder library that uses ``<canvas>`` and the data URI scheme to render placeholders entirely in browser.
 
 How to use it
 -------------
 
 Include ``holder.js`` in your HTML. Holder will process all images with a specific ``src`` attribute, like this:
 
-``html
+```html
 <img src="holder.js/200x300">
-``
+```
 
 The above will render as a placeholder 200 pixels wide and 300 pixels tall.
 
@@ -18,18 +18,18 @@ To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
 Holder also includes support for themes, to help placeholders blend in with your layout. There are 3 default themes: ``gray``, ``industrial``, and ``social``. You can use them like this:
 
-``html
+```html
 <img src="holder.js/200x300/industrial">
-``
+```
 
 Customizing themes
 ------------------
 
 Themes have 3 properties: ``foreground``, ``background``, and ``size``. The ``size`` property specifies the minimum font size for the theme. You can create a sample theme like this:
 
-``js
+```js
 Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11})
-``
+```
 
 Using custom themes
 -------------------
@@ -43,20 +43,20 @@ The first approach is the easiest. After you include ``holder.js``, add a ``scri
 
 The second approach requires that you call ``run`` after you add the theme, like this:
 
-``js
+```js
 Holder.add_theme("bright", {background:"white", foreground:"gray", size:12}).run()
-``
+```
 
 Using custom themes and domain on specific images
 -------------------------------------------------
 
 You can use Holder in different areas on different images with custom themes:
 
-``html
+```html
 <img data-src="example.com/100x100/simple" id="new">
-``
+```
 
-``js
+```js
 Holder.run({
     domain: "example.com",
     themes: {
@@ -67,16 +67,16 @@ Holder.run({
             }},
     images: "#new"
     })
-``
+```
 
 Using custom colors per placeholder
 -----------------------------------
 
 Custom colors can be specified in the ``background:foreground`` format using hex notation, like this:
 
-``html
+```html
 <img data-src="holder.js/100x200/#000:#fff">
-``
+```
 
 The above will render a placeholder with a black background and white text.
 
@@ -85,9 +85,9 @@ Using partially custom settings
 
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
-``js
+```js
 Holder.run({domain:"example.com})
-``
+```
 
 Using custom settings on load
 -----------------------------
@@ -99,9 +99,9 @@ Inserting an image with optional custom theme
 
 You can add a placeholder programmatically by chaining Holder calls:
 
-``js
+```js
 Holder.add_theme("new",{foreground:"#ccc", background:"#000", size:10}).add_image("holder.js/200x100/new", "body").run()
-``
+```
 
 The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
 
