@@ -69,10 +69,10 @@ Holder.run({
     })
 ```
 
-Using custom colors per placeholder
------------------------------------
+Using custom colors on specific images
+--------------------------------------
 
-Custom colors can be specified in the ``background:foreground`` format using hex notation, like this:
+You don't have to create a new theme just to use custom colors. Custom colors can be specified in the ``background:foreground`` format using hex notation, like this:
 
 ```html
 <img data-src="holder.js/100x200/#000:#fff">
@@ -86,7 +86,7 @@ Using partially custom settings
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
 ```js
-Holder.run({domain:"example.com})
+Holder.run({domain:"example.com"})
 ```
 
 Using custom settings on load
