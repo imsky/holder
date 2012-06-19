@@ -1,0 +1,84 @@
+<!doctype html>
+<!--
+    Holder is made by Ivan Malopinsky (http://imsky.co)
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<title>Holder.js</title>
+<style type="text/css">
+body {padding:0;margin:0;font-family:sans-serif}
+a {color:#5c9f7e}
+a:hover {color:#4D8569}
+a, a:hover {transition:color 0.1s ease-in}
+h1, h2 {margin:0;letter-spacing:-1px}
+h2.ie {font:3em inherit;color:red;position:fixed;top:0px;margin:0;z-index:2;width:100%;background:yellow}
+
+#content {position:absolute;z-index:1;top:120px;left:0px;height:230px;color:#555;font-size:12px}
+#content-inner {padding:20px;overflow:hidden;width:500px}
+.block {float:left;width:200px;margin-right:40px}
+#details {width:220px}
+.block.header h1 {margin-bottom:20px;color:#78c9a9;font-size:24px}
+.block h2 {color:#aaa;font-size:16px;line-height:20px;margin-bottom:8px}
+.block.fluid {width:auto}
+.block p {margin:0;margin-bottom:16px;line-height:16px}
+.block code {border-radius:4px;font-size:12px;font-family:'Lucida Console',monospace;background:#eee;text-align:center;display:block;padding:4px;white-space:nowrap}
+
+#download {background:#78c9a9;display:block;text-align:center;font-weight:bold;color:#fff;padding:4px 0;font-size:14px;border-radius:4px;text-decoration:none;text-shadow:0px 1px 0px rgba(0,0,0, 0.2);box-shadow:0px 0px 0px #69B094}
+#download:hover {box-shadow:0px 2px 0px #69B094}
+#download, #download:hover {transition:all 0.1s ease-out}
+
+#background {position:fixed;z-index:2}
+#background img {position:absolute;display:block}
+</style>
+</head>
+<body>
+
+<div id="content">
+	<div id="content-inner">
+        <div class="block header">
+		<h1>Holder.js</h1>
+        <p>Holder renders image placeholders entirely on the client side.</p>
+        <p>It works both online and offline, and offers a chainable API to style and create placeholders with ease.</p>
+        <a href="#" id="download">Download Holder.js (4KB)</a>
+        </div>
+        <div class="block" id="details">
+            <h2>Usage</h2>
+        <p> <code>&lt;img src="holder.js/300x200"&gt;</code></p>
+           <h2>Documentation</h2>
+             <p>View detailed documentation at the <a href="https://github.com/imsky/holder">Holder.js GitHub page</a>.</p>
+            <h2>Credits</h2>
+            <p>Made by <a href="http://imsky.co">Ivan Malopinsky</a>.</p>
+        </div>
+	</div>
+</div>
+<div id="background">
+</div>
+
+<!--[if lt IE 9]>
+<h2 class="ie">You're using an unsupported browser. <a href="http://goo.gl/OxmUO">Upgrade to IE9.</a></h2>
+<![endif]-->
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://imsky.github.com/cssFx/cssfx.min.js"></script>
+<script src="holder.js"></script>
+<script src="demo.js"></script>
+
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://analytics.imsky.co/" : "http://analytics.imsky.co/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 6);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://analytics.imsky.co/piwik.php?idsite=6" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+
+</body>
+</html>
