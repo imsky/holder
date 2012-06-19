@@ -94,8 +94,10 @@ var Holder = Holder || {};
 		images = images.length != null ? images : [images];
 		preempted = true;
 		for(var l = images.length, i = 0; i < l; i++) {
-			var dimensions, theme = settings.themes.gray;
-			src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
+			var dimensions,
+				theme = settings.themes.gray,
+				src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
+				
 			if( !! ~src.indexOf(options.domain)) {
 				var render = false;
 				for(var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/"), sl = flags.length, j = 0; j < sl; j++) {
