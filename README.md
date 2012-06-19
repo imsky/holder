@@ -116,7 +116,7 @@ Browser support
 License
 -------
 
-Holder is provided under the BSD license. Commercial use requires attribution.
+Holder is provided under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0). Commercial use requires attribution.
 
 Credits
 -------
