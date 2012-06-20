@@ -91,7 +91,6 @@ var Holder = Holder || {};
 	}
 	app.add_image = function (src, el) {
 		var node = selector(el);
-		console.log(node)
 		if(node.length) {
 			for(var i = 0, l = node.length; i < l; i++){
 				var img = document.createElement("img")
