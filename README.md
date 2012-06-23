@@ -111,7 +111,8 @@ Browser support
 * Chrome 1+
 * Firefox 3+
 * Safari 4+
-* Internet Explorer 9+
+* Internet Explorer 9+, with fallback for IE6-8
+* Android 1+
 
 License
 -------
