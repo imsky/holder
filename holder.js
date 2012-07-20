@@ -23,7 +23,7 @@ function selector(a){
 //shallow object property extend
 function extend(a,b){var c={};for(var d in a)c[d]=a[d];for(var e in b)c[e]=b[e];return c}
 	
-function draw(ctx, dimensions, template) {
+function draw(ctx, dimensions, template, customtext) {
 	var dimension_arr = [dimensions.height, dimensions.width].sort();
 	var maxFactor = Math.round(dimension_arr[1] / 16),
 		minFactor = Math.round(dimension_arr[0] / 16);
@@ -36,7 +36,12 @@ function draw(ctx, dimensions, template) {
 	ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px sans-serif";
-	var text = dimensions.width + "x" + dimensions.height;
+	if(customtext) {
+		var text = customtext;
+	} else {
+		var text = dimensions.width + "x" + dimensions.height;
+	}
+
 	if (Math.round(ctx.measureText(text).width) / dimensions.width > 1) {
 		text_height = Math.max(minFactor, template.size);
 	}
@@ -102,6 +107,7 @@ app.run = function (o) {
 	for (var l = images.length, i = 0; i < l; i++) {
 		var dimensions, theme = settings.themes.gray;
 		src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
+		var text = images[i].getAttribute("data-text");
 		if ( !! ~src.indexOf(options.domain)) {
 			var render = false;
 			for (var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/"), sl = flags.length, j = 0; j < sl; j++) {
@@ -126,7 +132,7 @@ app.run = function (o) {
 			if (render) {
 				images[i].setAttribute("data-src", src);
 				if (!fallback) {
-					images[i].setAttribute("src", draw(ctx, dimensions, theme));
+					images[i].setAttribute("src", draw(ctx, dimensions, theme, text));
 				} else {
 					images[i].style.width = dimensions.width + "px";
 					images[i].style.height = dimensions.height + "px";
