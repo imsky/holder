@@ -80,6 +80,15 @@ You don't have to create a new theme just to use custom colors. Custom colors ca
 
 The above will render a placeholder with a black background and white text.
 
+Specifying custom text on specific images
+-----------------------------------------
+
+You can use an entirely custom caption on the placeholder with the following settings:
+
+```html
+<img data-src="holder.js/200x200/text:hello world">
+```
+
 Using partially custom settings
 -------------------------------
 

@@ -36,7 +36,7 @@ function draw(ctx, dimensions, template) {
 	ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px sans-serif";
-	var text = dimensions.width + "x" + dimensions.height;
+	var text = template.text ? template.text : (dimensions.width + "x" + dimensions.height);
 	if (Math.round(ctx.measureText(text).width) / dimensions.width > 1) {
 		text_height = Math.max(minFactor, template.size);
 	}
@@ -46,6 +46,7 @@ function draw(ctx, dimensions, template) {
 }
 var dimensions_regex = /([0-9]+)x([0-9]+)/;
 var hex_regex = /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i;
+var text_regex = /text\:([\w\s]+)/;
 var preempted = false,
 	fallback = false;
 var canvas = document.createElement('canvas');
@@ -119,8 +120,13 @@ app.run = function (o) {
 						foreground: "#" + exec[2],
 						background: "#" + exec[1]
 					}
-				} else if (options.themes[flags[j]]) {
+				}
+				else if (options.themes[flags[j]]) {
 					theme = options.themes[flags[j]];
+				}
+				else if(flags[j].match(text_regex)){
+						var exec = text_regex.exec(flags[j]);
+						theme.text = exec[1];
 				}
 			}
 			if (render) {
