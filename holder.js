@@ -1,6 +1,6 @@
 /*
 
-Holder - client side image placeholders
+Holder - 1.2 - client side image placeholders
 (c) 2012 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -46,7 +46,7 @@ function draw(ctx, dimensions, template) {
 }
 var dimensions_regex = /([0-9]+)x([0-9]+)/;
 var hex_regex = /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i;
-var text_regex = /text\:([\w\s]+)/;
+var text_regex = /text\:(.*)/;
 var preempted = false,
 	fallback = false;
 var canvas = document.createElement('canvas');
@@ -60,6 +60,7 @@ if (!canvas.getContext) {
 		var ctx = canvas.getContext("2d");
 	}
 }
+
 var settings = {
 	domain: "holder.js",
 	images: "img",
@@ -80,11 +81,13 @@ var settings = {
 			size: 12
 		}
 	}
-}
+};
+
 app.add_theme = function (name, theme) {
 	name != null && theme != null && (settings.themes[name] = theme);
 	return app;
-}
+};
+
 app.add_image = function (src, el) {
 	var node = selector(el);
 	if (node.length) {
@@ -95,54 +98,60 @@ app.add_image = function (src, el) {
 		}
 	}
 	return app;
-}
+};
+
 app.run = function (o) {
 	var options = extend(settings, o),
 		images = selector(options.images),
 		preempted = true;
 	for (var l = images.length, i = 0; i < l; i++) {
 		var dimensions, theme = settings.themes.gray;
-		src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
+		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
 		if ( !! ~src.indexOf(options.domain)) {
 			var render = false;
 			for (var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/"), sl = flags.length, j = 0; j < sl; j++) {
+				var exec;
 				if (flags[j].match(dimensions_regex)) {
-					var exec = dimensions_regex.exec(flags[j])
+					exec = dimensions_regex.exec(flags[j]);
 					dimensions = {
-						width: parseInt(exec[1], 10),
-						height: parseInt(exec[2], 10)
-					}
+						width: +exec[1],
+						height: +exec[2]
+					};
 					render = true;
 				} else if (flags[j].match(hex_regex)) {
-					var exec = hex_regex.exec(flags[j]);
+					exec = hex_regex.exec(flags[j]);
 					theme = {
 						size: settings.themes.gray.size,
 						foreground: "#" + exec[2],
 						background: "#" + exec[1]
-					}
+					};
 				}
 				else if (options.themes[flags[j]]) {
 					theme = options.themes[flags[j]];
 				}
 				else if(flags[j].match(text_regex)){
-						var exec = text_regex.exec(flags[j]);
+						exec = text_regex.exec(flags[j]);
 						theme.text = exec[1];
 				}
 			}
 			if (render) {
 				images[i].setAttribute("data-src", src);
-				if (!fallback) {
-					images[i].setAttribute("src", draw(ctx, dimensions, theme));
-				} else {
-					images[i].style.width = dimensions.width + "px";
-					images[i].style.height = dimensions.height + "px";
-					images[i].style.backgroundColor = theme.background;
+				var dimensions_caption = dimensions.width+"x"+dimensions.height;
+				images[i].setAttribute("alt", theme.text ? theme.text + " ["+dimensions_caption+"]" : dimensions_caption);
+				
+				//Fallback
+				images[i].style.width = dimensions.width + "px";
+				images[i].style.height = dimensions.height + "px";
+				images[i].style.backgroundColor = theme.background;
+				
+				if(!fallback){
+				images[i].setAttribute("src", draw(ctx, dimensions, theme));
 				}
 			}
 		}
 	}
 	return app;
-}
+};
 contentLoaded(win, function () {
 	preempted || app.run()
 })
