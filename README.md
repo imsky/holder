@@ -6,13 +6,19 @@ Holder is a client-side image placeholder library that uses ``<canvas>`` and the
 How to use it
 -------------
 
-Include ``holder.js`` in your HTML. Holder will process all images with a specific ``src`` attribute, like this:
+Include ``holder.js`` in your HTML:
+
+```html
+<script src="holder.js"></script>
+```
+
+Holder will then process all images with a specific ``src`` attribute, like this one:
 
 ```html
 <img src="holder.js/200x300">
 ```
 
-The above will render as a placeholder 200 pixels wide and 300 pixels tall.
+The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
@@ -39,12 +45,17 @@ There are two ways to use custom themes with Holder:
 * Include theme at runtime to render placeholders already using the theme name
 * Include theme at any point and re-render placeholders that are using the theme name
 
-The first approach is the easiest. After you include ``holder.js``, add a ``script`` tag that adds the theme you want.
+The first approach is the easiest. After you include ``holder.js``, add a ``script`` tag that adds the theme you want:
+
+```html
+<script src="holder.js"></script>
+<script> Holder.add_theme("bright", { background: "white", foreground: "gray", size: 12 })</script>
+```
 
 The second approach requires that you call ``run`` after you add the theme, like this:
 
 ```js
-Holder.add_theme("bright", {background:"white", foreground:"gray", size:12}).run()
+Holder.add_theme("bright", { background: "white", foreground: "gray", size: 12}).run()
 ```
 
 Using custom themes and domain on specific images
@@ -64,7 +75,8 @@ Holder.run({
             background:"#fff",
             foreground:"#000",
             size:12
-            }},
+            }
+    },
     images: "#new"
     })
 ```
@@ -89,8 +101,17 @@ You can use an entirely custom caption on the placeholder with the following set
 <img data-src="holder.js/200x200/text:hello world">
 ```
 
-Using partially custom settings
--------------------------------
+Specifying custom text for a theme
+----------------------------------
+
+If you have a group of placeholders where you'd like to use a particular caption, you can do so by adding a ``text`` property to the theme:
+
+```js
+Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" })
+```
+
+Customizing only the settings you need
+--------------------------------------
 
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
