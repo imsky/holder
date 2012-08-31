@@ -1,7 +1,7 @@
 Holder
 ======
 
-Holder is a client-side image placeholder library that uses ``<canvas>`` and the data URI scheme to render placeholders entirely in browser.
+Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
 
 How to use it
 -------------
@@ -84,7 +84,7 @@ Holder.run({
 Using custom colors on specific images
 --------------------------------------
 
-You don't have to create a new theme just to use custom colors. Custom colors can be specified in the ``background:foreground`` format using hex notation, like this:
+Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
 
 ```html
 <img data-src="holder.js/100x200/#000:#fff">
@@ -94,8 +94,6 @@ The above will render a placeholder with a black background and white text.
 
 Specifying custom text on specific images
 -----------------------------------------
-
-You can use an entirely custom caption on the placeholder with the following settings:
 
 ```html
 <img data-src="holder.js/200x200/text:hello world">
