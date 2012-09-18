@@ -10,7 +10,7 @@ Commercial use requires attribution.
 
 var Holder = Holder || {};
 (function (app, win) {
-	
+
 var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
@@ -141,11 +141,11 @@ app.run = function (o) {
 	var options = extend(settings, o),
 		images = selector(options.images),
 		preempted = true;
-		
+
 	for (var l = images.length, i = 0; i < l; i++) {
 		var theme = settings.themes.gray;
 		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
-		if ( src !== null )
+		if ( src !== null ) {
 			if ( !! ~src.indexOf(options.domain)) {
 				var render = false,
 					dimensions = null,
@@ -168,16 +168,16 @@ app.run = function (o) {
 					images[i].setAttribute("data-src", src);
 					var dimensions_caption = dimensions.width + "x" + dimensions.height;
 					images[i].setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-					
+
 					//Fallback
 					images[i].style.width = dimensions.width + "px";
 					images[i].style.height = dimensions.height + "px";
 					images[i].style.backgroundColor = theme.background;
-					
+
 					var theme = (text ? extend(theme, {
 							text: text
 						}) : theme);
-					
+
 					if (!fallback) {
 						images[i].setAttribute("src", draw(ctx, dimensions, theme));
 					}
