@@ -145,40 +145,42 @@ app.run = function (o) {
 	for (var l = images.length, i = 0; i < l; i++) {
 		var theme = settings.themes.gray;
 		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
-		if ( !! ~src.indexOf(options.domain)) {
-			var render = false,
-				dimensions = null,
-				text = null;
-			var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/");
-			for (sl = flags.length, j = 0; j < sl; j++) {
-				if (app.flags.dimensions.match(flags[j])) {
-					render = true;
-					dimensions = app.flags.dimensions.output(flags[j]);
-				} else if (app.flags.colors.match(flags[j])) {
-					theme = app.flags.colors.output(flags[j]);
-				} else if (options.themes[flags[j]]) {
-					//If a theme is specified, it will override custom colors
-					theme = options.themes[flags[j]];
-				} else if (app.flags.text.match(flags[j])) {
-					text = app.flags.text.output(flags[j]);
+		if ( src !== null )
+			if ( !! ~src.indexOf(options.domain)) {
+				var render = false,
+					dimensions = null,
+					text = null;
+				var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/");
+				for (sl = flags.length, j = 0; j < sl; j++) {
+					if (app.flags.dimensions.match(flags[j])) {
+						render = true;
+						dimensions = app.flags.dimensions.output(flags[j]);
+					} else if (app.flags.colors.match(flags[j])) {
+						theme = app.flags.colors.output(flags[j]);
+					} else if (options.themes[flags[j]]) {
+						//If a theme is specified, it will override custom colors
+						theme = options.themes[flags[j]];
+					} else if (app.flags.text.match(flags[j])) {
+						text = app.flags.text.output(flags[j]);
+					}
 				}
-			}
-			if (render) {
-				images[i].setAttribute("data-src", src);
-				var dimensions_caption = dimensions.width + "x" + dimensions.height;
-				images[i].setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-				
-				//Fallback
-				images[i].style.width = dimensions.width + "px";
-				images[i].style.height = dimensions.height + "px";
-				images[i].style.backgroundColor = theme.background;
-				
-				var theme = (text ? extend(theme, {
-						text: text
-					}) : theme);
-				
-				if (!fallback) {
-					images[i].setAttribute("src", draw(ctx, dimensions, theme));
+				if (render) {
+					images[i].setAttribute("data-src", src);
+					var dimensions_caption = dimensions.width + "x" + dimensions.height;
+					images[i].setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
+					
+					//Fallback
+					images[i].style.width = dimensions.width + "px";
+					images[i].style.height = dimensions.height + "px";
+					images[i].style.backgroundColor = theme.background;
+					
+					var theme = (text ? extend(theme, {
+							text: text
+						}) : theme);
+					
+					if (!fallback) {
+						images[i].setAttribute("src", draw(ctx, dimensions, theme));
+					}
 				}
 			}
 		}
