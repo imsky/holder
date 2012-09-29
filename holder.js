@@ -10,7 +10,7 @@ Commercial use requires attribution.
 
 var Holder = Holder || {};
 (function (app, win) {
-	
+
 var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
@@ -197,7 +197,7 @@ app.run = function (o) {
 		images = selector(options.images),
 		elements = selector(options.elements),
 		preempted = true;
-	
+
 	var cssregex = new RegExp(options.domain+"\/(.*?)\"?\\)");
 	
 	for(var l = elements.length, i = 0; i < l; i++){
@@ -210,7 +210,7 @@ app.run = function (o) {
 			}
 		}
 	}
-	
+
 	for (var l = images.length, i = 0; i < l; i++) {
 		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
 		if (src.indexOf(options.domain)>=0) {
