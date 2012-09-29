@@ -1,6 +1,6 @@
 /*
 
-Holder - 1.3 - client side image placeholders
+Holder - 1.4 - client side image placeholders
 (c) 2012 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -14,6 +14,12 @@ var Holder = Holder || {};
 var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
+
+//getElementsByClassName polyfill
+document.getElementsByClassName||(document.getElementsByClassName=function(e){var t=document,n,r,i,s=[];if(t.querySelectorAll)return t.querySelectorAll("."+e);if(t.evaluate){r=".//*[contains(concat(' ', @class, ' '), ' "+e+" ')]",n=t.evaluate(r,t,null,0,null);while(i=n.iterateNext())s.push(i)}else{n=t.getElementsByTagName("*"),r=new RegExp("(^|\\s)"+e+"(\\s|$)");for(i=0;i<n.length;i++)r.test(n[i].className)&&s.push(n[i])}return s})
+
+//getComputedStyle polyfill
+window.getComputedStyle||(window.getComputedStyle=function(e,t){return this.el=e,this.getPropertyValue=function(t){var n=/(\-([a-z]){1})/g;return t=="float"&&(t="styleFloat"),n.test(t)&&(t=t.replace(n,function(){return arguments[2].toUpperCase()})),e.currentStyle[t]?e.currentStyle[t]:null},this})
 
 //http://javascript.nwbox.com/ContentLoaded by Diego Perini with modifications
 function contentLoaded(n,t){var l="complete",s="readystatechange",u=!1,h=u,c=!0,i=n.document,a=i.documentElement,e=i.addEventListener?"addEventListener":"attachEvent",v=i.addEventListener?"removeEventListener":"detachEvent",f=i.addEventListener?"":"on",r=function(e){(e.type!=s||i.readyState==l)&&((e.type=="load"?n:i)[v](f+e.type,r,u),!h&&(h=!0)&&t.call(n,null))},o=function(){try{a.doScroll("left")}catch(n){setTimeout(o,50);return}r("poll")};if(i.readyState==l)t.call(n,"lazy");else{if(i.createEventObject&&a.doScroll){try{c=!n.frameElement}catch(y){}c&&o()}i[e](f+"DOMContentLoaded",r,u),i[e](f+s,r,u),n[e](f+"load",r,u)}};
@@ -60,9 +66,59 @@ if (!canvas.getContext) {
 	}
 }
 
+function render(mode, el, holder, src){
+
+	var dimensions = holder.dimensions, theme = holder.theme, text = holder.text;
+	var dimensions_caption = dimensions.width + "x" + dimensions.height;
+		theme = (text ? extend(theme, {	text: text	}) : theme);
+	
+	if(mode == "image"){
+		el.setAttribute("data-src", src);
+		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
+		el.style.width = dimensions.width + "px";
+		el.style.height = dimensions.height + "px";
+		el.style.backgroundColor = theme.background;
+		
+		if(!fallback){
+			el.setAttribute("src", draw(ctx, dimensions, theme));
+		}
+	}
+	else {
+		if(!fallback){
+			el.style.backgroundImage = "url("+draw(ctx, dimensions, theme)+")";
+		}
+	}
+	
+};
+
+function parse_flags(flags, options){
+	
+	var ret = {
+		theme: settings.themes.gray
+		}, render = false;
+	
+	for (sl = flags.length, j = 0; j < sl; j++) {
+				if (app.flags.dimensions.match(flags[j])) {
+					render = true;
+					ret.dimensions = app.flags.dimensions.output(flags[j]);
+				} else if (app.flags.colors.match(flags[j])) {
+					ret.theme = app.flags.colors.output(flags[j]);
+				} else if (options.themes[flags[j]]) {
+					//If a theme is specified, it will override custom colors
+					ret.theme = options.themes[flags[j]];
+				} else if (app.flags.text.match(flags[j])) {
+					ret.text = app.flags.text.output(flags[j]);
+				}
+	}
+	
+	return render ? ret : false;
+	
+};
+
 var settings = {
 	domain: "holder.js",
 	images: "img",
+	elements: ".holderjs",
 	themes: {
 		"gray": {
 			background: "#eee",
@@ -81,7 +137,6 @@ var settings = {
 		}
 	}
 };
-
 
 
 app.flags = {
@@ -140,53 +195,36 @@ app.add_image = function (src, el) {
 app.run = function (o) {
 	var options = extend(settings, o),
 		images = selector(options.images),
+		elements = selector(options.elements),
 		preempted = true;
-		
-	for (var l = images.length, i = 0; i < l; i++) {
-		var theme = settings.themes.gray;
-		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
-		if ( !! ~src.indexOf(options.domain)) {
-			var render = false,
-				dimensions = null,
-				text = null;
-			var flags = src.substr(src.indexOf(options.domain) + options.domain.length + 1).split("/");
-			for (sl = flags.length, j = 0; j < sl; j++) {
-				if (app.flags.dimensions.match(flags[j])) {
-					render = true;
-					dimensions = app.flags.dimensions.output(flags[j]);
-				} else if (app.flags.colors.match(flags[j])) {
-					theme = app.flags.colors.output(flags[j]);
-				} else if (options.themes[flags[j]]) {
-					//If a theme is specified, it will override custom colors
-					theme = options.themes[flags[j]];
-				} else if (app.flags.text.match(flags[j])) {
-					text = app.flags.text.output(flags[j]);
-				}
+	
+	var cssregex = new RegExp(options.domain+"\/(.*?)\"?\\)");
+	
+	for(var l = elements.length, i = 0; i < l; i++){
+		var src = window.getComputedStyle(elements[i],null).getPropertyValue("background-image");
+		var flags = src.match(cssregex);
+		if(flags){
+			var holder = parse_flags(flags[1].split("/"), options);
+			if(holder){
+				render("background", elements[i], holder, src);
 			}
-			if (render) {
-				images[i].setAttribute("data-src", src);
-				var dimensions_caption = dimensions.width + "x" + dimensions.height;
-				images[i].setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-				
-				//Fallback
-				images[i].style.width = dimensions.width + "px";
-				images[i].style.height = dimensions.height + "px";
-				images[i].style.backgroundColor = theme.background;
-				
-				var theme = (text ? extend(theme, {
-						text: text
-					}) : theme);
-				
-				if (!fallback) {
-					images[i].setAttribute("src", draw(ctx, dimensions, theme));
-				}
+		}
+	}
+	
+	for (var l = images.length, i = 0; i < l; i++) {
+		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
+		if (src.indexOf(options.domain)>=0) {
+			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
+			if (holder) {
+				render("image", images[i], holder, src);
 			}
 		}
 	}
 	return app;
 };
+
 contentLoaded(win, function () {
 	preempted || app.run()
-})
+});
 
 })(Holder, window);

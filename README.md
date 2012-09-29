@@ -92,21 +92,35 @@ Custom colors on a specific image can be specified in the ``background:foregroun
 
 The above will render a placeholder with a black background and white text.
 
-Specifying custom text on specific images
------------------------------------------
+Custom text
+-----------
+
+You can specify custom text using the ``text:`` operator:
 
 ```html
 <img data-src="holder.js/200x200/text:hello world">
 ```
 
-Specifying custom text for a theme
-----------------------------------
-
-If you have a group of placeholders where you'd like to use a particular caption, you can do so by adding a ``text`` property to the theme:
+If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
 
 ```js
 Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" })
 ```
+
+Background placeholders
+-----------------------
+
+Holder can render placeholders as background images for elements with the `holderjs` class, like this:
+
+```css
+#sample {background:url(#holder.js/200x200/social) no-repeat}
+```
+
+```html
+<div id="sample" class="holderjs"></div>
+```
+
+The Holder URL in CSS should have either a `?` or a `#` in front for all browsers except Opera. You can change the default class by specifying a selector as the `elements` property when calling `Holder.run`.
 
 Customizing only the settings you need
 --------------------------------------
