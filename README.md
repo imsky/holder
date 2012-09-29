@@ -113,14 +113,14 @@ Background placeholders
 Holder can render placeholders as background images for elements with the `holderjs` class, like this:
 
 ```css
-#sample {background:url(#holder.js/200x200/social) no-repeat}
+#sample {background:url(?holder.js/200x200/social) no-repeat}
 ```
 
 ```html
 <div id="sample" class="holderjs"></div>
 ```
 
-The Holder URL in CSS should have either a `?` or a `#` in front for all browsers except Opera. You can change the default class by specifying a selector as the `elements` property when calling `Holder.run`.
+The Holder URL in CSS should have a `?` in front. You can change the default class by specifying a selector as the `elements` property when calling `Holder.run`.
 
 Customizing only the settings you need
 --------------------------------------
