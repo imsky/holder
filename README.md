@@ -20,6 +20,13 @@ Holder will then process all images with a specific ``src`` attribute, like this
 
 The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
+```html
+<img src="holder.js/200">
+<img src="holder.js/200/social">
+```
+
+If you need square images, you can just put one size
+
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
 Holder also includes support for themes, to help placeholders blend in with your layout. There are 3 default themes: ``gray``, ``industrial``, and ``social``. You can use them like this:
