@@ -113,7 +113,6 @@ function parse_flags(flags, options){
 				} else if (options.themes[flags[j]]) {
 					//If a theme is specified, it will override custom colors
 					ret.theme = options.themes[flags[j]];
-					//console.log("theme");
 				} else if (app.flags.text.match(flags[j])) {
 					ret.text = app.flags.text.output(flags[j]);
 				}
@@ -224,7 +223,6 @@ app.run = function (o) {
 		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
 		if (src.indexOf(options.domain)>=0) {
 			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
-			//console.log(holder);
 			if (holder) {
 				render("image", images[i], holder, src);
 			}
