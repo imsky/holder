@@ -213,7 +213,7 @@ app.run = function (o) {
 
 	for (var l = images.length, i = 0; i < l; i++) {
 		var src = images[i].getAttribute("data-src") || images[i].getAttribute("src");
-		if (src.indexOf(options.domain)>=0) {
+		if (src != null && src.indexOf(options.domain)>=0) {
 			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
 			if (holder) {
 				render("image", images[i], holder, src);
