@@ -107,6 +107,17 @@ If you have a group of placeholders where you'd like to use particular text, you
 Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" })
 ```
 
+Fluid placeholders
+------------------
+
+Specifying a dimension in percentages creates a fluid placeholder that responds to media queries.
+
+```html
+<img data-src="holder.js/100%x75/social">
+```
+
+By default, the fluid placeholder will show its current size in pixels.
+
 Background placeholders
 -----------------------
 
