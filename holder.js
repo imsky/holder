@@ -84,10 +84,11 @@ function render(mode, el, holder, src) {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
 		el.style.width = dimensions.width + "px";
 		el.style.height = dimensions.height + "px";
-		el.style.backgroundColor = theme.background;
 
-		if (!fallback) {
-			
+		if (fallback) {
+			el.style.backgroundColor = theme.background;
+		}
+		else{
 			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
 		}
 	} else {
