@@ -1,6 +1,6 @@
 /*
 
-Holder - 1.5 - client side image placeholders
+Holder - 1.6 - client side image placeholders
 (c) 2012 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -38,26 +38,29 @@ function text_size(width, height, template) {
 	var maxFactor = Math.round(dimension_arr[1] / 16),
 		minFactor = Math.round(dimension_arr[0] / 16);
 	var text_height = Math.max(template.size, maxFactor);
-	return text_height;
+	return {
+		height: text_height
+	}
 }
 
-function draw(ctx, dimensions, template) {
-	var text_height = text_size(dimensions.width, dimensions.height, template)
-	canvas.width = dimensions.width;
-	canvas.height = dimensions.height;
+function draw(ctx, dimensions, template, ratio) {
+	var ts = text_size(dimensions.width, dimensions.height, template);
+	var text_height = ts.height;
+	var width = dimensions.width * ratio, height = dimensions.height * ratio;
+	canvas.width = width;
+	canvas.height = height;
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 	ctx.fillStyle = template.background;
-	ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px sans-serif";
 	var text = template.text ? template.text : (dimensions.width + "x" + dimensions.height);
-	if (Math.round(ctx.measureText(text)
-		.width) / dimensions.width > 1) {
-		text_height = Math.max(minFactor, template.size);
+	if (ctx.measureText(text).width / width > 1) {
+		text_height = template.size / (ctx.measureText(text).width / width);
 	}
-	ctx.font = "bold " + text_height + "px sans-serif";
-	ctx.fillText(text, (dimensions.width / 2), (dimensions.height / 2), dimensions.width);
+	ctx.font = "bold " + (text_height * ratio) + "px sans-serif";
+	ctx.fillText(text, (width / 2), (height / 2), width);
 	return canvas.toDataURL("image/png");
 }
 
@@ -71,6 +74,11 @@ function render(mode, el, holder, src) {
 		text: text
 	}) : theme);
 
+	var ratio = 1;
+	if(window.devicePixelRatio && window.devicePixelRatio > 1){
+		ratio = window.devicePixelRatio;
+	}
+	
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
@@ -79,11 +87,13 @@ function render(mode, el, holder, src) {
 		el.style.backgroundColor = theme.background;
 
 		if (!fallback) {
-			el.setAttribute("src", draw(ctx, dimensions, theme));
+			
+			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
 		}
 	} else {
 		if (!fallback) {
-			el.style.backgroundImage = "url(" + draw(ctx, dimensions, theme) + ")";
+			el.style.backgroundImage = "url(" + draw(ctx, dimensions, theme, ratio) + ")";
+			el.style.backgroundSize = dimensions.width+"px "+dimensions.height+"px";
 		}
 	}
 };
