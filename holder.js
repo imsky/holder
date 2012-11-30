@@ -1,6 +1,6 @@
 /*
 
-Holder - 1.6 - client side image placeholders
+Holder - 1.7 - client side image placeholders
 (c) 2012 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -208,7 +208,7 @@ var settings = {
 
 app.flags = {
 	dimensions: {
-		regex: /(\d+)x(\d+)/,
+		regex: /^(\d+)x(\d+)$/,
 		output: function (val) {
 			var exec = this.regex.exec(val);
 			return {
@@ -218,7 +218,7 @@ app.flags = {
 		}
 	},
 	fluid: {
-		regex: /([0-9%]+)x([0-9%]+)/,
+		regex: /^([0-9%]+)x([0-9%]+)$/,
 		output: function (val) {
 			var exec = this.regex.exec(val);
 			return {
