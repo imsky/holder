@@ -108,14 +108,7 @@ function fluid(el, holder, src) {
 		text: text
 	}) : theme);
 
-	var fluid = document.createElement("table");
-	fluid.setAttribute("cellspacing",0)
-	fluid.setAttribute("cellpadding",0)
-	fluid.setAttribute("border",0)
-
-	var row = document.createElement("tr")
-		.appendChild(document.createElement("td")
-		.appendChild(document.createTextNode(theme.text)));
+	var fluid = document.createElement("div");
 
 	fluid.style.backgroundColor = theme.background;
 	fluid.style.color = theme.foreground;
@@ -123,21 +116,11 @@ function fluid(el, holder, src) {
 	fluid.style.width = holder.dimensions.width + (holder.dimensions.width.indexOf("%")>0?"":"px");
 	fluid.style.height = holder.dimensions.height + (holder.dimensions.height.indexOf("%")>0?"":"px");
 	fluid.id = el.id;
-
-	var frag = document.createDocumentFragment(),
-		tbody = document.createElement("tbody"),
-		tr = document.createElement("tr"),
-		td = document.createElement("td");
-		tr.appendChild(td);
-		tbody.appendChild(tr);
-		frag.appendChild(tbody);
 	
 	if (theme.text) {
-		td.appendChild(document.createTextNode(theme.text))
-		fluid.appendChild(frag);
+		fluid.appendChild(document.createTextNode(theme.text))
 	} else {
-		td.appendChild(document.createTextNode(dimensions_caption))
-		fluid.appendChild(frag);
+		fluid.appendChild(document.createTextNode(dimensions_caption))
 		fluid_images.push(fluid);
 		setTimeout(fluid_update, 0);
 	}
@@ -147,8 +130,10 @@ function fluid(el, holder, src) {
 
 function fluid_update() {
 	for (i in fluid_images) {
-		var el = fluid_images[i];
-		var label = el.getElementsByTagName("td")[0].firstChild;
+		var el = fluid_images[i],
+			label = el.firstChild;
+		
+		el.style.lineHeight = el.offsetHeight+"px";
 		label.data = el.offsetWidth + "x" + el.offsetHeight;
 	}
 }
@@ -217,7 +202,7 @@ var settings = {
 			size: 12
 		}
 	},
-	stylesheet: ".holderjs-fluid {font-size:16px;font-weight:bold;text-align:center;font-family:sans-serif;border-collapse:collapse;border:0;vertical-align:middle;margin:0}"
+	stylesheet: ".holderjs-fluid {font-size:16px;font-weight:bold;text-align:center;font-family:sans-serif;margin:0}"
 };
 
 
