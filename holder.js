@@ -324,9 +324,8 @@ contentLoaded(win, function () {
 	preempted || app.run();
 });
 
-// AMD friendly
 if ( typeof define === "function" && define.amd ) {
-	define( "Holder", [], function () { return Holder; } );
+	define( "Holder", [], function () { return app; } );
 }
 
 })(Holder, window);
