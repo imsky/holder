@@ -78,7 +78,7 @@ function render(mode, el, holder, src) {
 	if(window.devicePixelRatio && window.devicePixelRatio > 1){
 		ratio = window.devicePixelRatio;
 	}
-	
+
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
@@ -116,7 +116,7 @@ function fluid(el, holder, src) {
 	fluid.style.width = holder.dimensions.width + (holder.dimensions.width.indexOf("%")>0?"":"px");
 	fluid.style.height = holder.dimensions.height + (holder.dimensions.height.indexOf("%")>0?"":"px");
 	fluid.id = el.id;
-	
+
 	if (theme.text) {
 		fluid.appendChild(document.createTextNode(theme.text))
 	} else {
@@ -124,17 +124,19 @@ function fluid(el, holder, src) {
 		fluid_images.push(fluid);
 		setTimeout(fluid_update, 0);
 	}
-	
+
 	el.parentNode.replaceChild(fluid, el);
 }
 
 function fluid_update() {
 	for (i in fluid_images) {
-		var el = fluid_images[i],
-			label = el.firstChild;
-		
-		el.style.lineHeight = el.offsetHeight+"px";
-		label.data = el.offsetWidth + "x" + el.offsetHeight;
+		if(fluid_images.hasOwnProperty(i)){
+			var el = fluid_images[i],
+				label = el.firstChild;
+
+			el.style.lineHeight = el.offsetHeight+"px";
+			label.data = el.offsetWidth + "x" + el.offsetHeight;
+		}
 	}
 }
 
@@ -247,8 +249,10 @@ app.flags = {
 }
 
 for (var flag in app.flags) {
-	app.flags[flag].match = function (val) {
-		return val.match(this.regex)
+	if(app.flags.hasOwnProperty(flag)){
+		app.flags[flag].match = function (val) {
+			return val.match(this.regex)
+		}
 	}
 }
 
