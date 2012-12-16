@@ -33,6 +33,13 @@ function selector(a){
 //shallow object property extend
 function extend(a,b){var c={};for(var d in a)c[d]=a[d];for(var e in b)c[e]=b[e];return c}
 
+//hasOwnProperty polyfill
+if (!Object.prototype.hasOwnProperty)
+	Object.prototype.hasOwnProperty = function(prop) {
+		var proto = this.__proto__ || this.constructor.prototype;
+		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
+	}
+
 function text_size(width, height, template) {
 	var dimension_arr = [height, width].sort();
 	var maxFactor = Math.round(dimension_arr[1] / 16),
@@ -130,13 +137,12 @@ function fluid(el, holder, src) {
 
 function fluid_update() {
 	for (i in fluid_images) {
-		if(fluid_images.hasOwnProperty(i)){
-			var el = fluid_images[i],
-				label = el.firstChild;
+		if(!fluid_images.hasOwnProperty(i)) continue;
+		var el = fluid_images[i],
+			label = el.firstChild;
 
-			el.style.lineHeight = el.offsetHeight+"px";
-			label.data = el.offsetWidth + "x" + el.offsetHeight;
-		}
+		el.style.lineHeight = el.offsetHeight+"px";
+		label.data = el.offsetWidth + "x" + el.offsetHeight;
 	}
 }
 
@@ -249,10 +255,9 @@ app.flags = {
 }
 
 for (var flag in app.flags) {
-	if(app.flags.hasOwnProperty(flag)){
-		app.flags[flag].match = function (val) {
-			return val.match(this.regex)
-		}
+	if(!app.flags.hasOwnProperty(flag)) continue;
+	app.flags[flag].match = function (val) {
+		return val.match(this.regex)
 	}
 }
 
