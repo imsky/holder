@@ -158,6 +158,11 @@ Holder.add_theme("new",{foreground:"#ccc", background:"#000", size:10}).add_imag
 
 The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
 
+Using with ``lazyload.js``
+--------------------------
+
+Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
+
 Browser support
 ---------------
 

@@ -123,7 +123,10 @@ function fluid(el, holder, src) {
 	fluid.style.width = holder.dimensions.width + (holder.dimensions.width.indexOf("%")>0?"":"px");
 	fluid.style.height = holder.dimensions.height + (holder.dimensions.height.indexOf("%")>0?"":"px");
 	fluid.id = el.id;
-
+	
+	el.style.width=0;
+	el.style.height=0;
+	
 	if (theme.text) {
 		fluid.appendChild(document.createTextNode(theme.text))
 	} else {
@@ -132,7 +135,18 @@ function fluid(el, holder, src) {
 		setTimeout(fluid_update, 0);
 	}
 
-	el.parentNode.replaceChild(fluid, el);
+	el.parentNode.insertBefore(fluid, el.nextSibling)
+	
+	if(jQuery){
+	    jQuery(function($){
+		$(el).on("load", function(){
+		   el.style.width = fluid.style.width;
+		   el.style.height = fluid.style.height;
+		   $(el).show();
+		   $(fluid).remove();
+		});
+	    })
+	}
 }
 
 function fluid_update() {
