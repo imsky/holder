@@ -54,6 +54,7 @@ function draw(ctx, dimensions, template, ratio) {
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
 	var width = dimensions.width * ratio, height = dimensions.height * ratio;
+	var font = template.font ? template.font : "sans-serif";
 	canvas.width = width;
 	canvas.height = height;
 	ctx.textAlign = "center";
@@ -61,25 +62,24 @@ function draw(ctx, dimensions, template, ratio) {
 	ctx.fillStyle = template.background;
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
-	ctx.font = "bold " + text_height + "px sans-serif";
+	ctx.font = "bold " + text_height + "px "+font;
 	var text = template.text ? template.text : (dimensions.width + "x" + dimensions.height);
 	if (ctx.measureText(text).width / width > 1) {
 		text_height = template.size / (ctx.measureText(text).width / width);
 	}
-	ctx.font = "bold " + (text_height * ratio) + "px sans-serif";
+	//Resetting font size if necessary
+	ctx.font = "bold " + (text_height * ratio) + "px "+font;
 	ctx.fillText(text, (width / 2), (height / 2), width);
 	return canvas.toDataURL("image/png");
 }
 
 function render(mode, el, holder, src) {
-
 	var dimensions = holder.dimensions,
 		theme = holder.theme,
-		text = holder.text;
+		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
 	var dimensions_caption = dimensions.width + "x" + dimensions.height;
-	theme = (text ? extend(theme, {
-		text: text
-	}) : theme);
+	theme = (text ? extend(theme, {	text: text }) : theme);
+	theme = (holder.font ? extend(theme, {font: holder.font}) : theme);
 
 	var ratio = 1;
 	if(window.devicePixelRatio && window.devicePixelRatio > 1){
@@ -168,6 +168,8 @@ function parse_flags(flags, options) {
 			ret.theme = options.themes[flag];
 		} else if (app.flags.text.match(flag)) {
 			ret.text = app.flags.text.output(flag);
+		} else if(app.flags.font.match(flag)){
+			ret.font = app.flags.font.output(flag);
 		}
 	}
 
@@ -251,6 +253,12 @@ app.flags = {
 		output: function (val) {
 			return this.regex.exec(val)[1];
 		}
+	},
+	font: {
+	    regex: /font\:(.*)/,
+	    output: function(val){
+		return this.regex.exec(val)[1];
+	    }
 	}
 }
 

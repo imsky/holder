@@ -31,10 +31,10 @@ Holder also includes support for themes, to help placeholders blend in with your
 Customizing themes
 ------------------
 
-Themes have 3 properties: ``foreground``, ``background``, and ``size``. The ``size`` property specifies the minimum font size for the theme. You can create a sample theme like this:
+Themes have 4 properties: ``foreground``, ``background``, ``size``, and ``font``. The ``size`` property specifies the minimum font size for the theme. You can create a sample theme like this:
 
 ```js
-Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11})
+Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11, font: "Monaco"})
 ```
 
 Using custom themes
