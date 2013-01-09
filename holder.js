@@ -1,7 +1,7 @@
 /*
 
 Holder - 1.8 - client side image placeholders
-(c) 2012 Ivan Malopinsky / http://imsky.co
+(c) 2012-2013 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
 Commercial use requires attribution.
@@ -89,11 +89,11 @@ function render(mode, el, holder, src) {
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-		el.style.width = dimensions.width + "px";
-		el.style.height = dimensions.height + "px";
 
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
+			el.style.width = dimensions.width + "px";
+			el.style.height = dimensions.height + "px";
 		}
 		else{
 			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
