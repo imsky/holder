@@ -300,6 +300,22 @@ app.add_image = function (src, el) {
 	return app;
 };
 
+app.process_img = function (el, options) {
+	options = options || settings;
+	var src = el.getAttribute("src") || el.getAttribute("data-src");
+	if (src != null && src.indexOf(options.domain) >= 0) {
+		var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1)
+			.split("/"), options);
+		if (holder) {
+			if (holder.fluid) {
+				fluid(el, holder, src);
+			} else {
+				render("image", el, holder, src);
+			}
+		}
+	}
+};
+
 app.run = function (o) {
 	var options = extend(settings, o),
 		images_nodes = selector(options.images),
@@ -329,18 +345,7 @@ app.run = function (o) {
 	}
 
 	for (var l = images.length, i = 0; i < l; i++) {
-		var src = images[i].getAttribute("src") || images[i].getAttribute("data-src");
-		if (src != null && src.indexOf(options.domain) >= 0) {
-			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1)
-				.split("/"), options);
-			if (holder) {
-				if (holder.fluid) {
-					fluid(images[i], holder, src);
-				} else {
-					render("image", images[i], holder, src);
-				}
-			}
-		}
+		app.process_img(images[i], options);
 	}
 	return app;
 };
