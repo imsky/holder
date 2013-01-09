@@ -326,12 +326,23 @@ app.run = function (o) {
 	preempted = true;
 	   
 	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
+	
+	var holdercss = document.getElementById("holderjs-style");
+	
+	if(!holdercss){
+	    holdercss = document.createElement("style");
+	    holdercss.setAttribute("id", "holderjs-style");
+	    holdercss.type = "text/css";
+	    document.getElementsByTagName("head")[0].appendChild(holdercss);
+	}
 
-	var holdercss = document.createElement("style");
-	holdercss.type = "text/css";
-	holdercss.styleSheet ? holdercss.styleSheet.cssText = options.stylesheet : holdercss.textContent = options.stylesheet;
-	document.getElementsByTagName("head")[0].appendChild(holdercss);
-
+	if(holdercss.styleSheet){
+	    holdercss.styleSheet += options.stylesheet;
+	}
+	else{
+	    holdercss.textContent+= options.stylesheet;
+	}
+	
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 
 	for (var l = bgnodes.length, i = 0; i < l; i++) {
