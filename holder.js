@@ -1,6 +1,6 @@
 /*
 
-Holder - 1.8 - client side image placeholders
+Holder - 1.9 - client side image placeholders
 (c) 2012-2013 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -137,7 +137,7 @@ function fluid(el, holder, src) {
 
 	el.parentNode.insertBefore(fluid, el.nextSibling)
 	
-	if(jQuery){
+	if(window.jQuery){
 	    jQuery(function($){
 		$(el).on("load", function(){
 		   el.style.width = fluid.style.width;
@@ -208,7 +208,7 @@ var fluid_images = [];
 var settings = {
 	domain: "holder.js",
 	images: "img",
-	elements: ".holderjs",
+	bgnodes: ".holderjs",
 	themes: {
 		"gray": {
 			background: "#eee",
@@ -301,13 +301,31 @@ app.add_image = function (src, el) {
 };
 
 app.run = function (o) {
-	var options = extend(settings, o),
-		images_nodes = selector(options.images),
-		elements = selector(options.elements),
-		preempted = true,
-		images = [];
-
-	for (i = 0, l = images_nodes.length; i < l; i++) images.push(images_nodes[i]);
+	var options = extend(settings, o), images = [];
+	    
+	if(options.images instanceof window.NodeList){
+	    imageNodes = options.images;
+	}
+	else if(options.images instanceof window.Node){
+	    imageNodes = [options.images];
+	}
+	else{
+	    imageNodes = selector(options.images);
+	}
+	
+	if(options.elements instanceof window.NodeList){
+	    bgnodes = options.bgnodes;
+	}
+	else if(options.bgnodes instanceof window.Node){
+	    bgnodes = [options.bgnodes];
+	}
+	else{
+	    bgnodes = selector(options.bgnodes);
+	}
+	
+	preempted = true;
+	   
+	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
 	var holdercss = document.createElement("style");
 	holdercss.type = "text/css";
@@ -316,14 +334,14 @@ app.run = function (o) {
 
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 
-	for (var l = elements.length, i = 0; i < l; i++) {
-		var src = window.getComputedStyle(elements[i], null)
+	for (var l = bgnodes.length, i = 0; i < l; i++) {
+		var src = window.getComputedStyle(bgnodes[i], null)
 			.getPropertyValue("background-image");
 		var flags = src.match(cssregex);
 		if (flags) {
 			var holder = parse_flags(flags[1].split("/"), options);
 			if (holder) {
-				render("background", elements[i], holder, src);
+				render("background", bgnodes[i], holder, src);
 			}
 		}
 	}

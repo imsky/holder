@@ -3,7 +3,7 @@ Holder
 
 Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
 
-It's also the placeholder library for [Bootstrap](http://twitter.github.com/bootstrap/).
+It's used by [Bootstrap](http://twitter.github.com/bootstrap/) for image placeholders.
 
 How to use it
 -------------
@@ -133,7 +133,7 @@ Holder can render placeholders as background images for elements with the `holde
 <div id="sample" class="holderjs"></div>
 ```
 
-The Holder URL in CSS should have a `?` in front. You can change the default class by specifying a selector as the `elements` property when calling `Holder.run`.
+The Holder URL in CSS should have a `?` in front. You can change the default class by specifying a selector as the `bgnodes` property when calling `Holder.run`.
 
 Customizing only the settings you need
 --------------------------------------
