@@ -3,7 +3,7 @@ Holder
 
 Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
 
-[Bootstrap](http://twitter.github.com/bootstrap/) uses Holder for thumbnail.
+[Bootstrap](http://twitter.github.com/bootstrap/) uses Holder for thumbnails.
 
 How to use it
 -------------
@@ -119,6 +119,17 @@ Specifying a dimension in percentages creates a fluid placeholder that responds 
 ```
 
 By default, the fluid placeholder will show its current size in pixels.
+
+Automatically sized placeholders
+--------------------------------
+
+If you'd like to avoid Holder enforcing an image size, use the ``auto`` flag like so:
+
+```html
+<img data-src="holder.js/200x200/auto">
+```
+
+The above will render a placeholder without any embedded CSS for height or width.
 
 Background placeholders
 -----------------------

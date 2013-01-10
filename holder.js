@@ -89,11 +89,15 @@ function render(mode, el, holder, src) {
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-
+		
+		if(fallback || !holder.auto){
+		    el.style.width = dimensions.width + "px";
+		    el.style.height = dimensions.height + "px";
+		}
+	
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
-			el.style.width = dimensions.width + "px";
-			el.style.height = dimensions.height + "px";
+			
 		}
 		else{
 			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
@@ -185,6 +189,9 @@ function parse_flags(flags, options) {
 		} else if(app.flags.font.match(flag)){
 			ret.font = app.flags.font.output(flag);
 		}
+		else if(app.flags.auto.match(flag)){
+			ret.auto = true;
+		}
 	}
 
 	return render ? ret : false;
@@ -273,6 +280,9 @@ app.flags = {
 	    output: function(val){
 		return this.regex.exec(val)[1];
 	    }
+	},
+	auto: {
+	    regex: /^auto$/
 	}
 }
 
