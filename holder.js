@@ -369,9 +369,31 @@ app.run = function (o) {
 		}
 	}
 
+	/*
+	 *
+	 *		var attr_src = images[i].getAttribute("src");
+		var attr_datasrc = images[i].getAttribute("data-src");
+		var src = null;
+		if(attr_datasrc == null){
+		    src = attr_src;
+		}
+		else if(attr_datasrc.indexOf(options.domain) >= 0){
+		    src = attr_datasrc;
+		}
+		if (src) {
+	*/
 	for (var l = images.length, i = 0; i < l; i++) {
-		var src = images[i].getAttribute("src") || images[i].getAttribute("data-src");
-		if (src != null && src.indexOf(options.domain) >= 0) {
+		var attr_src = images[i].getAttribute("src"),
+		    attr_datasrc = images[i].getAttribute("data-src");
+		var src = null;
+		if(attr_datasrc == null && !!attr_src && attr_src.indexOf(options.domain) >= 0){
+		    src = attr_src;
+		}
+		else if(!!attr_datasrc && attr_datasrc.indexOf(options.domain) >= 0){
+		    src = attr_datasrc;
+		}
+		
+		if (src) {
 			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1)
 				.split("/"), options);
 			if (holder) {
