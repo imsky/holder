@@ -120,6 +120,10 @@ function fluid(el, holder, src) {
 	}) : theme);
 
 	var fluid = document.createElement("div");
+	
+	if(el.fluidRef){
+	    fluid = el.fluidRef;
+	}
 
 	fluid.style.backgroundColor = theme.background;
 	fluid.style.color = theme.foreground;
@@ -131,13 +135,20 @@ function fluid(el, holder, src) {
 	el.style.width=0;
 	el.style.height=0;
 	
+	if(!el.fluidRef){
+	
 	if (theme.text) {
 		fluid.appendChild(document.createTextNode(theme.text))
 	} else {
 		fluid.appendChild(document.createTextNode(dimensions_caption))
+		
 		fluid_images.push(fluid);
 		setTimeout(fluid_update, 0);
 	}
+	
+	}
+	
+	el.fluidRef = fluid;
 
 	el.parentNode.insertBefore(fluid, el.nextSibling)
 	
