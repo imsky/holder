@@ -345,12 +345,14 @@ app.run = function (o) {
 	    holdercss.type = "text/css";
 	    document.getElementsByTagName("head")[0].appendChild(holdercss);
 	}
-
-	if(holdercss.styleSheet){
-	    holdercss.styleSheet += options.stylesheet;
-	}
-	else{
-	    holdercss.textContent+= options.stylesheet;
+	
+	if(!options.nocss){
+	    if(holdercss.styleSheet){
+		holdercss.styleSheet += options.stylesheet;
+	    }
+	    else{
+		holdercss.textContent+= options.stylesheet;
+	    }
 	}
 	
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
