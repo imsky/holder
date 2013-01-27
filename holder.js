@@ -79,17 +79,19 @@ function render(mode, el, holder, src) {
 		theme = holder.theme,
 		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
 	var dimensions_caption = dimensions.width + "x" + dimensions.height;
+		
 	theme = (text ? extend(theme, {
 		text: text
 	}) : theme);
 	theme = (holder.font ? extend(theme, {
 		font: holder.font
 	}) : theme);
+	
+	var dpr = window.devicePixelRatio || 1,
+	    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+	
+	var ratio = dpr / bsr;
 
-	var ratio = 1;
-	if (window.devicePixelRatio && window.devicePixelRatio > 1) {
-		ratio = window.devicePixelRatio;
-	}
 
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
