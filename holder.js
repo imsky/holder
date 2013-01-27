@@ -90,6 +90,9 @@ function render(mode, el, holder, src) {
 	if (window.devicePixelRatio && window.devicePixelRatio > 1) {
 		ratio = window.devicePixelRatio;
 	}
+	if (ctx.webkitBackingStorePixelRatio && ctx.webkitBackingStorePixelRatio > 1) {
+		ratio = 1;
+	}
 
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
