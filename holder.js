@@ -87,11 +87,14 @@ function render(mode, el, holder, src) {
 		font: holder.font
 	}) : theme);
 	
-	var dpr = window.devicePixelRatio || 1,
+	var dpr = 1, bsr = 1;
+	
+	if(!fallback){
+	    dpr = window.devicePixelRatio || 1,
 	    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+	}
 	
 	var ratio = dpr / bsr;
-
 
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
@@ -326,22 +329,23 @@ app.add_image = function (src, el) {
 
 app.run = function (o) {
 	var options = extend(settings, o),
-		images = [];
-
-	if (options.images instanceof window.NodeList) {
-		imageNodes = options.images;
-	} else if (options.images instanceof window.Node) {
-		imageNodes = [options.images];
-	} else {
-		imageNodes = selector(options.images);
+	    images = [], imageNodes = [], bgnodes = [];
+	    
+	if(typeof(options.images) == "string"){
+	    imageNodes = selector(options.images);
 	}
-
-	if (options.elements instanceof window.NodeList) {
+	else if (window.NodeList && options.images instanceof window.NodeList) {
+		imageNodes = options.images;
+	} else if (window.Node && options.images instanceof window.Node) {
+		imageNodes = [options.images];
+	}
+	
+	if(typeof(options.elements) == "string"){
+	    bgnodes = selector(options.bgnodes);
+	} else	if (window.NodeList && options.elements instanceof window.NodeList) {
 		bgnodes = options.bgnodes;
-	} else if (options.bgnodes instanceof window.Node) {
+	} else if (window.Node && options.bgnodes instanceof window.Node) {
 		bgnodes = [options.bgnodes];
-	} else {
-		bgnodes = selector(options.bgnodes);
 	}
 
 	preempted = true;
@@ -356,14 +360,17 @@ app.run = function (o) {
 		holdercss.type = "text/css";
 		document.getElementsByTagName("head")[0].appendChild(holdercss);
 	}
-
-	if (!options.nocss) {
+	else{
+	    if (!options.nocss) {
 		if (holdercss.styleSheet) {
-			holdercss.styleSheet += options.stylesheet;
+			holdercss.styleSheet +=	options.stylesheet;
 		} else {
 			holdercss.textContent += options.stylesheet;
 		}
 	}
+	}
+
+	
 
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 
