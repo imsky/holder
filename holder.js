@@ -355,21 +355,19 @@ app.run = function (o) {
 	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
 	var holdercss = document.getElementById("holderjs-style");
-
 	if (!holdercss) {
 		holdercss = document.createElement("style");
 		holdercss.setAttribute("id", "holderjs-style");
 		holdercss.type = "text/css";
 		document.getElementsByTagName("head")[0].appendChild(holdercss);
 	}
-	else{
-	    if (!options.nocss) {
-		if (holdercss.styleSheet) {
-			holdercss.styleSheet +=	options.stylesheet;
-		} else {
-			holdercss.textContent += options.stylesheet;
-		}
-	}
+	
+	if (!options.nocss) {
+	    if (holdercss.styleSheet) {
+		    holdercss.styleSheet.cssText += options.stylesheet;
+	    } else {
+		    holdercss.appendChild(document.createTextNode(options.stylesheet));
+	    }
 	}
 
 	
