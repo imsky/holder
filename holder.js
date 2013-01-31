@@ -86,15 +86,6 @@ function render(mode, el, holder, src) {
 	theme = (holder.font ? extend(theme, {
 		font: holder.font
 	}) : theme);
-	
-	var dpr = 1, bsr = 1;
-	
-	if(!fallback){
-	    dpr = window.devicePixelRatio || 1,
-	    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-	}
-	
-	var ratio = dpr / bsr;
 
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
@@ -215,6 +206,8 @@ function parse_flags(flags, options) {
 
 };
 
+
+
 if (!canvas.getContext) {
 	fallback = true;
 } else {
@@ -226,6 +219,15 @@ if (!canvas.getContext) {
 		var ctx = canvas.getContext("2d");
 	}
 }
+
+var dpr = 1, bsr = 1;
+	
+if(!fallback){
+    dpr = window.devicePixelRatio || 1,
+    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+}
+
+var ratio = dpr / bsr;
 
 var fluid_images = [];
 
@@ -339,8 +341,8 @@ app.run = function (o) {
 	} else if (window.Node && options.images instanceof window.Node) {
 		imageNodes = [options.images];
 	}
-	
-	if(typeof(options.elements) == "string"){
+
+	if(typeof(options.bgnodes) == "string"){
 	    bgnodes = selector(options.bgnodes);
 	} else	if (window.NodeList && options.elements instanceof window.NodeList) {
 		bgnodes = options.bgnodes;
