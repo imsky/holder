@@ -378,11 +378,20 @@ app.run = function (o) {
 		var src = window.getComputedStyle(bgnodes[i], null)
 			.getPropertyValue("background-image");
 		var flags = src.match(cssregex);
+		var bgsrc = bgnodes[i].getAttribute("data-background-src");
+
 		if (flags) {
 			var holder = parse_flags(flags[1].split("/"), options);
 			if (holder) {
 				render("background", bgnodes[i], holder, src);
 			}
+		}
+		else if(bgsrc != null){
+		    var holder = parse_flags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
+				.split("/"), options);
+		    if(holder){
+			render("background", bgnodes[i], holder, src);
+		    }
 		}
 	}
 
