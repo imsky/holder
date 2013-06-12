@@ -1,6 +1,6 @@
 /*
 
-Holder - 1.9 - client side image placeholders
+Holder - 2.0 - client side image placeholders
 (c) 2012-2013 Ivan Malopinsky / http://imsky.co
 
 Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
@@ -42,9 +42,11 @@ if (!Object.prototype.hasOwnProperty)
 
 function text_size(width, height, template) {
 	var dimension_arr = [height, width].sort();
-	var maxFactor = Math.round(dimension_arr[1] / 16),
-		minFactor = Math.round(dimension_arr[0] / 16);
+	var scale = 1 / 16;
+	var maxFactor = Math.round(dimension_arr[1] * scale),
+		minFactor = Math.round(dimension_arr[0] * scale);
 	var text_height = Math.max(template.size, maxFactor);
+		text_height = Math.min(text_height, Math.round((0.75 / scale)*minFactor))
 	return {
 		height: text_height
 	}
@@ -83,6 +85,7 @@ function render(mode, el, holder, src) {
 	theme = (text ? extend(theme, {
 		text: text
 	}) : theme);
+
 	theme = (holder.font ? extend(theme, {
 		font: holder.font
 	}) : theme);
@@ -102,74 +105,65 @@ function render(mode, el, holder, src) {
 		} else {
 			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
 		}
-	} else {
+	} else if(mode == "background") {
 		if (!fallback) {
 			el.style.backgroundImage = "url(" + draw(ctx, dimensions, theme, ratio) + ")";
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
 	}
+	else if(mode == "fluid"){
+		el.setAttribute("data-src", src);
+		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
+
+		if (fallback) {
+			el.style.backgroundColor = theme.background;
+
+		} else {
+			el.holderData = holder;
+			fluid_images.push(el);
+			fluid_update(el);
+		}
+	}
 };
 
-function fluid(el, holder, src) {
-	var dimensions = holder.dimensions,
-		theme = holder.theme,
-		text = holder.text;
-	var dimensions_caption = dimensions.width + "x" + dimensions.height;
-	theme = (text ? extend(theme, {
-		text: text
-	}) : theme);
-
-	var fluid = document.createElement("div");
-
-	if (el.fluidRef) {
-		fluid = el.fluidRef;
+function fluid_update(element) {
+	var images;
+	if(element.nodeType == null){
+		images = fluid_images;
 	}
+	else{
+		images = [element]
+	}
+	for(i in images){
+		var el = images[i]
+		if(el.holderData){
+			var parent = el.parentNode;
+			var parentHeight = Math.max(parent.offsetHeight, parent.scrollHeight)
+			var parentWidth = Math.max(parent.offsetWidth, parent.scrollWidth)
+			if(parent == document.body){
+				var scrollbarWidth = Math.abs(window.innerWidth - document.body.offsetWidth)
+				var scrollbarHeight = Math.abs(window.innerHeight - document.body.offsetHeight)
+				parentWidth = Math.min(window.innerWidth - scrollbarWidth, parentWidth)
+				parentHeight = Math.min(window.innerHeight - scrollbarHeight, parentHeight)
+			}
 
-	fluid.style.backgroundColor = theme.background;
-	fluid.style.color = theme.foreground;
-	fluid.className = el.className + " holderjs-fluid";
-	fluid.style.width = holder.dimensions.width + (holder.dimensions.width.indexOf("%") > 0 ? "" : "px");
-	fluid.style.height = holder.dimensions.height + (holder.dimensions.height.indexOf("%") > 0 ? "" : "px");
-	fluid.id = el.id;
+			var holder = el.holderData;
+			var dimensions = el.holderData.dimensions;
+			var new_dimensions = {width: parseFloat(dimensions.width), height: parseFloat(dimensions.height)}
+			if(dimensions.height.substr(-1) == "%"){
+				new_dimensions.height = parseFloat(dimensions.height)/100 * parentHeight;
+			}
+			if(dimensions.width.substr(-1) == "%"){
+				new_dimensions.width = parseFloat(dimensions.width)/100 * parentWidth;
+			}
 
-	el.style.width = 0;
-	el.style.height = 0;
+			if (fallback || !holder.auto) {
+				el.style.width = new_dimensions.width + "px";
+				el.style.height = new_dimensions.height + "px";
+			}
 
-	if (!el.fluidRef) {
-
-		if (theme.text) {
-			fluid.appendChild(document.createTextNode(theme.text))
-		} else {
-			fluid.appendChild(document.createTextNode(dimensions_caption))
-			fluid_images.push(fluid);
-			setTimeout(fluid_update, 0);
+			el.setAttribute("src", draw(ctx, new_dimensions, holder.theme, ratio));
 		}
-
-	}
-
-	el.fluidRef = fluid;
-	el.parentNode.insertBefore(fluid, el.nextSibling)
-
-	if (window.jQuery) {
-		jQuery(function ($) {
-			$(el).on("load", function () {
-				el.style.width = fluid.style.width;
-				el.style.height = fluid.style.height;
-				$(el).show();
-				$(fluid).remove();
-			});
-		})
-	}
-}
-
-function fluid_update() {
-	for (i in fluid_images) {
-		if (!fluid_images.hasOwnProperty(i)) continue;
-		var el = fluid_images[i],
-			label = el.firstChild;
-
-		el.style.lineHeight = el.offsetHeight + "px";
-		label.data = el.offsetWidth + "x" + el.offsetHeight;
 	}
 }
 
@@ -370,8 +364,6 @@ app.run = function (o) {
 	    }
 	}
 
-	
-
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 
 	for (var l = bgnodes.length, i = 0; i < l; i++) {
@@ -415,7 +407,7 @@ app.run = function (o) {
 				.split("/"), options);
 			if (holder) {
 				if (holder.fluid) {
-					fluid(images[i], holder, src);
+					render("fluid", images[i], holder, src)
 				} else {
 					render("image", images[i], holder, src);
 				}
