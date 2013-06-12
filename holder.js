@@ -338,7 +338,7 @@ app.run = function (o) {
 
 	if(typeof(options.bgnodes) == "string"){
 	    bgnodes = selector(options.bgnodes);
-	} else	if (window.NodeList && options.elements instanceof window.NodeList) {
+	} else if (window.NodeList && options.elements instanceof window.NodeList) {
 		bgnodes = options.bgnodes;
 	} else if (window.Node && options.bgnodes instanceof window.Node) {
 		bgnodes = [options.bgnodes];
