@@ -41,12 +41,13 @@ if (!Object.prototype.hasOwnProperty)
 	}
 
 function text_size(width, height, template) {
-	var dimension_arr = [height, width].sort();
-	var scale = 1 / 16;
-	var maxFactor = Math.round(dimension_arr[1] * scale),
-		minFactor = Math.round(dimension_arr[0] * scale);
-	var text_height = Math.max(template.size, maxFactor);
-		text_height = Math.min(text_height, Math.round((0.75 / scale)*minFactor))
+	height = parseInt(height,10);
+	width = parseInt(width,10);
+	var bigSide = Math.max(height, width)
+	var smallSide = Math.min(height, width)
+	var scale = 1 / 12;
+	var newHeight = Math.min(height * 0.75, bigSide * scale);
+	var text_height = Math.round(Math.max(template.size, newHeight));
 	return {
 		height: text_height
 	}
@@ -66,7 +67,7 @@ function draw(ctx, dimensions, template, ratio) {
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px " + font;
-	var text = template.text ? template.text : (dimensions.width + "x" + dimensions.height);
+	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (ctx.measureText(text).width / width > 1) {
 		text_height = template.size / (ctx.measureText(text).width / width);
 	}
@@ -138,13 +139,23 @@ function fluid_update(element) {
 		var el = images[i]
 		if(el.holderData){
 			var parent = el.parentNode;
-			var parentHeight = Math.max(parent.offsetHeight, parent.scrollHeight)
-			var parentWidth = Math.max(parent.offsetWidth, parent.scrollWidth)
+			var parentHeight = Math.round(Math.max(parent.offsetHeight, parent.scrollHeight))
+			var parentWidth = Math.round(Math.max(parent.offsetWidth, parent.scrollWidth))
+
 			if(parent == document.body){
 				var scrollbarWidth = Math.abs(window.innerWidth - document.body.offsetWidth)
 				var scrollbarHeight = Math.abs(window.innerHeight - document.body.offsetHeight)
-				parentWidth = Math.min(window.innerWidth - scrollbarWidth, parentWidth)
-				parentHeight = Math.min(window.innerHeight - scrollbarHeight, parentHeight)
+
+				var windowScrollHeight = window.innerHeight - scrollbarHeight
+				var windowScrollWidth = window.innerWidth - scrollbarWidth
+
+				parentWidth = Math.min(windowScrollWidth, parentWidth)
+				parentHeight = Math.min(windowScrollHeight, parentHeight)
+
+				if(parentHeight < 2){
+					parentHeight = 50;
+					if(window.console){window.console.info("Holder: HTML CSS height needs to be set at 100% for fluid placeholders inside the BODY tag.")}
+				}
 			}
 
 			var holder = el.holderData;
