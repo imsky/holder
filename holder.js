@@ -46,10 +46,9 @@ function text_size(width, height, template) {
 	var bigSide = Math.max(height, width)
 	var smallSide = Math.min(height, width)
 	var scale = 1 / 12;
-	var newHeight = Math.min(height * 0.75, bigSide * scale);
-	var text_height = Math.round(Math.max(template.size, newHeight));
+	var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
 	return {
-		height: text_height
+		height: Math.round(Math.max(template.size, newHeight))
 	}
 }
 
@@ -68,8 +67,9 @@ function draw(ctx, dimensions, template, ratio) {
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px " + font;
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	if (ctx.measureText(text).width / width > 1) {
-		text_height = template.size / (ctx.measureText(text).width / width);
+	var text_width = ctx.measureText(text).width;
+	if (text_width / width >= 0.75) {
+		text_height = Math.floor(text_height * 0.75 * (width/text_width));
 	}
 	//Resetting font size if necessary
 	ctx.font = "bold " + (text_height * ratio) + "px " + font;
