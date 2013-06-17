@@ -1,6 +1,6 @@
 {
   "name": "Holder",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "description": "Holder uses the canvas element and the data URI scheme to render image placeholders entirely in browser.",
   "keywords": [ "images", "placeholders", "client-side", "canvas", "generation", "development" ],
   "main": "holder.js",

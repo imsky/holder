@@ -229,7 +229,7 @@ var settings = {
 			size: 12
 		}
 	},
-	stylesheet: ".holderjs-fluid {font-size:16px;font-weight:bold;text-align:center;font-family:sans-serif;margin:0}"
+	stylesheet: ""
 };
 
 
