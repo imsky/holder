@@ -82,43 +82,47 @@ function render(mode, el, holder, src) {
 		theme = holder.theme,
 		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
 	var dimensions_caption = dimensions.width + "x" + dimensions.height;
-		
 	theme = (text ? extend(theme, {
 		text: text
 	}) : theme);
-
 	theme = (holder.font ? extend(theme, {
 		font: holder.font
 	}) : theme);
-
 	if (mode == "image") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-
 		if (fallback || !holder.auto) {
 			el.style.width = dimensions.width + "px";
 			el.style.height = dimensions.height + "px";
 		}
-
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
-
 		} else {
 			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
 		}
-	} else if(mode == "background") {
+	} else if (mode == "background") {
 		if (!fallback) {
 			el.style.backgroundImage = "url(" + draw(ctx, dimensions, theme, ratio) + ")";
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
-	}
-	else if(mode == "fluid"){
+	} else if (mode == "fluid") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-
+		if (dimensions.height.substr(-1) == "%") {
+			el.style.height = dimensions.height
+		} else {
+			el.style.height = dimensions.height + "px"
+		}
+		if (dimensions.width.substr(-1) == "%") {
+			el.style.width = dimensions.width
+		} else {
+			el.style.width = dimensions.width + "px"
+		}
+		if (el.style.display == "inline" || el.style.display == "") {
+			el.style.display = "block";
+		}
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
-
 		} else {
 			el.holderData = holder;
 			fluid_images.push(el);
@@ -129,51 +133,19 @@ function render(mode, el, holder, src) {
 
 function fluid_update(element) {
 	var images;
-	if(element.nodeType == null){
+	if (element.nodeType == null) {
 		images = fluid_images;
-	}
-	else{
+	} else {
 		images = [element]
 	}
-	for(i in images){
+	for (i in images) {
 		var el = images[i]
-		if(el.holderData){
-			var parent = el.parentNode;
-			var parentHeight = Math.round(Math.max(parent.offsetHeight, parent.scrollHeight))
-			var parentWidth = Math.round(Math.max(parent.offsetWidth, parent.scrollWidth))
-
-			if(parent == document.body){
-				var scrollbarWidth = Math.abs(window.innerWidth - document.body.offsetWidth)
-				var scrollbarHeight = Math.abs(window.innerHeight - document.body.offsetHeight)
-
-				var windowScrollHeight = window.innerHeight - scrollbarHeight
-				var windowScrollWidth = window.innerWidth - scrollbarWidth
-
-				parentWidth = Math.min(windowScrollWidth, parentWidth)
-				parentHeight = Math.min(windowScrollHeight, parentHeight)
-
-				if(parentHeight < 2){
-					parentHeight = 50;
-					if(window.console){window.console.info("Holder: HTML CSS height needs to be set at 100% for fluid placeholders inside the BODY tag.")}
-				}
-			}
-
+		if (el.holderData) {
 			var holder = el.holderData;
-			var dimensions = el.holderData.dimensions;
-			var new_dimensions = {width: parseFloat(dimensions.width), height: parseFloat(dimensions.height)}
-			if(dimensions.height.substr(-1) == "%"){
-				new_dimensions.height = parseFloat(dimensions.height)/100 * parentHeight;
-			}
-			if(dimensions.width.substr(-1) == "%"){
-				new_dimensions.width = parseFloat(dimensions.width)/100 * parentWidth;
-			}
-
-			if (fallback || !holder.auto) {
-				el.style.width = new_dimensions.width + "px";
-				el.style.height = new_dimensions.height + "px";
-			}
-
-			el.setAttribute("src", draw(ctx, new_dimensions, holder.theme, ratio));
+			el.setAttribute("src", draw(ctx, {
+				height: el.clientHeight,
+				width: el.clientWidth
+			}, holder.theme, ratio));
 		}
 	}
 }
