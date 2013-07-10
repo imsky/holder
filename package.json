@@ -1,16 +1,35 @@
 {
   "name": "Holder",
   "version": "2.0.0",
+  "summary": "client side image placeholders",
   "description": "Holder uses the canvas element and the data URI scheme to render image placeholders entirely in browser.",
-  "keywords": [ "images", "placeholders", "client-side", "canvas", "generation", "development" ],
+  "keywords": [
+    "images",
+    "placeholders",
+    "client-side",
+    "canvas",
+    "generation",
+    "development"
+  ],
   "main": "holder.js",
+  "author": {
+    "name": "Ivan Malopinsky",
+    "url": "http://imsky.co"
+  },
   "homepage": "https://github.com/imsky/holder",
   "repository": {
     "type": "git",
     "url": "git://github.com/imsky/holder.git"
   },
   "bugs": {
-    "url" : "https://github.com/imsky/holder/issues"
+    "url": "https://github.com/imsky/holder/issues"
   },
-  "license": "Apache"
+  "license": {
+      "type": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.2"
+  }
 }
