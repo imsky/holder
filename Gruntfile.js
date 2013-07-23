@@ -14,6 +14,17 @@ module.exports = function(grunt) {
         'Commercial use requires attribution.\n\n' +
         '*/\n',
     // Task configuration.
+    jshint: {
+      options: {
+        jshintrc: '.jshintrc'
+      },
+      gruntfile: {
+        src: 'Gruntfile.js'
+      },
+      src: {
+        src: ['holder.js']
+      }
+    },
     uglify: {
       options: {
         banner: '<%= banner %>'
@@ -27,8 +38,9 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
 
   // Default task.
-  grunt.registerTask('default', ['uglify']);
+  grunt.registerTask('default', ['jshint', 'uglify']);
 };
