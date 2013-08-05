@@ -66,6 +66,15 @@ function draw(ctx, dimensions, template, ratio) {
 	ctx.textBaseline = "middle";
 	ctx.fillStyle = template.background;
 	ctx.fillRect(0, 0, width, height);
+	if (template.lines) {
+		ctx.strokeStyle = template.lines;
+		ctx.moveTo(0, 0);
+		ctx.lineTo(width, height);
+		ctx.stroke();
+		ctx.moveTo(width, 0);
+		ctx.lineTo(0, height);
+		ctx.stroke();
+	}
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px " + font;
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
