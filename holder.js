@@ -413,7 +413,7 @@ contentLoaded(win, function () {
 });
 
 if (typeof define === "function" && define.amd) {
-	define("Holder", [], function () {
+	define([], function () {
 		return app;
 	});
 }
