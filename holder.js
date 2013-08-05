@@ -35,12 +35,12 @@ function extend(a,b){var c={};for(var d in a)c[d]=a[d];for(var e in b)c[e]=b[e];
 
 //hasOwnProperty polyfill
 if (!Object.prototype.hasOwnProperty)
-    /*jshint -W001 */
+    /*jshint -W001, -W103 */
     Object.prototype.hasOwnProperty = function(prop) {
 		var proto = this.__proto__ || this.constructor.prototype;
 		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
 	}
-    /*jshint +W001 */
+    /*jshint +W001, +W103 */
 
 function text_size(width, height, template) {
 	height = parseInt(height,10);
