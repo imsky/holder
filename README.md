@@ -188,7 +188,7 @@ Browser support
 License
 -------
 
-Holder is provided under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0). Commercial use requires attribution.
+Holder is provided under the [MIT License](http://opensource.org/licenses/MIT). Commercial use requires attribution.
 
 Credits
 -------
