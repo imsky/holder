@@ -3,7 +3,7 @@ Holder
 
 Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
 
-[Bootstrap](http://twitter.github.com/bootstrap/) uses Holder for thumbnails.
+[Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
 
 How to use it
 -------------
