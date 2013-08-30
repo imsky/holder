@@ -3,7 +3,7 @@
 Holder - 2.0 - client side image placeholders
 (c) 2012-2013 Ivan Malopinsky / http://imsky.co
 
-Provided under the Apache 2.0 License: http://www.apache.org/licenses/LICENSE-2.0
+Provided under the MIT License.
 Commercial use requires attribution.
 
 */
