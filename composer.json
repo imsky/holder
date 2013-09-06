@@ -11,14 +11,13 @@
         "development"
     ],
     "license": "MIT",
-    "type": "library",
+    "type": "component",
     "authors": [
         {
             "name": "Ivan Malopinsky",
             "homepage": "http://imsky.co"
         }
     ],
-    "version": "2.0.0",
     "require": {
         "robloach/component-installer": "*"
     },
