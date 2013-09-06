@@ -1,8 +1,8 @@
 {
   "name": "Holder",
+  "version": "2.0.0",
   "summary": "client side image placeholders",
   "description": "Holder uses the canvas element and the data URI scheme to render image placeholders entirely in browser.",
-  "type": "component",
   "keywords": [
     "images",
     "placeholders",
