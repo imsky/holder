@@ -1,6 +1,6 @@
 /*
 
-Holder - 2.0 - client side image placeholders
+Holder - 2.1 - client side image placeholders
 (c) 2012-2013 Ivan Malopinsky / http://imsky.co
 
 Provided under the MIT License.
@@ -14,6 +14,27 @@ var Holder = Holder || {};
 var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
+
+if (!canvas.getContext) {
+	fallback = true;
+} else {
+	if (canvas.toDataURL("image/png")
+		.indexOf("data:image/png") < 0) {
+		//Android doesn't support data URI
+		fallback = true;
+	} else {
+		var ctx = canvas.getContext("2d");
+	}
+}
+
+var dpr = 1, bsr = 1;
+	
+if(!fallback){
+    dpr = window.devicePixelRatio || 1,
+    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+}
+
+var ratio = dpr / bsr;
 
 //getElementsByClassName polyfill
 document.getElementsByClassName||(document.getElementsByClassName=function(e){var t=document,n,r,i,s=[];if(t.querySelectorAll)return t.querySelectorAll("."+e);if(t.evaluate){r=".//*[contains(concat(' ', @class, ' '), ' "+e+" ')]",n=t.evaluate(r,t,null,0,null);while(i=n.iterateNext())s.push(i)}else{n=t.getElementsByTagName("*"),r=new RegExp("(^|\\s)"+e+"(\\s|$)");for(i=0;i<n.length;i++)r.test(n[i].className)&&s.push(n[i])}return s})
@@ -54,7 +75,7 @@ function text_size(width, height, template) {
 	}
 }
 
-function draw(ctx, dimensions, template, ratio) {
+function draw(ctx, dimensions, template, ratio, literal) {
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
 	var width = dimensions.width * ratio,
@@ -69,6 +90,11 @@ function draw(ctx, dimensions, template, ratio) {
 	ctx.fillStyle = template.foreground;
 	ctx.font = "bold " + text_height + "px " + font;
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
+	
+	if(literal){
+		text = template.literalText;
+	}
+	
 	var text_width = ctx.measureText(text).width;
 	if (text_width / width >= 0.75) {
 		text_height = Math.floor(text_height * 0.75 * (width/text_width));
@@ -90,8 +116,10 @@ function render(mode, el, holder, src) {
 	theme = (holder.font ? extend(theme, {
 		font: holder.font
 	}) : theme);
+	
+	el.setAttribute("data-src", src);
+	
 	if (mode == "image") {
-		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
 		if (fallback || !holder.auto) {
 			el.style.width = dimensions.width + "px";
@@ -108,8 +136,8 @@ function render(mode, el, holder, src) {
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
 	} else if (mode == "fluid") {
-		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
+		theme.literalText = dimensions_caption;
 		if (dimensions.height.slice(-1) == "%") {
 			el.style.height = dimensions.height
 		} else {
@@ -147,7 +175,7 @@ function fluid_update(element) {
 			el.setAttribute("src", draw(ctx, {
 				height: el.clientHeight,
 				width: el.clientWidth
-			}, holder.theme, ratio));
+			}, holder.theme, ratio, !!holder.literal));
 		}
 	}
 }
@@ -156,7 +184,8 @@ function parse_flags(flags, options) {
 
 	var ret = {
 		theme: settings.themes.gray
-	}, render = false;
+	};
+	var render = false;
 
 	for (sl = flags.length, j = 0; j < sl; j++) {
 		var flag = flags[j];
@@ -167,7 +196,10 @@ function parse_flags(flags, options) {
 			render = true;
 			ret.dimensions = app.flags.fluid.output(flag);
 			ret.fluid = true;
-		} else if (app.flags.colors.match(flag)) {
+		} else if(app.flags.literal.match(flag)){
+			ret.literal = true;
+		}
+		else if (app.flags.colors.match(flag)) {
 			ret.theme = app.flags.colors.output(flag);
 		} else if (options.themes[flag]) {
 			//If a theme is specified, it will override custom colors
@@ -180,33 +212,9 @@ function parse_flags(flags, options) {
 			ret.auto = true;
 		}
 	}
-
 	return render ? ret : false;
-
-}
-
-
-
-if (!canvas.getContext) {
-	fallback = true;
-} else {
-	if (canvas.toDataURL("image/png")
-		.indexOf("data:image/png") < 0) {
-		//Android doesn't support data URI
-		fallback = true;
-	} else {
-		var ctx = canvas.getContext("2d");
-	}
-}
-
-var dpr = 1, bsr = 1;
 	
-if(!fallback){
-    dpr = window.devicePixelRatio || 1,
-    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 }
-
-var ratio = dpr / bsr;
 
 var fluid_images = [];
 
@@ -281,6 +289,9 @@ app.flags = {
 	},
 	auto: {
 		regex: /^auto$/
+	},
+	literal: {
+		regex: /^literal$/
 	}
 }
 

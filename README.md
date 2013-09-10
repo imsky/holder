@@ -118,7 +118,7 @@ Specifying a dimension in percentages creates a fluid placeholder that responds 
 <img data-src="holder.js/100%x75/social">
 ```
 
-By default, the fluid placeholder will show its current size in pixels.
+By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, add the "literal" flag like so: `holder.js/100%x75/literal`.
 
 Automatically sized placeholders
 --------------------------------
