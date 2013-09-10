@@ -5,6 +5,8 @@ Holder uses the `canvas` element and the data URI scheme to render image placeho
 
 [Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
 
+You can install Holder using [Bower](http://bower.io/): `bower install holderjs`
+
 How to use it
 -------------
 
