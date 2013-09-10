@@ -110,12 +110,12 @@ function render(mode, el, holder, src) {
 	} else if (mode == "fluid") {
 		el.setAttribute("data-src", src);
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-		if (dimensions.height.substr(-1) == "%") {
+		if (dimensions.height.slice(-1) == "%") {
 			el.style.height = dimensions.height
 		} else {
 			el.style.height = dimensions.height + "px"
 		}
-		if (dimensions.width.substr(-1) == "%") {
+		if (dimensions.width.slice(-1) == "%") {
 			el.style.width = dimensions.width
 		} else {
 			el.style.width = dimensions.width + "px"
