@@ -15,7 +15,7 @@ var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
 var dpr = 1, bsr = 1;
-var fluid_images = [];
+var resizable_images = [];
 
 if (!canvas.getContext) {
 	fallback = true;
@@ -144,6 +144,7 @@ function extend(a,b){
 	}
 	return c
 }
+
 //hasOwnProperty polyfill
 if (!Object.prototype.hasOwnProperty)
     /*jshint -W001, -W103 */
@@ -171,7 +172,8 @@ function draw(args) {
 	var template = args.template;
 	var ratio = args.ratio;
 	var literal = args.holder.textmode == "literal";
-	
+	var exact = args.holder.textmode == "exact";
+
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
 	var width = dimensions.width * ratio,
@@ -188,6 +190,10 @@ function draw(args) {
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (literal) {
 		text = template.literalText;
+	}
+	else if(exact && template.exact_dimensions){
+		var dimensions = template.exact_dimensions;
+		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	}
 	var text_width = ctx.measureText(text).width;
 	if (text_width / width >= 0.75) {
@@ -214,6 +220,7 @@ function render(mode, el, holder, src) {
 	theme.literalText = dimensions_caption;
 	holder.originalTheme = holder.theme;
 	holder.theme = theme;
+	el.holderData = holder;
 	
 	if (mode == "image") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
@@ -225,6 +232,12 @@ function render(mode, el, holder, src) {
 			el.style.backgroundColor = theme.background;
 		} else {
 			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder}));
+			
+			if(holder.textmode && holder.textmode == "exact"){
+				resizable_images.push(el);
+				resizable_update(el);
+			}
+			
 		}
 	} else if (mode == "background") {
 		if (!fallback) {
@@ -249,9 +262,8 @@ function render(mode, el, holder, src) {
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			el.holderData = holder;
-			fluid_images.push(el);
-			fluid_update(el);
+			resizable_images.push(el);
+			resizable_update(el);
 		}
 	}
 }
@@ -277,10 +289,10 @@ function dimension_check(el, callback) {
 	return dimensions;
 }
 
-function fluid_update(element) {
+function resizable_update(element) {
 	var images;
 	if (element.nodeType == null) {
-		images = fluid_images;
+		images = resizable_images;
 	} else {
 		images = [element]
 	}
@@ -291,15 +303,27 @@ function fluid_update(element) {
 		var el = images[i]
 		if (el.holderData) {
 			var holder = el.holderData;
-			var dimensions = dimension_check(el, fluid_update)
+			var dimensions = dimension_check(el, resizable_update)
 			if(dimensions){
-			el.setAttribute("src", draw({
-					ctx: ctx,
-					dimensions: dimensions,
-					template: holder.theme,
-					ratio: ratio,
-					holder: holder
-				}))
+				if(holder.fluid){
+					el.setAttribute("src", draw({
+						ctx: ctx,
+						dimensions: dimensions,
+						template: holder.theme,
+						ratio: ratio,
+						holder: holder
+					}))
+				}
+				if(holder.textmode && holder.textmode == "exact"){
+					holder.theme.exact_dimensions = dimensions;
+					el.setAttribute("src", draw({
+						ctx: ctx,
+						dimensions: holder.dimensions,
+						template: holder.theme,
+						ratio: ratio,
+						holder: holder
+					}))
+				}
 			}
 		}
 	}
@@ -444,10 +468,10 @@ app.run = function (o) {
 };
 contentLoaded(win, function () {
 	if (window.addEventListener) {
-		window.addEventListener("resize", fluid_update, false);
-		window.addEventListener("orientationchange", fluid_update, false);
+		window.addEventListener("resize", resizable_update, false);
+		window.addEventListener("orientationchange", resizable_update, false);
 	} else {
-		window.attachEvent("onresize", fluid_update)
+		window.attachEvent("onresize", resizable_update)
 	}
 	preempted || app.run();
 });
