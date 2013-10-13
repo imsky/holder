@@ -75,7 +75,14 @@ function text_size(width, height, template) {
 	}
 }
 
-function draw(ctx, dimensions, template, ratio, literal) {
+function draw(args) {
+	
+	var ctx = args.ctx;
+	var dimensions = args.dimensions;
+	var template = args.template;
+	var ratio = args.ratio;
+	var literal = args.literal;
+	
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
 	var width = dimensions.width * ratio,
@@ -128,11 +135,11 @@ function render(mode, el, holder, src) {
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			el.setAttribute("src", draw(ctx, dimensions, theme, ratio));
+			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio}));
 		}
 	} else if (mode == "background") {
 		if (!fallback) {
-			el.style.backgroundImage = "url(" + draw(ctx, dimensions, theme, ratio) + ")";
+			el.style.backgroundImage = "url(" + draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio}) + ")";
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
 	} else if (mode == "fluid") {
@@ -171,14 +178,19 @@ function fluid_update(element) {
 		var el = images[i]
 		if (el.holderData) {
 			var holder = el.holderData;
-			el.setAttribute("src", draw(ctx, {
-				height: el.clientHeight,
-				width: el.clientWidth
-			}, holder.theme, ratio, !! holder.literal));
+			el.setAttribute("src", draw({
+					ctx: ctx,
+					dimensions: {
+						height: el.clientHeight,
+						width: el.clientWidth
+					},
+					template: holder.theme,
+					ratio: ratio,
+					literal: ( !! holder.literal)
+				}))
 		}
 	}
 }
-
 function parse_flags(flags, options) {
 	var ret = {
 		theme: settings.themes.gray
