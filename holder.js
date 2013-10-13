@@ -130,8 +130,20 @@ function selector(a){
 }
 
 //shallow object property extend
-function extend(a,b){var c={};for(var d in a)c[d]=a[d];for(var e in b)c[e]=b[e];return c}
-
+function extend(a,b){
+	var c={};
+	for(var i in a){
+		if(a.hasOwnProperty(i)){
+			c[i]=a[i];
+		}
+	}
+	for(var i in b){
+		if(b.hasOwnProperty(i)){
+			c[i]=b[i];
+		}
+	}
+	return c
+}
 //hasOwnProperty polyfill
 if (!Object.prototype.hasOwnProperty)
     /*jshint -W001, -W103 */
@@ -295,7 +307,7 @@ function fluid_update(element) {
 
 function parse_flags(flags, options) {
 	var ret = {
-		theme: settings.themes.gray
+		theme: extend(settings.themes.gray, {})
 	};
 	var render = false;
 	for (sl = flags.length, j = 0; j < sl; j++) {
@@ -313,7 +325,9 @@ function parse_flags(flags, options) {
 			ret.theme = app.flags.colors.output(flag);
 		} else if (options.themes[flag]) {
 			//If a theme is specified, it will override custom colors
-			ret.theme = options.themes[flag];
+			if(options.themes.hasOwnProperty(flag)){
+				ret.theme = extend(options.themes[flag], {});
+			}
 		} else if (app.flags.font.match(flag)) {
 			ret.font = app.flags.font.output(flag);
 		} else if (app.flags.auto.match(flag)) {
