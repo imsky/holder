@@ -171,8 +171,9 @@ function draw(args) {
 	var dimensions = args.dimensions;
 	var template = args.template;
 	var ratio = args.ratio;
-	var literal = args.holder.textmode == "literal";
-	var exact = args.holder.textmode == "exact";
+	var holder = args.holder;
+	var literal = holder.textmode == "literal";
+	var exact = holder.textmode == "exact";
 
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
@@ -189,10 +190,11 @@ function draw(args) {
 	ctx.font = "bold " + text_height + "px " + font;
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (literal) {
-		text = template.literalText;
+		var dimensions = holder.dimensions;
+		text = dimensions.width + "x" + dimensions.height;
 	}
-	else if(exact && template.exact_dimensions){
-		var dimensions = template.exact_dimensions;
+	else if(exact && holder.exact_dimensions){
+		var dimensions = holder.exact_dimensions;
 		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	}
 	var text_width = ctx.measureText(text).width;
@@ -206,6 +208,7 @@ function draw(args) {
 }
 
 function render(mode, el, holder, src) {
+	
 	var dimensions = holder.dimensions,
 		theme = holder.theme,
 		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
@@ -217,10 +220,8 @@ function render(mode, el, holder, src) {
 		font: holder.font
 	}) : theme);
 	el.setAttribute("data-src", src);
-	theme.literalText = dimensions_caption;
-	holder.originalTheme = holder.theme;
 	holder.theme = theme;
-	el.holderData = holder;
+	el.holder_data = holder;
 	
 	if (mode == "image") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
@@ -301,8 +302,8 @@ function resizable_update(element) {
 			continue;
 		}
 		var el = images[i]
-		if (el.holderData) {
-			var holder = el.holderData;
+		if (el.holder_data) {
+			var holder = el.holder_data;
 			var dimensions = dimension_check(el, resizable_update)
 			if(dimensions){
 				if(holder.fluid){
@@ -315,7 +316,7 @@ function resizable_update(element) {
 					}))
 				}
 				if(holder.textmode && holder.textmode == "exact"){
-					holder.theme.exact_dimensions = dimensions;
+					holder.exact_dimensions = dimensions;
 					el.setAttribute("src", draw({
 						ctx: ctx,
 						dimensions: holder.dimensions,
