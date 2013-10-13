@@ -257,7 +257,7 @@ function render(mode, el, holder, src) {
 		} else {
 			el.style.width = dimensions.width + "px"
 		}
-		if (el.style.display == "inline" || el.style.display === "") {
+		if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
 			el.style.display = "block";
 		}
 		if (fallback) {
