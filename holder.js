@@ -14,6 +14,8 @@ var Holder = Holder || {};
 var preempted = false,
 fallback = false,
 canvas = document.createElement('canvas');
+var dpr = 1, bsr = 1;
+var fluid_images = [];
 
 if (!canvas.getContext) {
 	fallback = true;
@@ -27,14 +29,87 @@ if (!canvas.getContext) {
 	}
 }
 
-var dpr = 1, bsr = 1;
-
 if(!fallback){
     dpr = window.devicePixelRatio || 1,
     bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 }
 
 var ratio = dpr / bsr;
+
+var settings = {
+	domain: "holder.js",
+	images: "img",
+	bgnodes: ".holderjs",
+	themes: {
+		"gray": {
+			background: "#eee",
+			foreground: "#aaa",
+			size: 12
+		},
+		"social": {
+			background: "#3a5a97",
+			foreground: "#fff",
+			size: 12
+		},
+		"industrial": {
+			background: "#434A52",
+			foreground: "#C2F200",
+			size: 12
+		}
+	},
+	stylesheet: ""
+};
+app.flags = {
+	dimensions: {
+		regex: /^(\d+)x(\d+)$/,
+		output: function (val) {
+			var exec = this.regex.exec(val);
+			return {
+				width: +exec[1],
+				height: +exec[2]
+			}
+		}
+	},
+	fluid: {
+		regex: /^([0-9%]+)x([0-9%]+)$/,
+		output: function (val) {
+			var exec = this.regex.exec(val);
+			return {
+				width: exec[1],
+				height: exec[2]
+			}
+		}
+	},
+	colors: {
+		regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
+		output: function (val) {
+			var exec = this.regex.exec(val);
+			return {
+				size: settings.themes.gray.size,
+				foreground: "#" + exec[2],
+				background: "#" + exec[1]
+			}
+		}
+	},
+	text: {
+		regex: /text\:(.*)/,
+		output: function (val) {
+			return this.regex.exec(val)[1];
+		}
+	},
+	font: {
+		regex: /font\:(.*)/,
+		output: function (val) {
+			return this.regex.exec(val)[1];
+		}
+	},
+	auto: {
+		regex: /^auto$/
+	},
+	literal: {
+		regex: /^literal$/
+	}
+}
 
 //getElementsByClassName polyfill
 document.getElementsByClassName||(document.getElementsByClassName=function(e){var t=document,n,r,i,s=[];if(t.querySelectorAll)return t.querySelectorAll("."+e);if(t.evaluate){r=".//*[contains(concat(' ', @class, ' '), ' "+e+" ')]",n=t.evaluate(r,t,null,0,null);while(i=n.iterateNext())s.push(i)}else{n=t.getElementsByTagName("*"),r=new RegExp("(^|\\s)"+e+"(\\s|$)");for(i=0;i<n.length;i++)r.test(n[i].className)&&s.push(n[i])}return s})
@@ -76,7 +151,6 @@ function text_size(width, height, template) {
 }
 
 function draw(args) {
-	
 	var ctx = args.ctx;
 	var dimensions = args.dimensions;
 	var template = args.template;
@@ -181,12 +255,27 @@ function fluid_update(element) {
 		var el = images[i]
 		if (el.holderData) {
 			var holder = el.holderData;
-			el.setAttribute("src", draw({
-					ctx: ctx,
-					dimensions: {
+			var dimensions = {
 						height: el.clientHeight,
 						width: el.clientWidth
-					},
+					};
+			if(!dimensions.height && !dimensions.width){
+				if(el.hasAttribute("data-holder-invisible")){
+					throw new Error("Holder: fluid placeholder is not visible");
+				}
+				else {
+					setTimeout(function(){
+						el.setAttribute("data-holder-invisible", true)
+						fluid_update(el)
+					}, 1)
+				}
+			}
+			else{
+				el.removeAttribute("data-holder-invisible")
+			}
+			el.setAttribute("src", draw({
+					ctx: ctx,
+					dimensions: dimensions,
 					template: holder.theme,
 					ratio: ratio,
 					literal: ( !! holder.literal)
@@ -225,81 +314,7 @@ function parse_flags(flags, options) {
 	}
 	return render ? ret : false;
 }
-var fluid_images = [];
-var settings = {
-	domain: "holder.js",
-	images: "img",
-	bgnodes: ".holderjs",
-	themes: {
-		"gray": {
-			background: "#eee",
-			foreground: "#aaa",
-			size: 12
-		},
-		"social": {
-			background: "#3a5a97",
-			foreground: "#fff",
-			size: 12
-		},
-		"industrial": {
-			background: "#434A52",
-			foreground: "#C2F200",
-			size: 12
-		}
-	},
-	stylesheet: ""
-};
-app.flags = {
-	dimensions: {
-		regex: /^(\d+)x(\d+)$/,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				width: +exec[1],
-				height: +exec[2]
-			}
-		}
-	},
-	fluid: {
-		regex: /^([0-9%]+)x([0-9%]+)$/,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				width: exec[1],
-				height: exec[2]
-			}
-		}
-	},
-	colors: {
-		regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				size: settings.themes.gray.size,
-				foreground: "#" + exec[2],
-				background: "#" + exec[1]
-			}
-		}
-	},
-	text: {
-		regex: /text\:(.*)/,
-		output: function (val) {
-			return this.regex.exec(val)[1];
-		}
-	},
-	font: {
-		regex: /font\:(.*)/,
-		output: function (val) {
-			return this.regex.exec(val)[1];
-		}
-	},
-	auto: {
-		regex: /^auto$/
-	},
-	literal: {
-		regex: /^literal$/
-	}
-}
+
 for (var flag in app.flags) {
 	if (!app.flags.hasOwnProperty(flag)) continue;
 	app.flags[flag].match = function (val) {
@@ -322,6 +337,8 @@ app.add_image = function (src, el) {
 	return app;
 };
 app.run = function (o) {
+	preempted = true;
+	
 	var options = extend(settings, o),
 		images = [],
 		imageNodes = [],
@@ -333,6 +350,7 @@ app.run = function (o) {
 	} else if (window.Node && options.images instanceof window.Node) {
 		imageNodes = [options.images];
 	}
+	
 	if (typeof (options.bgnodes) == "string") {
 		bgnodes = selector(options.bgnodes);
 	} else if (window.NodeList && options.elements instanceof window.NodeList) {
@@ -340,7 +358,6 @@ app.run = function (o) {
 	} else if (window.Node && options.bgnodes instanceof window.Node) {
 		bgnodes = [options.bgnodes];
 	}
-	preempted = true;
 	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 	var holdercss = document.getElementById("holderjs-style");
 	if (!holdercss) {
