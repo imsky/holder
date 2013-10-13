@@ -106,8 +106,11 @@ app.flags = {
 	auto: {
 		regex: /^auto$/
 	},
-	literal: {
-		regex: /^literal$/
+	textmode: {
+		regex: /textmode\:(.*)/,
+		output: function(val){
+			return this.regex.exec(val)[1];
+		}
 	}
 }
 
@@ -155,7 +158,7 @@ function draw(args) {
 	var dimensions = args.dimensions;
 	var template = args.template;
 	var ratio = args.ratio;
-	var literal = args.literal;
+	var literal = args.holder.textmode == "literal";
 	
 	var ts = text_size(dimensions.width, dimensions.height, template);
 	var text_height = ts.height;
@@ -199,7 +202,7 @@ function render(mode, el, holder, src) {
 	theme.literalText = dimensions_caption;
 	holder.originalTheme = holder.theme;
 	holder.theme = theme;
-
+	
 	if (mode == "image") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
 		if (fallback || !holder.auto) {
@@ -209,11 +212,11 @@ function render(mode, el, holder, src) {
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio}));
+			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder}));
 		}
 	} else if (mode == "background") {
 		if (!fallback) {
-			el.style.backgroundImage = "url(" + draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio}) + ")";
+			el.style.backgroundImage = "url(" + draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio, holder: holder}) + ")";
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
 	} else if (mode == "fluid") {
@@ -241,6 +244,27 @@ function render(mode, el, holder, src) {
 	}
 }
 
+function dimension_check(el, callback) {
+	var dimensions = {
+		height: el.clientHeight,
+		width: el.clientWidth
+	};
+	if (!dimensions.height && !dimensions.width) {
+		if (el.hasAttribute("data-holder-invisible")) {
+			throw new Error("Holder: placeholder is not visible");
+		} else {
+			el.setAttribute("data-holder-invisible", true)
+			setTimeout(function () {
+				callback.call(this, el)
+			}, 1)
+			return null;
+		}
+	} else {
+		el.removeAttribute("data-holder-invisible")
+	}
+	return dimensions;
+}
+
 function fluid_update(element) {
 	var images;
 	if (element.nodeType == null) {
@@ -255,34 +279,20 @@ function fluid_update(element) {
 		var el = images[i]
 		if (el.holderData) {
 			var holder = el.holderData;
-			var dimensions = {
-						height: el.clientHeight,
-						width: el.clientWidth
-					};
-			if(!dimensions.height && !dimensions.width){
-				if(el.hasAttribute("data-holder-invisible")){
-					throw new Error("Holder: fluid placeholder is not visible");
-				}
-				else {
-					setTimeout(function(){
-						el.setAttribute("data-holder-invisible", true)
-						fluid_update(el)
-					}, 1)
-				}
-			}
-			else{
-				el.removeAttribute("data-holder-invisible")
-			}
+			var dimensions = dimension_check(el, fluid_update)
+			if(dimensions){
 			el.setAttribute("src", draw({
 					ctx: ctx,
 					dimensions: dimensions,
 					template: holder.theme,
 					ratio: ratio,
-					literal: ( !! holder.literal)
+					holder: holder
 				}))
+			}
 		}
 	}
 }
+
 function parse_flags(flags, options) {
 	var ret = {
 		theme: settings.themes.gray
@@ -297,8 +307,8 @@ function parse_flags(flags, options) {
 			render = true;
 			ret.dimensions = app.flags.fluid.output(flag);
 			ret.fluid = true;
-		} else if (app.flags.literal.match(flag)) {
-			ret.literal = true;
+		} else if (app.flags.textmode.match(flag)) {
+			ret.textmode = app.flags.textmode.output(flag)
 		} else if (app.flags.colors.match(flag)) {
 			ret.theme = app.flags.colors.output(flag);
 		} else if (options.themes[flag]) {
