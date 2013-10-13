@@ -28,7 +28,7 @@ if (!canvas.getContext) {
 }
 
 var dpr = 1, bsr = 1;
-	
+
 if(!fallback){
     dpr = window.devicePixelRatio || 1,
     bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
@@ -175,6 +175,9 @@ function fluid_update(element) {
 		images = [element]
 	}
 	for (var i in images) {
+		if (!images.hasOwnProperty(i)) {
+			continue;
+		}
 		var el = images[i]
 		if (el.holderData) {
 			var holder = el.holderData;
