@@ -35,7 +35,7 @@ Theming
 
 Holder includes support for themes, to help placeholders blend in with your layout. 
 
-There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``. You can use them like this:
+There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``. Use them like so:
 
 ```html
 <img src="holder.js/200x300/sky">
