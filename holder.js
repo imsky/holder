@@ -55,6 +55,21 @@ var settings = {
 			background: "#434A52",
 			foreground: "#C2F200",
 			size: 12
+		},
+		"sky": {
+			background: "#0D8FDB",
+			foreground: "#fff",
+			size: 12
+		},
+		"vine": {
+			background: "#39DBAC",
+			foreground: "#1E292C",
+			size: 12
+		},
+		"lava": {
+			background: "#F8591A",
+			foreground: "#1C2846",
+			size: 12
 		}
 	},
 	stylesheet: ""

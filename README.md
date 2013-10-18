@@ -1,6 +1,8 @@
 Holder
 ======
 
+![](http://imsky.github.io/holder/images/header.png)
+
 Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
 
 [Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
@@ -26,10 +28,17 @@ The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
-Holder also includes support for themes, to help placeholders blend in with your layout. There are 3 default themes: ``gray``, ``industrial``, and ``social``. You can use them like this:
+Theming
+-------
+
+![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
+
+Holder includes support for themes, to help placeholders blend in with your layout. 
+
+There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``. You can use them like this:
 
 ```html
-<img src="holder.js/200x300/industrial">
+<img src="holder.js/200x300/sky">
 ```
 
 Customizing themes
@@ -183,11 +192,11 @@ Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-wi
 Browser support
 ---------------
 
-* Chrome 1+
+* Chrome
 * Firefox 3+
 * Safari 4+
-* Internet Explorer 9+, with fallback for IE6-8
-* Android 1+
+* Internet Explorer 6+ (with fallback for older IE)
+* Android (with fallback)
 
 License
 -------
