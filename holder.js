@@ -194,7 +194,7 @@ function draw(args) {
 	var text_height = ts.height;
 	var width = dimensions.width * ratio,
 		height = dimensions.height * ratio;
-	var font = template.font ? template.font : "sans-serif";
+	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
 	canvas.width = width;
 	canvas.height = height;
 	ctx.textAlign = "center";
@@ -264,17 +264,20 @@ function render(mode, el, holder, src) {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
 		if (dimensions.height.slice(-1) == "%") {
 			el.style.height = dimensions.height
-		} else {
+		} else if(holder.auto == null || !holder.auto){
 			el.style.height = dimensions.height + "px"
 		}
 		if (dimensions.width.slice(-1) == "%") {
 			el.style.width = dimensions.width
-		} else {
+		} else if(holder.auto == null || !holder.auto){
 			el.style.width = dimensions.width + "px"
 		}
 		if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
 			el.style.display = "block";
 		}
+		
+		set_initial_dimensions(el)
+		
 		if (fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
@@ -305,6 +308,29 @@ function dimension_check(el, callback) {
 	return dimensions;
 }
 
+function set_initial_dimensions(el){
+	if(el.holder_data){
+		var dimensions = dimension_check(el, set_initial_dimensions)
+		if(dimensions){
+			var holder = el.holder_data;
+			holder.initial_dimensions = dimensions;
+			holder.fluid_data = {
+				fluid_height: holder.dimensions.height.slice(-1) == "%",
+				fluid_width: holder.dimensions.width.slice(-1) == "%",
+				mode: null
+			}
+			if(holder.fluid_data.fluid_width && !holder.fluid_data.fluid_height){
+				holder.fluid_data.mode = "width"
+				holder.fluid_data.ratio = holder.initial_dimensions.width / parseFloat(holder.dimensions.height)
+			}
+			else if(!holder.fluid_data.fluid_width && holder.fluid_data.fluid_height){
+				holder.fluid_data.mode = "height";
+				holder.fluid_data.ratio = parseFloat(holder.dimensions.width) / holder.initial_dimensions.height
+			}
+		}
+	}
+}
+
 function resizable_update(element) {
 	var images;
 	if (element.nodeType == null) {
@@ -322,6 +348,16 @@ function resizable_update(element) {
 			var dimensions = dimension_check(el, resizable_update)
 			if(dimensions){
 				if(holder.fluid){
+					if(holder.auto){
+						switch(holder.fluid_data.mode){
+							case "width":
+								dimensions.height = dimensions.width / holder.fluid_data.ratio;
+							break;
+							case "height":
+								dimensions.width = dimensions.height * holder.fluid_data.ratio;
+							break;
+						}
+					}
 					el.setAttribute("src", draw({
 						ctx: ctx,
 						dimensions: dimensions,
