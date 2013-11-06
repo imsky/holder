@@ -298,7 +298,9 @@ function dimension_check(el, callback) {
 		} else {
 			el.setAttribute("data-holder-invisible", true)
 			setTimeout(function () {
-				callback.call(this, el)
+				handle_errors(function() {
+					callback.call(this, el)
+				})
 			}, 1)
 			return null;
 		}
@@ -329,6 +331,25 @@ function set_initial_dimensions(el){
 			}
 		}
 	}
+}
+
+// Thanks emberjs https://github.com/emberjs/ember.js/blob/master/packages/ember-metal/lib/error.js
+function handle_errors(func, context) {
+  if ('function' === typeof app.onerror) {
+    try {
+      return func.call(context || this);
+    } catch (error) {
+      app.onerror(error);
+    }
+  } else {
+    return func.call(context || this);
+  }
+}
+
+function resize_event(element) {
+	handle_errors(function() {
+		resizable_update(element);
+	});
 }
 
 function resizable_update(element) {
@@ -437,6 +458,11 @@ app.add_image = function (src, el) {
 	return app;
 };
 app.run = function (o) {
+	handle_errors(function() {
+		app._run(o);
+	});
+};
+app._run = function (o) {
 	preempted = true;
 	
 	var options = extend(settings, o),
@@ -520,10 +546,10 @@ app.run = function (o) {
 };
 contentLoaded(win, function () {
 	if (window.addEventListener) {
-		window.addEventListener("resize", resizable_update, false);
-		window.addEventListener("orientationchange", resizable_update, false);
+		window.addEventListener("resize", resize_event, false);
+		window.addEventListener("orientationchange", resize_event, false);
 	} else {
-		window.attachEvent("onresize", resizable_update)
+		window.attachEvent("onresize", resize_event)
 	}
 	preempted || app.run();
 });
