@@ -30,7 +30,7 @@ if (!canvas.getContext) {
 }
 
 if(!fallback){
-    dpr = window.devicePixelRatio || 1,
+    dpr = window.devicePixelRatio || 1;
     bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 }
 
