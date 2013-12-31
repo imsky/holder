@@ -593,7 +593,7 @@ contentLoaded(win, function () {
 	} else {
 		window.attachEvent("onresize", resizable_update)
 	}
-	preempted || app.run();
+	preempted || app.run({});
 });
 if (typeof define === "function" && define.amd) {
 	define([], function () {
