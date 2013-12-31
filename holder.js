@@ -498,16 +498,17 @@ app.add_image = function (src, el) {
 app.run = function (o) {
 	instance_config = extend({}, system_config)
 	preempted = true;
-	
-	if(o.use_canvas != null && o.use_canvas){
-		instance_config.use_canvas = true;
-		instance_config.use_svg = false;
-	}
-	
+
 	var options = extend(settings, o),
 		images = [],
 		imageNodes = [],
 		bgnodes = [];
+	
+	if(options.use_canvas != null && options.use_canvas){
+		instance_config.use_canvas = true;
+		instance_config.use_svg = false;
+	}
+		
 	if (typeof (options.images) == "string") {
 		imageNodes = selector(options.images);
 	} else if (window.NodeList && options.images instanceof window.NodeList) {
