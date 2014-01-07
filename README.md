@@ -3,7 +3,7 @@ Holder
 
 ![](http://imsky.github.io/holder/images/header.png)
 
-Holder uses SVG and `canvas`to render image placeholders on the client side.
+Holder uses SVG and `canvas` to render image placeholders on the client side.
 
 [Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
 
