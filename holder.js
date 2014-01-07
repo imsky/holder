@@ -7,7 +7,6 @@ Provided under the MIT License.
 Commercial use requires attribution.
 
 */
-
 var Holder = Holder || {};
 (function (app, win) {
 
@@ -349,24 +348,18 @@ function dimension_check(el, callback) {
 		width: el.clientWidth
 	};
 	if (!dimensions.height && !dimensions.width) {
-		if (el.hasAttribute("data-holder-invisible")) {
-			throw new Error("Holder: placeholder is not visible");
-		} else {
-			el.setAttribute("data-holder-invisible", true)
-			setTimeout(function () {
-				callback.call(this, el)
-			}, 1)
-			return null;
-		}
-	} else {
-		el.removeAttribute("data-holder-invisible")
+		el.setAttribute("data-holder-invisible", true)
+		callback.call(this, el)
 	}
-	return dimensions;
+	else{
+		el.removeAttribute("data-holder-invisible")
+		return dimensions;
+	}
 }
 
 function set_initial_dimensions(el){
 	if(el.holder_data){
-		var dimensions = dimension_check(el, set_initial_dimensions)
+		var dimensions = dimension_check(el, app.invisible_error_fn( set_initial_dimensions))
 		if(dimensions){
 			var holder = el.holder_data;
 			holder.initial_dimensions = dimensions;
@@ -401,7 +394,7 @@ function resizable_update(element) {
 		var el = images[i]
 		if (el.holder_data) {
 			var holder = el.holder_data;
-			var dimensions = dimension_check(el, resizable_update)
+			var dimensions = dimension_check(el, app.invisible_error_fn( resizable_update))
 			if(dimensions){
 				if(holder.fluid){
 					if(holder.auto){
@@ -478,6 +471,14 @@ for (var flag in app.flags) {
 	}
 }
 
+app.invisible_error_fn = function(fn){
+	return function(el){
+		if(el.hasAttribute("data-holder-invisible")){
+			throw new Error("Holder: invisible placeholder")
+		}
+	}
+}
+
 app.add_theme = function (name, theme) {
 	name != null && theme != null && (settings.themes[name] = theme);
 	return app;
@@ -503,7 +504,7 @@ app.run = function (o) {
 		images = [],
 		imageNodes = [],
 		bgnodes = [];
-	
+		
 	if(options.use_canvas != null && options.use_canvas){
 		instance_config.use_canvas = true;
 		instance_config.use_svg = false;
@@ -518,7 +519,7 @@ app.run = function (o) {
 	} else if(window.HTMLCollection && options.images instanceof window.HTMLCollection){
 		imageNodes = options.images
 	}
-	
+
 	if (typeof (options.bgnodes) == "string") {
 		bgnodes = selector(options.bgnodes);
 	} else if (window.NodeList && options.elements instanceof window.NodeList) {
