@@ -5,7 +5,7 @@ Holder
 
 Holder uses SVG and `canvas` to render image placeholders on the client side.
 
-[Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
+[Bootstrap](http://getbootstrap.com) uses Holder in documentation.
 
 You can install Holder using [Bower](http://bower.io/): `bower install holderjs`
 
