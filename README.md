@@ -3,7 +3,7 @@ Holder
 
 ![](http://imsky.github.io/holder/images/header.png)
 
-Holder uses the `canvas` element and the data URI scheme to render image placeholders entirely in browser.
+Holder uses SVG and `canvas`to render image placeholders on the client side.
 
 [Bootstrap](http://getbootstrap.com) uses Holder for thumbnails.
 
@@ -183,6 +183,15 @@ Holder.add_theme("new",{foreground:"#ccc", background:"#000", size:10}).add_imag
 ```
 
 The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
+
+Changing rendering engine
+-------------------------
+
+By default, Holder renders placeholders using SVG, however it has a fallback `canvas` engine that it uses in case the browser lacks SVG support. If you'd like to force `canvas` rendering, you can do it like so:
+
+```js
+Holder.run({use_canvas:true})
+```
 
 Using with ``lazyload.js``
 --------------------------
