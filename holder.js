@@ -1,6 +1,6 @@
 /*!
 
-Holder - 2.3 - client side image placeholders
+Holder - 2.3.1 - client side image placeholders
 (c) 2012-2014 Ivan Malopinsky / http://imsky.co
 
 Provided under the MIT License.
