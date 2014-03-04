@@ -1,7 +1,5 @@
 {
   "name": "holderjs",
   "version": "2.3.1",
-  "main": "holder.js",
-  "dependencies": {
-  }
+  "main": "holder.js"
 }
