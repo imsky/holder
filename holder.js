@@ -269,7 +269,7 @@ function draw_svg(args){
 		font:font, 
 		template:template
 	})
-	return "data:image/svg+xml;base64,"+btoa(string);
+	return "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(string)));
 }
 
 function draw(args) {
