@@ -598,6 +598,10 @@ contentLoaded(win, function () {
 		window.attachEvent("onresize", resizable_update)
 	}
 	preempted || app.run({});
+
+	if (typeof window.Turbolinks === "object") {
+		document.addEventListener("page:change", function() { app.run({}) })
+	}
 });
 if (typeof define === "function" && define.amd) {
 	define([], function () {
