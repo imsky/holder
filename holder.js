@@ -178,7 +178,7 @@ var svg_el = (function(){
 		textnode_el.nodeValue=props.text
 		text_el.setAttribute("style", css_properties({
 		"fill": props.template.foreground,
-		"font-weight": "bold",
+		"font-weight": props.font_weight,
 		"font-size": props.text_height+"px",
 		"font-family":props.font,
 		"dominant-baseline":"central"
@@ -254,6 +254,7 @@ function draw_svg(args){
 		height = dimensions.height;
 		
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+	var font_weight = template.fontweight ? template.fontweight : "bold";
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	
 	if (literal) {
@@ -269,7 +270,8 @@ function draw_svg(args){
 		width:width, 
 		height:height, 
 		text_height:text_height, 
-		font:font, 
+		font:font,
+		font_weight:font_weight,
 		template:template
 	})
 	return "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(string)));
