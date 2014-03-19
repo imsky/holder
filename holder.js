@@ -211,6 +211,8 @@ function draw_canvas(args) {
 	var width = dimensions.width * ratio,
 		height = dimensions.height * ratio;
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+	var font_weight = template.fontweight ? template.fontweight : "bold";
+	font_weight = font_weight == "normal" ? "" : font_weight;
 	canvas.width = width;
 	canvas.height = height;
 	ctx.textAlign = "center";
@@ -218,7 +220,8 @@ function draw_canvas(args) {
 	ctx.fillStyle = template.background;
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
-	ctx.font = "bold " + text_height + "px " + font;
+	ctx.font = font_weight + " " + text_height + "px " + font;
+	
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (literal) {
 		var dimensions = holder.dimensions;
@@ -233,7 +236,7 @@ function draw_canvas(args) {
 		text_height = Math.floor(text_height * 0.75 * (width / text_width));
 	}
 	//Resetting font size if necessary
-	ctx.font = "bold " + (text_height * ratio) + "px " + font;
+	ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
 	ctx.fillText(text, (width / 2), (height / 2), width);
 	return canvas.toDataURL("image/png");
 }
