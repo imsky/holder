@@ -178,7 +178,7 @@ var svg_el = (function(){
 		textnode_el.nodeValue=props.text
 		text_el.setAttribute("style", css_properties({
 		"fill": props.template.foreground,
-		"font-weight": "bold",
+		"font-weight": props.font_weight,
 		"font-size": props.text_height+"px",
 		"font-family":props.font,
 		"dominant-baseline":"central"
@@ -189,7 +189,7 @@ var svg_el = (function(){
 
 function css_properties(props){
 	var ret = [];
-	for(p in props){
+	for(var p in props){
 		if(props.hasOwnProperty(p)){
 			ret.push(p+":"+props[p])
 		}
@@ -211,6 +211,8 @@ function draw_canvas(args) {
 	var width = dimensions.width * ratio,
 		height = dimensions.height * ratio;
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+	var font_weight = template.fontweight ? template.fontweight : "bold";
+	font_weight = font_weight == "normal" ? "" : font_weight;
 	canvas.width = width;
 	canvas.height = height;
 	ctx.textAlign = "center";
@@ -218,7 +220,8 @@ function draw_canvas(args) {
 	ctx.fillStyle = template.background;
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
-	ctx.font = "bold " + text_height + "px " + font;
+	ctx.font = font_weight + " " + text_height + "px " + font;
+	
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (literal) {
 		var dimensions = holder.dimensions;
@@ -233,7 +236,7 @@ function draw_canvas(args) {
 		text_height = Math.floor(text_height * 0.75 * (width / text_width));
 	}
 	//Resetting font size if necessary
-	ctx.font = "bold " + (text_height * ratio) + "px " + font;
+	ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
 	ctx.fillText(text, (width / 2), (height / 2), width);
 	return canvas.toDataURL("image/png");
 }
@@ -251,6 +254,7 @@ function draw_svg(args){
 		height = dimensions.height;
 		
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+	var font_weight = template.fontweight ? template.fontweight : "bold";
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	
 	if (literal) {
@@ -266,7 +270,8 @@ function draw_svg(args){
 		width:width, 
 		height:height, 
 		text_height:text_height, 
-		font:font, 
+		font:font,
+		font_weight:font_weight,
 		template:template
 	})
 	return "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(string)));
@@ -616,7 +621,7 @@ if (typeof define === "function" && define.amd) {
 }
 
 //github.com/davidchambers/Base64.js
-(function(){function t(t){this.message=t}var e="undefined"!=typeof exports?exports:this,r="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";t.prototype=Error(),t.prototype.name="InvalidCharacterError",e.btoa||(e.btoa=function(e){for(var o,n,a=0,i=r,c="";e.charAt(0|a)||(i="=",a%1);c+=i.charAt(63&o>>8-8*(a%1))){if(n=e.charCodeAt(a+=.75),n>255)throw new t("'btoa' failed");o=o<<8|n}return c}),e.atob||(e.atob=function(e){if(e=e.replace(/=+$/,""),1==e.length%4)throw new t("'atob' failed");for(var o,n,a=0,i=0,c="";n=e.charAt(i++);~n&&(o=a%4?64*o+n:n,a++%4)?c+=String.fromCharCode(255&o>>(6&-2*a)):0)n=r.indexOf(n);return c})})();
+(function(){function t(t){this.message=t}var e="undefined"!=typeof exports?exports:this,r="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";t.prototype=Error(),t.prototype.name="InvalidCharacterError",e.btoa||(e.btoa=function(e){for(var o,n,a=0,i=r,c="";e.charAt(0|a)||(i="=",a%1);c+=i.charAt(63&o>>8-8*(a%1))){if(n=e.charCodeAt(a+=0.75),n>255)throw new t("'btoa' failed");o=o<<8|n}return c}),e.atob||(e.atob=function(e){if(e=e.replace(/=+$/,""),1==e.length%4)throw new t("'atob' failed");for(var o,n,a=0,i=0,c="";n=e.charAt(i++);~n&&(o=a%4?64*o+n:n,a++%4)?c+=String.fromCharCode(255&o>>(6&-2*a)):0)n=r.indexOf(n);return c})})();
 
 //getElementsByClassName polyfill
 document.getElementsByClassName||(document.getElementsByClassName=function(e){var t=document,n,r,i,s=[];if(t.querySelectorAll)return t.querySelectorAll("."+e);if(t.evaluate){r=".//*[contains(concat(' ', @class, ' '), ' "+e+" ')]",n=t.evaluate(r,t,null,0,null);while(i=n.iterateNext())s.push(i)}else{n=t.getElementsByTagName("*"),r=new RegExp("(^|\\s)"+e+"(\\s|$)");for(i=0;i<n.length;i++)r.test(n[i].className)&&s.push(n[i])}return s})

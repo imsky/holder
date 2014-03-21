@@ -44,10 +44,10 @@ There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial`
 Customizing themes
 ------------------
 
-Themes have 4 properties: ``foreground``, ``background``, ``size``, and ``font``. The ``size`` property specifies the minimum font size for the theme. You can create a sample theme like this:
+Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
 
 ```js
-Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11, font: "Monaco"})
+Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11, font: "Monaco", fontweight:"normal"})
 ```
 
 Using custom themes
