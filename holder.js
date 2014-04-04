@@ -584,7 +584,7 @@ app.run = function (o) {
 		} catch (e) {}
 		if (attr_datasrc == null && !! attr_src && attr_src.indexOf(options.domain) >= 0) {
 			src = attr_src;
-		} else if ( !! attr_datasrc && attr_datasrc.indexOf(options.domain) >= 0) {
+		} else if ( !! attr_src && attr_datasrc.indexOf(options.domain) >= 0) {
 			src = attr_datasrc;
 		}
 		if (src) {
