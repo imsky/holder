@@ -81,8 +81,7 @@ var settings = {
 			foreground: "#1C2846",
 			size: 12
 		}
-	},
-	stylesheet: ""
+	}
 };
 app.flags = {
 	dimensions: {
@@ -554,24 +553,6 @@ app.run = function (o) {
 		bgnodes = [options.bgnodes];
 	}
 	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
-	
-	var holdercss = document.getElementById("holderjs-style");
-	if (!holdercss) {
-		holdercss = document.createElement("style");
-		holdercss.setAttribute("id", "holderjs-style");
-		holdercss.type = "text/css";
-		document.getElementsByTagName("head")[0].appendChild(holdercss);
-	}
-	
-	if (!options.nocss) {
-		if (holdercss.styleSheet) {
-			holdercss.styleSheet.cssText += options.stylesheet;
-		} else {
-			if(options.stylesheet.length){
-				holdercss.appendChild(document.createTextNode(options.stylesheet));
-			}
-		}
-	}
 	
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 	for (var l = bgnodes.length, i = 0; i < l; i++) {
