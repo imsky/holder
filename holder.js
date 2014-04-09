@@ -19,6 +19,7 @@ var preempted = false;
 canvas = document.createElement('canvas');
 var dpr = 1, bsr = 1;
 var resizable_images = [];
+var debounce_timer;
 
 if (!canvas.getContext) {
 	system_config.use_fallback = true;
@@ -80,7 +81,8 @@ var settings = {
 			size: 12
 		}
 	},
-	stylesheet: ""
+	stylesheet: "",
+	debounce: 100
 };
 app.flags = {
 	dimensions: {
@@ -388,6 +390,18 @@ function set_initial_dimensions(el){
 	}
 }
 
+function debounce_resize() {
+	if (instance_config.debounce) {
+		if (debounce_timer) clearTimeout(debounce_timer);
+		debounce_timer = setTimeout(function() {
+			debounce_timer = null;
+			resizable_update(window);
+		}, instance_config.debounce);
+	} else {
+		resizable_update(window);
+	}
+}
+
 function resizable_update(element) {
 	var images;
 	if (element.nodeType == null) {
@@ -518,6 +532,7 @@ app.run = function (o) {
 		instance_config.use_canvas = true;
 		instance_config.use_svg = false;
 	}
+	instance_config.debounce = options.debounce;
 			
 	if (typeof (options.images) == "string") {
 		imageNodes = selector(options.images);
@@ -603,10 +618,10 @@ app.run = function (o) {
 
 contentLoaded(win, function () {
 	if (window.addEventListener) {
-		window.addEventListener("resize", resizable_update, false);
-		window.addEventListener("orientationchange", resizable_update, false);
+		window.addEventListener("resize", debounce_resize, false);
+		window.addEventListener("orientationchange", debounce_resize, false);
 	} else {
-		window.attachEvent("onresize", resizable_update)
+		window.attachEvent("onresize", debounce_resize)
 	}
 	preempted || app.run({});
 
