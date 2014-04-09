@@ -12,7 +12,8 @@ var Holder = Holder || {};
 var system_config = {
 	use_svg: false,
 	use_canvas: false,
-	use_fallback: false
+	use_fallback: false,
+	debounce: 100
 };
 var instance_config = {};
 var preempted = false;
@@ -81,8 +82,7 @@ var settings = {
 			size: 12
 		}
 	},
-	stylesheet: "",
-	debounce: 100
+	stylesheet: ""
 };
 app.flags = {
 	dimensions: {
@@ -172,6 +172,8 @@ var svg_el = (function(){
 	return function(props){
 		svg.setAttribute("width",props.width);
 		svg.setAttribute("height", props.height);
+		svg.setAttribute("viewBox", "0 0 "+props.width+" "+props.height)
+		svg.setAttribute("preserveAspectRatio", "none")
 		bg_el.setAttribute("width", props.width);
 		bg_el.setAttribute("height", props.height);
 		bg_el.setAttribute("fill", props.template.background);
@@ -390,21 +392,22 @@ function set_initial_dimensions(el){
 	}
 }
 
-function debounce_resize() {
+function debounce(fn) {
 	if (instance_config.debounce) {
+		if (!debounce_timer) fn.call(this);
 		if (debounce_timer) clearTimeout(debounce_timer);
 		debounce_timer = setTimeout(function() {
 			debounce_timer = null;
-			resizable_update(window);
+			fn.call(this)
 		}, instance_config.debounce);
 	} else {
-		resizable_update(window);
+		fn.call(this)
 	}
 }
 
 function resizable_update(element) {
 	var images;
-	if (element.nodeType == null) {
+	if (element == null || element.nodeType == null) {
 		images = resizable_images;
 	} else {
 		images = [element]
@@ -413,40 +416,38 @@ function resizable_update(element) {
 		if (!images.hasOwnProperty(i)) {
 			continue;
 		}
-		var el = images[i]
+		var el = images[i];
 		if (el.holder_data) {
 			var holder = el.holder_data;
-			var dimensions = dimension_check(el, app.invisible_error_fn( resizable_update))
-			if(dimensions){
-				if(holder.fluid){
-					if(holder.auto){
-						switch(holder.fluid_data.mode){
-							case "width":
-								dimensions.height = dimensions.width / holder.fluid_data.ratio;
+			var dimensions = dimension_check(el, app.invisible_error_fn(resizable_update))
+			if (dimensions) {
+				if (holder.fluid) {
+					if (holder.auto) {
+						switch (holder.fluid_data.mode) {
+						case "width":
+							dimensions.height = dimensions.width / holder.fluid_data.ratio;
 							break;
-							case "height":
-								dimensions.width = dimensions.height * holder.fluid_data.ratio;
+						case "height":
+							dimensions.width = dimensions.height * holder.fluid_data.ratio;
 							break;
 						}
 					}
-					el.setAttribute("src", draw({
-						ctx: ctx,
-						dimensions: dimensions,
-						template: holder.theme,
-						ratio: ratio,
-						holder: holder
-					}))
 				}
-				if(holder.textmode && holder.textmode == "exact"){
+				
+				var draw_params = {
+					ctx: ctx,
+					dimensions: dimensions,
+					template: holder.theme,
+					ratio: ratio,
+					holder: holder
+				};
+								
+				if (holder.textmode && holder.textmode == "exact") {
 					holder.exact_dimensions = dimensions;
-					el.setAttribute("src", draw({
-						ctx: ctx,
-						dimensions: holder.dimensions,
-						template: holder.theme,
-						ratio: ratio,
-						holder: holder
-					}))
+					draw_params.dimensions = holder.dimensions;
 				}
+				
+				el.setAttribute("src", draw(draw_params));
 			}
 		}
 	}
@@ -532,8 +533,9 @@ app.run = function (o) {
 		instance_config.use_canvas = true;
 		instance_config.use_svg = false;
 	}
-	instance_config.debounce = options.debounce;
-			
+	
+	instance_config.debounce = (options.debounce != null) ? options.debounce : instance_config.debounce;
+
 	if (typeof (options.images) == "string") {
 		imageNodes = selector(options.images);
 	} else if (window.NodeList && options.images instanceof window.NodeList) {
@@ -617,16 +619,23 @@ app.run = function (o) {
 };
 
 contentLoaded(win, function () {
+	var debounce_resizable_update = function () {
+		debounce(function () {
+			resizable_update(null)
+		})
+	};
 	if (window.addEventListener) {
-		window.addEventListener("resize", debounce_resize, false);
-		window.addEventListener("orientationchange", debounce_resize, false);
+		window.addEventListener("resize", debounce_resizable_update, false);
+		window.addEventListener("orientationchange", debounce_resizable_update, false);
 	} else {
-		window.attachEvent("onresize", debounce_resize)
+		window.attachEvent("onresize", debounce_resizable_update)
 	}
 	preempted || app.run({});
 
 	if (typeof window.Turbolinks === "object") {
-		document.addEventListener("page:change", function() { app.run({}) })
+		document.addEventListener("page:change", function () {
+			app.run({})
+		})
 	}
 });
 if (typeof define === "function" && define.amd) {
