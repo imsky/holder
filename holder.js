@@ -518,6 +518,23 @@ app.add_image = function (src, el) {
 	return app;
 };
 
+app.remove_from_resize = function(el) {
+	var node = selector(el);
+	if (node.length) {
+		for (var i = 0, l = node.length; i < l; i++) {
+			// Need resizable_images.length because of the possibility of shortening
+			// the array when spliced on a match.  Also, avoid 'break' in the loop
+			// on match in case the element has (somehow) been added more than once.
+			for (var j = 0; j < resizable_images.length; j++) {
+				if (node[i] === resizable_images[j]) {
+					resizable_images.splice(j, 1);
+				}
+			}
+		}
+	}
+	return app;
+};
+
 app.run = function (o) {
 
 	instance_config = extend({}, system_config)
