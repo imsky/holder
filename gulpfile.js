@@ -3,9 +3,11 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var header = require('gulp-header');
 var jshint = require('gulp-jshint');
+var exec = require('child_process').exec;
 
 var moment = require('moment');
 var pkg = require("package.json");
+var build = 0;
 
 var banner =
 	'/*!\n\n' +
@@ -20,9 +22,12 @@ var paths = {
 	scripts: ["src/ondomready/ondomready.js", "src/polyfills.js", "src/holder.js"]
 }
 
-function build(){
-	return moment().format("YYYYMMDD") + "." + (moment().diff(moment().startOf('day'), 'seconds'));
-}
+gulp.task('git-head', function(cb){
+	exec('git rev-parse HEAD', function(err, stdout, stderr){
+		build = stdout.substr(0,7);
+		cb(err);
+	})
+})
 
 gulp.task('jshint', function () {
 	return gulp.src(paths.scripts)
@@ -30,14 +35,14 @@ gulp.task('jshint', function () {
 		.pipe(jshint.reporter('default'))
 })
 
-gulp.task('scripts', function () {
+gulp.task('scripts', ['git-head'], function () {
 	return gulp.src(paths.scripts)
 		.pipe(concat("holder.js"))
 		.pipe(uglify())
 		.pipe(header(banner, {
 			pkg: pkg,
 			year: moment().format("YYYY"),
-			build: build()
+			build: build
 		}))
 		.pipe(gulp.dest("./"))
 })
