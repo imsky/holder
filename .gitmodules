@@ -1,0 +1,3 @@
+[submodule "src/ondomready"]
+	path = src/ondomready
+	url = git@github.com:imsky/ondomready.git
