@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title></title>
+<style>
+	body {font-family:sans-serif}
+	.thumb {width:300px;height:250px;margin:25px;float:left}
+	.thumb img, .thumb .holderjs {display:block;margin:0 auto}
+	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
+	.thumb.fullpage {float:none;clear:both;width:auto}
+	.autosize img {width:100%}
+</style>
+</head>
+<body>
+<div class="thumb">
+	<img src="holder.js/300x200">
+	<div class="caption">
+		 Plain placeholder
+	</div>
+</div>
+<div class="thumb">
+	<img src="holder.js/300x200/social">
+	<div class="caption">
+		 Themed placeholder
+	</div>
+</div>
+<div class="thumb">
+	<img src="holder.js/300x200/lava/text:заполнитель">
+	<div class="caption">
+		 Placeholder with text
+	</div>
+</div>
+<div class="thumb">
+	<img src="holder.js/300x200/sky/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
+	<div class="caption">
+		 Placeholder with lengthy text
+	</div>
+</div>
+<div class="thumb">
+	<img src="holder.js/80%x50%/vine">
+	<div class="caption">
+		 Fluid placeholder
+	</div>
+</div>
+<div class="thumb">
+	<div class="autosize">
+		<img src="holder.js/200x100/#555:#aaa/auto">
+	</div>
+	<div class="caption">
+		 Auto-sized placeholder
+	</div>
+</div>
+<div class="thumb">
+	<div class="autosize">
+		<img src="holder.js/200x100/auto/textmode:exact">
+	</div>
+	<div class="caption">
+		 Auto-sized placeholder in exact mode
+	</div>
+</div>
+<div class="thumb">
+	<div class="holderjs" style="background:url(?holder.js/200x100/#ff0000:#ffffff);width:200px;height:100px">
+	</div>
+	<div class="caption">
+		<code>&lt;div&gt;</code> with background placeholder
+	</div>
+</div>
+<div class="thumb">
+	<div class="holderjs" style="background:url(?holder.js/100%x100%/#ff0000:#ffffff);width:200px;height:100px">
+	</div>
+	<div class="caption">
+		<code>&lt;div&gt;</code> with fluid background placeholder
+	</div>
+</div>
+<div class="thumb">
+	<div id="thumb1">
+	</div>
+	<div class="caption">
+		 Placeholder added through Holder API
+	</div>
+</div>
+<div class="thumb">
+	<img src="custom.holder/50x50/custom/auto" style="width:200px;height:200px">
+	<div class="caption">
+		Auto-sized <code>canvas</code> placeholder with custom domain and theme
+	</div>
+</div>
+<div class="fullpage thumb">
+	<img src="holder.js/80%x50%/industrial">
+	<div class="caption">
+		 Full-page fluid placeholder
+	</div>
+</div>
+<div class="fullpage thumb">
+	<img src="holder.js/80%x50%/vine/textmode:literal">
+	<div class="caption">
+		 Full-page fluid placeholder in literal mode
+	</div>
+</div>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="../holder.js"></script>
+<script>
+	$(function(){
+		Holder.run();
+		Holder.add_image("holder.js/250x120/sky", "#thumb1").run();
+		Holder.add_theme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
+			domain: "custom.holder",
+			use_canvas: true
+		})
+	})
+</script>
+</body>
+</html>

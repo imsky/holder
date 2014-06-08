@@ -13,42 +13,42 @@ Holder.js - client side image placeholders
 })("Holder", this, 
 
 (function (app, win) {
-var system_config = {
+var systemConfig = {
 	use_svg: false,
 	use_canvas: false,
 	use_fallback: false,
 	debounce: 100
 };
-var instance_config = {};
+var instanceConfig = {};
 var preempted = false;
 canvas = document.createElement('canvas');
-var dpr = 1, bsr = 1;
-var resizable_images = [];
-var debounce_timer;
+var devicePixelRatio = 1, backingStoreRatio = 1;
+var resizableImages = [];
+var debounceTimer;
 
 if (!canvas.getContext) {
-	system_config.use_fallback = true;
+	systemConfig.use_fallback = true;
 } else {
 	if (canvas.toDataURL("image/png")
 		.indexOf("data:image/png") < 0) {
 		//Android doesn't support data URI
-		system_config.use_fallback = true;
+		systemConfig.use_fallback = true;
 	} else {
 		var ctx = canvas.getContext("2d");
 	}
 }
 
 if(!!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect){
-	system_config.use_svg = true;
-	system_config.use_canvas = false;
+	systemConfig.use_svg = true;
+	systemConfig.use_canvas = false;
 }
 
-if(!system_config.use_fallback){
-    dpr = window.devicePixelRatio || 1,
-    bsr = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+if(!systemConfig.use_fallback){
+    devicePixelRatio = window.devicePixelRatio || 1;
+    backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 }
 
-var ratio = dpr / bsr;
+var ratio = devicePixelRatio / backingStoreRatio;
 
 var settings = {
 	domain: "holder.js",
@@ -87,6 +87,7 @@ var settings = {
 		}
 	}
 };
+
 app.flags = {
 	dimensions: {
 		regex: /^(\d+)x(\d+)$/,
@@ -149,7 +150,7 @@ for (var flag in app.flags) {
 	}
 }
 
-function text_size(width, height, template) {
+function text_size(width, height, fontSize) {
 	height = parseInt(height, 10);
 	width = parseInt(width, 10);
 	var bigSide = Math.max(height, width)
@@ -157,7 +158,7 @@ function text_size(width, height, template) {
 	var scale = 1 / 12;
 	var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
 	return {
-		height: Math.round(Math.max(template.size, newHeight))
+		height: Math.round(Math.max(fontSize, newHeight))
 	}
 }
 
@@ -180,6 +181,9 @@ var svg_el = (function(){
 	svg.appendChild(text_el)
 
 	return function(props){
+		if(isNaN(props.width) || isNaN(props.height) || isNaN(props.text_height)){
+			throw "Holder: incorrect properties passed to SVG constructor";
+		}
 		svg.setAttribute("width",props.width);
 		svg.setAttribute("height", props.height);
 		svg.setAttribute("viewBox", "0 0 "+props.width+" "+props.height)
@@ -220,7 +224,7 @@ function draw_canvas(args) {
 		literal = holder.textmode == "literal",
 		exact = holder.textmode == "exact";
 
-	var ts = text_size(dimensions.width, dimensions.height, template);
+	var ts = text_size(dimensions.width, dimensions.height, template.size);
 	var text_height = ts.height;
 	var width = dimensions.width * ratio,
 		height = dimensions.height * ratio;
@@ -262,7 +266,7 @@ function draw_svg(args){
 		literal = holder.textmode == "literal",
 		exact = holder.textmode == "exact";
 
-	var ts = text_size(dimensions.width, dimensions.height, template);
+	var ts = text_size(dimensions.width, dimensions.height, template.size);
 	var text_height = ts.height;
 	var width = dimensions.width,
 		height = dimensions.height;
@@ -292,11 +296,21 @@ function draw_svg(args){
 }
 
 function draw(args) {
-	if(instance_config.use_canvas && !instance_config.use_svg){
-		return draw_canvas(args);
+	if(instanceConfig.use_canvas && !instanceConfig.use_svg){
+		try {
+			return draw_canvas(args);
+		}
+		catch(e){
+			window.console && console.error(e);
+		}
 	}
 	else{
-		return draw_svg(args);
+		try {
+			return draw_svg(args);
+		}
+		catch(e){
+			window.console && console.error(e);
+		}
 	}
 }
 
@@ -304,7 +318,7 @@ function render(mode, el, holder, src) {
 	var dimensions = holder.dimensions,
 		theme = holder.theme,
 		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
-	var dimensions_caption = dimensions.width + "x" + dimensions.height;
+	var dimensionsCaption = dimensions.width + "x" + dimensions.height;
 	theme = (text ? extend(theme, {
 		text: text
 	}) : theme);
@@ -313,32 +327,34 @@ function render(mode, el, holder, src) {
 	}) : theme);
 	el.setAttribute("data-src", src);
 	holder.theme = theme;
-	el.holder_data = holder;
+	el.holderData = holder;
 	
 	if (mode == "image") {
-		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
-		if (instance_config.use_fallback || !holder.auto) {
+		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
+		if (instanceConfig.use_fallback || !holder.auto) {
 			el.style.width = dimensions.width + "px";
 			el.style.height = dimensions.height + "px";
 		}
-		if (instance_config.use_fallback) {
+		if (instanceConfig.use_fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder}));
+			var image = draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder});
+			el.setAttribute("src", image);
 			
 			if(holder.textmode && holder.textmode == "exact"){
-				resizable_images.push(el);
+				resizableImages.push(el);
 				resizable_update(el);
 			}
 			
 		}
 	} else if (mode == "background") {
-		if (!instance_config.use_fallback) {
-			el.style.backgroundImage = "url(" + draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio, holder: holder}) + ")";
+		if (!instanceConfig.use_fallback) {
+			var image = draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio, holder: holder});
+			el.style.backgroundImage = "url(" + image + ")";
 			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
 		}
 	} else if (mode == "fluid") {
-		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
+		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
 		if (dimensions.height.slice(-1) == "%") {
 			el.style.height = dimensions.height
 		} else if(holder.auto == null || !holder.auto){
@@ -355,10 +371,10 @@ function render(mode, el, holder, src) {
 		
 		set_initial_dimensions(el)
 		
-		if (instance_config.use_fallback) {
+		if (instanceConfig.use_fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			resizable_images.push(el);
+			resizableImages.push(el);
 			resizable_update(el);
 		}
 	}
@@ -380,10 +396,10 @@ function dimension_check(el, callback) {
 }
 
 function set_initial_dimensions(el){
-	if(el.holder_data){
+	if(el.holderData){
 		var dimensions = dimension_check(el, app.invisible_error_fn( set_initial_dimensions))
 		if(dimensions){
-			var holder = el.holder_data;
+			var holder = el.holderData;
 			holder.initial_dimensions = dimensions;
 			holder.fluid_data = {
 				fluid_height: holder.dimensions.height.slice(-1) == "%",
@@ -403,13 +419,13 @@ function set_initial_dimensions(el){
 }
 
 function debounce(fn) {
-	if (instance_config.debounce) {
-		if (!debounce_timer) fn.call(this);
-		if (debounce_timer) clearTimeout(debounce_timer);
-		debounce_timer = setTimeout(function() {
-			debounce_timer = null;
+	if (instanceConfig.debounce) {
+		if (!debounceTimer) fn.call(this);
+		if (debounceTimer) clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(function() {
+			debounceTimer = null;
 			fn.call(this)
-		}, instance_config.debounce);
+		}, instanceConfig.debounce);
 	} else {
 		fn.call(this)
 	}
@@ -418,7 +434,7 @@ function debounce(fn) {
 function resizable_update(element) {
 	var images;
 	if (element == null || element.nodeType == null) {
-		images = resizable_images;
+		images = resizableImages;
 	} else {
 		images = [element]
 	}
@@ -427,8 +443,8 @@ function resizable_update(element) {
 			continue;
 		}
 		var el = images[i];
-		if (el.holder_data) {
-			var holder = el.holder_data;
+		if (el.holderData) {
+			var holder = el.holderData;
 			var dimensions = dimension_check(el, app.invisible_error_fn(resizable_update))
 			if (dimensions) {
 				if (holder.fluid) {
@@ -457,7 +473,8 @@ function resizable_update(element) {
 					draw_params.dimensions = holder.dimensions;
 				}
 				
-				el.setAttribute("src", draw(draw_params));
+				var image = draw(draw_params);
+				el.setAttribute("src", image);
 			}
 		}
 	}
@@ -525,7 +542,7 @@ app.add_image = function (src, el) {
 
 app.run = function (o) {
 
-	instance_config = extend({}, system_config)
+	instanceConfig = extend({}, systemConfig)
 	preempted = true;
 
 	var options = extend(settings, o),
@@ -534,11 +551,11 @@ app.run = function (o) {
 		bgnodes = [];
 
 	if(options.use_canvas != null && options.use_canvas){
-		instance_config.use_canvas = true;
-		instance_config.use_svg = false;
+		instanceConfig.use_canvas = true;
+		instanceConfig.use_svg = false;
 	}
 	
-	instance_config.debounce = (options.debounce != null) ? options.debounce : instance_config.debounce;
+	instanceConfig.debounce = (options.debounce != null) ? options.debounce : instanceConfig.debounce;
 
 	if (typeof (options.images) == "string") {
 		imageNodes = document.querySelectorAll(options.images);
