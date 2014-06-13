@@ -3,154 +3,149 @@ Holder.js - client side image placeholders
 © 2012-2014 Ivan Malopinsky - http://imsky.co
 */
 
-(function(name, global, callback){
-	if(typeof define === "function" && define.amd){
-		define(callback);
-	}
-	else {
-		global[name] = callback;
-	}
-})("Holder", this, 
+(function (register, global, undefined) {
+	
+	var app = {};
 
-(function (app, win) {
-var systemConfig = {
-	use_svg: false,
-	use_canvas: false,
-	use_fallback: false,
-	debounce: 100
-};
-var instanceConfig = {};
-var preempted = false;
-canvas = document.createElement('canvas');
-var devicePixelRatio = 1, backingStoreRatio = 1;
-var resizableImages = [];
-var debounceTimer;
-
-if (!canvas.getContext) {
-	systemConfig.use_fallback = true;
-} else {
-	if (canvas.toDataURL("image/png")
-		.indexOf("data:image/png") < 0) {
-		//Android doesn't support data URI
-		systemConfig.use_fallback = true;
-	} else {
-		var ctx = canvas.getContext("2d");
-	}
-}
-
-if(!!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect){
-	systemConfig.use_svg = true;
-	systemConfig.use_canvas = false;
-}
-
-if(!systemConfig.use_fallback){
-    devicePixelRatio = window.devicePixelRatio || 1;
-    backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-}
-
-var ratio = devicePixelRatio / backingStoreRatio;
-
-var settings = {
-	domain: "holder.js",
-	images: "img",
-	bgnodes: ".holderjs",
-	themes: {
-		"gray": {
-			background: "#eee",
-			foreground: "#aaa",
-			size: 12
+	var Holder = {
+		addTheme: function (name, theme) {
+			name != null && theme != null && (app.settings.themes[name] = theme);
+			return this;
 		},
-		"social": {
-			background: "#3a5a97",
-			foreground: "#fff",
-			size: 12
+		addImage: function (src, el) {
+			var node = document.querySelectorAll(el);
+			if (node.length) {
+				for (var i = 0, l = node.length; i < l; i++) {
+					var img = document.createElement("img")
+					img.setAttribute("data-src", src);
+					node[i].appendChild(img);
+				}
+			}
+			return this;
 		},
-		"industrial": {
-			background: "#434A52",
-			foreground: "#C2F200",
-			size: 12
-		},
-		"sky": {
-			background: "#0D8FDB",
-			foreground: "#fff",
-			size: 12
-		},
-		"vine": {
-			background: "#39DBAC",
-			foreground: "#1E292C",
-			size: 12
-		},
-		"lava": {
-			background: "#F8591A",
-			foreground: "#1C2846",
-			size: 12
-		}
-	}
-};
+		run: function (instanceOptions) {
+			var instanceConfig = extend({}, app.config)
+			app.runtime.preempted = true;
 
-app.flags = {
-	dimensions: {
-		regex: /^(\d+)x(\d+)$/,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				width: +exec[1],
-				height: +exec[2]
+			var options = extend(app.settings, instanceOptions),
+				images = [],
+				imageNodes = [],
+				bgnodes = [];
+
+			if (options.use_canvas != null && options.use_canvas) {
+				instanceConfig.use_canvas = true;
+				instanceConfig.use_svg = false;
+			}
+
+			instanceConfig.debounce = (options.debounce != null) ? options.debounce : instanceConfig.debounce;
+
+			if (typeof (options.images) == "string") {
+				imageNodes = document.querySelectorAll(options.images);
+			} else if (window.NodeList && options.images instanceof window.NodeList) {
+				imageNodes = options.images;
+			} else if (window.Node && options.images instanceof window.Node) {
+				imageNodes = [options.images];
+			} else if (window.HTMLCollection && options.images instanceof window.HTMLCollection) {
+				imageNodes = options.images
+			}
+
+			if (typeof (options.bgnodes) == "string") {
+				bgnodes = document.querySelectorAll(options.bgnodes);
+			} else if (window.NodeList && options.elements instanceof window.NodeList) {
+				bgnodes = options.bgnodes;
+			} else if (window.Node && options.bgnodes instanceof window.Node) {
+				bgnodes = [options.bgnodes];
+			}
+			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
+
+			var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
+			for (var l = bgnodes.length, i = 0; i < l; i++) {
+				var src = window.getComputedStyle(bgnodes[i], null).getPropertyValue("background-image");
+				var flags = src.match(cssregex);
+				var bgsrc = bgnodes[i].getAttribute("data-background-src");
+				if (flags) {
+					var holder = parse_flags(flags[1].split("/"), options);
+					if (holder) {
+						render("background", bgnodes[i], holder, src, instanceConfig);
+					}
+				} else if (bgsrc != null) {
+					var holder = parse_flags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
+						.split("/"), options);
+					if (holder) {
+						render("background", bgnodes[i], holder, src, instanceConfig);
+					}
+				}
+			}
+			for (l = images.length, i = 0; i < l; i++) {
+				var attr_data_src, attr_src;
+				attr_src = attr_data_src = src = null;
+				try {
+					attr_src = images[i].getAttribute("src");
+					attr_datasrc = images[i].getAttribute("data-src");
+				} catch (e) {}
+				if (attr_datasrc == null && !!attr_src && attr_src.indexOf(options.domain) >= 0) {
+					src = attr_src;
+				} else if (!!attr_datasrc && attr_datasrc.indexOf(options.domain) >= 0) {
+					src = attr_datasrc;
+				}
+				if (src) {
+					var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
+					if (holder) {
+						if (holder.fluid) {
+							render("fluid", images[i], holder, src, instanceConfig)
+						} else {
+							render("image", images[i], holder, src, instanceConfig);
+						}
+					}
+				}
+			}
+			return this;
+		},
+		invisibleErrorFn: function (fn) {
+			return function (el) {
+				if (el.hasAttribute("data-holder-invisible")) {
+					throw new Error("Holder: invisible placeholder")
+				}
 			}
 		}
-	},
-	fluid: {
-		regex: /^([0-9%]+)x([0-9%]+)$/,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				width: exec[1],
-				height: exec[2]
+	}
+	
+	function parse_flags(flags, options) {
+	var ret = {
+		theme: extend(app.settings.themes.gray, {})
+	};
+	var render = false;
+	for (var fl = flags.length, j = 0; j < fl; j++) {
+		var flag = flags[j];
+		if (app.flags.dimensions.match(flag)) {
+			render = true;
+			ret.dimensions = app.flags.dimensions.output(flag);
+		} else if (app.flags.fluid.match(flag)) {
+			render = true;
+			ret.dimensions = app.flags.fluid.output(flag);
+			ret.fluid = true;
+		} else if (app.flags.textmode.match(flag)) {
+			ret.textmode = app.flags.textmode.output(flag)
+		} else if (app.flags.colors.match(flag)) {
+			var colors = app.flags.colors.output(flag)
+			ret.theme = extend(colors, ret.theme);
+		} else if (options.themes[flag]) {
+			//If a theme is specified, it will override custom colors
+			if(options.themes.hasOwnProperty(flag)){
+				ret.theme = extend(options.themes[flag], {});
 			}
-		}
-	},
-	colors: {
-		regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
-		output: function (val) {
-			var exec = this.regex.exec(val);
-			return {
-				size: settings.themes.gray.size,
-				foreground: "#" + exec[2],
-				background: "#" + exec[1]
-			}
-		}
-	},
-	text: {
-		regex: /text\:(.*)/,
-		output: function (val) {
-			return this.regex.exec(val)[1];
-		}
-	},
-	font: {
-		regex: /font\:(.*)/,
-		output: function (val) {
-			return this.regex.exec(val)[1];
-		}
-	},
-	auto: {
-		regex: /^auto$/
-	},
-	textmode: {
-		regex: /textmode\:(.*)/,
-		output: function(val){
-			return this.regex.exec(val)[1];
+		} else if (app.flags.font.match(flag)) {
+			ret.font = app.flags.font.output(flag);
+		} else if (app.flags.auto.match(flag)) {
+			ret.auto = true;
+		} else if (app.flags.text.match(flag)) {
+			ret.text = app.flags.text.output(flag);
 		}
 	}
-}
-
-for (var flag in app.flags) {
-	if (!app.flags.hasOwnProperty(flag)) continue;
-	app.flags[flag].match = function (val) {
-		return val.match(this.regex)
+	return render ? ret : false;
 	}
-}
-
-function text_size(width, height, fontSize) {
+	
+	function text_size(width, height, fontSize) {
 	height = parseInt(height, 10);
 	width = parseInt(width, 10);
 	var bigSide = Math.max(height, width)
@@ -172,6 +167,17 @@ var svg_el = (function(){
 	if(svg.webkitMatchesSelector){
 		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
 	}
+	
+	/* todo: needs to be generalized
+	var xml = new DOMParser().parseFromString('<xml />', "application/xml")
+	var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
+	xml.insertBefore(css, xml.firstChild);
+	xml.removeChild(xml.documentElement)
+	var svg_css = serializer.serializeToString(xml);
+	*/
+	
+	var svg_css = "";
+	
 	var bg_el = document.createElementNS(svg_ns, "rect")
 	var text_el = document.createElementNS(svg_ns, "text")
 	var textnode_el = document.createTextNode(null)
@@ -201,21 +207,12 @@ var svg_el = (function(){
 		"font-family":props.font,
 		"dominant-baseline":"central"
 		}))
-		return serializer.serializeToString(svg)
+		
+		return svg_css + serializer.serializeToString(svg)
 	}
 })()
 
-function css_properties(props){
-	var ret = [];
-	for(var p in props){
-		if(props.hasOwnProperty(p)){
-			ret.push(p+":"+props[p])
-		}
-	}
-	return ret.join(";")
-}
-
-function draw_canvas(args) {
+function drawCanvas(args) {
 	var ctx = args.ctx,
 		dimensions = args.dimensions,
 		template = args.template,
@@ -231,8 +228,9 @@ function draw_canvas(args) {
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
 	var font_weight = template.fontweight ? template.fontweight : "bold";
 	font_weight = font_weight == "normal" ? "" : font_weight;
-	canvas.width = width;
-	canvas.height = height;
+	
+	_canvas.width = width;
+	_canvas.height = height;
 	ctx.textAlign = "center";
 	ctx.textBaseline = "middle";
 	ctx.fillStyle = template.background;
@@ -249,17 +247,13 @@ function draw_canvas(args) {
 		var dimensions = holder.exact_dimensions;
 		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	}
-	var text_width = ctx.measureText(text).width;
-	if (text_width / width >= 0.75) {
-		text_height = Math.floor(text_height * 0.75 * (width / text_width));
-	}
-	//Resetting font size if necessary
+
 	ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
 	ctx.fillText(text, (width / 2), (height / 2), width);
-	return canvas.toDataURL("image/png");
+	return _canvas.toDataURL("image/png");
 }
 
-function draw_svg(args){
+function drawSVG(args){
 	var dimensions = args.dimensions,
 		template = args.template,
 		holder = args.holder,
@@ -292,13 +286,26 @@ function draw_svg(args){
 		font_weight:font_weight,
 		template:template
 	})
+	
 	return "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(string)));
 }
 
-function draw(args) {
+function renderToImage(mode, params, el, instanceConfig){
+	var image = draw(params, instanceConfig);
+	if(mode == "background"){
+		el.style.backgroundImage = "url(" + image + ")";
+		el.style.backgroundSize = params.dimensions.width + "px " + params.dimensions.height + "px";
+	}
+	else{
+		el.setAttribute("src", image);
+	}
+	el.setAttribute("data-holder-rendered", true);
+}
+
+function draw(args, instanceConfig) {
 	if(instanceConfig.use_canvas && !instanceConfig.use_svg){
 		try {
-			return draw_canvas(args);
+			return drawCanvas(args);
 		}
 		catch(e){
 			window.console && console.error(e);
@@ -306,7 +313,7 @@ function draw(args) {
 	}
 	else{
 		try {
-			return draw_svg(args);
+			return drawSVG(args);
 		}
 		catch(e){
 			window.console && console.error(e);
@@ -314,7 +321,7 @@ function draw(args) {
 	}
 }
 
-function render(mode, el, holder, src) {
+function render(mode, el, holder, src, instanceConfig) {
 	var dimensions = holder.dimensions,
 		theme = holder.theme,
 		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
@@ -329,6 +336,9 @@ function render(mode, el, holder, src) {
 	holder.theme = theme;
 	el.holderData = holder;
 	
+	//todo: remove this once canvas_el is implemeted
+	var ctx = _ctx;
+	
 	if (mode == "image") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
 		if (instanceConfig.use_fallback || !holder.auto) {
@@ -338,20 +348,17 @@ function render(mode, el, holder, src) {
 		if (instanceConfig.use_fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			var image = draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder});
-			el.setAttribute("src", image);
+			renderToImage(mode, {ctx: ctx, dimensions: dimensions, template: theme, ratio: app.config.ratio, holder: holder}, el, instanceConfig);
 			
 			if(holder.textmode && holder.textmode == "exact"){
-				resizableImages.push(el);
-				resizable_update(el);
+				app.runtime.resizableImages.push(el);
+				//resizable_update(el);
 			}
-			
 		}
 	} else if (mode == "background") {
 		if (!instanceConfig.use_fallback) {
-			var image = draw({ctx:ctx, dimensions: dimensions, template: theme, ratio: ratio, holder: holder});
-			el.style.backgroundImage = "url(" + image + ")";
-			el.style.backgroundSize = dimensions.width + "px " + dimensions.height + "px";
+			renderToImage(mode, {ctx:ctx, dimensions: dimensions, template: theme, ratio: app.config.ratio, holder: holder},
+				el, instanceConfig);
 		}
 	} else if (mode == "fluid") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
@@ -374,8 +381,59 @@ function render(mode, el, holder, src) {
 		if (instanceConfig.use_fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
-			resizableImages.push(el);
-			resizable_update(el);
+			app.runtime.resizableImages.push(el);
+			//resizable_update(el);
+		}
+	}
+}
+
+function resizable_update(element) {
+	var images;
+	if (element == null || element.nodeType == null) {
+		images = app.runtime.resizableImages;
+	} else {
+		images = [element]
+	}
+	for (var i in images) {
+		if (!images.hasOwnProperty(i)) {
+			continue;
+		}
+		var el = images[i];
+		if (el.holderData) {
+			var holder = el.holderData;
+			var dimensions = dimension_check(el, Holder.invisibleErrorFn(resizable_update))
+			if (dimensions) {
+				if (holder.fluid) {
+					if (holder.auto) {
+						switch (holder.fluid_data.mode) {
+						case "width":
+							dimensions.height = dimensions.width / holder.fluid_data.ratio;
+							break;
+						case "height":
+							dimensions.width = dimensions.height * holder.fluid_data.ratio;
+							break;
+						}
+					}
+				}
+				
+				//todo: remove once canvas_el is implemented
+				var ctx = _ctx;
+				
+				var draw_params = {
+					ctx: ctx,
+					dimensions: dimensions,
+					template: holder.theme,
+					ratio: app.config.ratio,
+					holder: holder
+				};
+								
+				if (holder.textmode && holder.textmode == "exact") {
+					holder.exact_dimensions = dimensions;
+					draw_params.dimensions = holder.dimensions;
+				}
+				
+				renderToImage(draw_params, el);
+			}
 		}
 	}
 }
@@ -397,7 +455,7 @@ function dimension_check(el, callback) {
 
 function set_initial_dimensions(el){
 	if(el.holderData){
-		var dimensions = dimension_check(el, app.invisible_error_fn( set_initial_dimensions))
+		var dimensions = dimension_check(el, Holder.invisibleErrorFn(set_initial_dimensions))
 		if(dimensions){
 			var holder = el.holderData;
 			holder.initial_dimensions = dimensions;
@@ -418,249 +476,243 @@ function set_initial_dimensions(el){
 	}
 }
 
-function debounce(fn) {
-	if (instanceConfig.debounce) {
-		if (!debounceTimer) fn.call(this);
-		if (debounceTimer) clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(function() {
-			debounceTimer = null;
+	//Configuration
+
+	app.flags = {
+		dimensions: {
+			regex: /^(\d+)x(\d+)$/,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					width: +exec[1],
+					height: +exec[2]
+				}
+			}
+		},
+		fluid: {
+			regex: /^([0-9%]+)x([0-9%]+)$/,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					width: exec[1],
+					height: exec[2]
+				}
+			}
+		},
+		colors: {
+			regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					foreground: "#" + exec[2],
+					background: "#" + exec[1]
+				}
+			}
+		},
+		text: {
+			regex: /text\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		},
+		font: {
+			regex: /font\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		},
+		auto: {
+			regex: /^auto$/
+		},
+		textmode: {
+			regex: /textmode\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		}
+	}
+
+	for (var flag in app.flags) {
+		if (!app.flags.hasOwnProperty(flag)) continue;
+		app.flags[flag].match = function (val) {
+			return val.match(this.regex)
+		}
+	}
+
+	app.settings = {
+		domain: "holder.js",
+		images: "img",
+		bgnodes: ".holderjs",
+		themes: {
+			"gray": {
+				background: "#eee",
+				foreground: "#aaa",
+				size: 12
+			},
+			"social": {
+				background: "#3a5a97",
+				foreground: "#fff",
+				size: 12
+			},
+			"industrial": {
+				background: "#434A52",
+				foreground: "#C2F200",
+				size: 12
+			},
+			"sky": {
+				background: "#0D8FDB",
+				foreground: "#fff",
+				size: 12
+			},
+			"vine": {
+				background: "#39DBAC",
+				foreground: "#1E292C",
+				size: 12
+			},
+			"lava": {
+				background: "#F8591A",
+				foreground: "#1C2846",
+				size: 12
+			}
+		}
+	};
+
+	//Helpers
+
+	function extend(a, b) {
+		var c = {};
+		for (var i in a) {
+			if (a.hasOwnProperty(i)) {
+				c[i] = a[i];
+			}
+		}
+		for (var i in b) {
+			if (b.hasOwnProperty(i)) {
+				c[i] = b[i];
+			}
+		}
+		return c
+	}
+
+	function css_properties(props) {
+		var ret = [];
+		for (var p in props) {
+			if (props.hasOwnProperty(p)) {
+				ret.push(p + ":" + props[p])
+			}
+		}
+		return ret.join(";")
+	}
+
+	function debounce(config, fn) {
+		if (config.debounce) {
+			if (!app.runtime.debounceTimer) fn.call(this);
+			if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
+			app.runtime.debounceTimer = setTimeout(function () {
+				app.runtime.debounceTimer = null;
+				fn.call(this)
+			}, app.config.debounce);
+		} else {
 			fn.call(this)
-		}, instanceConfig.debounce);
-	} else {
-		fn.call(this)
-	}
-}
-
-function resizable_update(element) {
-	var images;
-	if (element == null || element.nodeType == null) {
-		images = resizableImages;
-	} else {
-		images = [element]
-	}
-	for (var i in images) {
-		if (!images.hasOwnProperty(i)) {
-			continue;
 		}
-		var el = images[i];
-		if (el.holderData) {
-			var holder = el.holderData;
-			var dimensions = dimension_check(el, app.invisible_error_fn(resizable_update))
-			if (dimensions) {
-				if (holder.fluid) {
-					if (holder.auto) {
-						switch (holder.fluid_data.mode) {
-						case "width":
-							dimensions.height = dimensions.width / holder.fluid_data.ratio;
-							break;
-						case "height":
-							dimensions.width = dimensions.height * holder.fluid_data.ratio;
-							break;
-						}
-					}
-				}
-				
-				var draw_params = {
-					ctx: ctx,
-					dimensions: dimensions,
-					template: holder.theme,
-					ratio: ratio,
-					holder: holder
-				};
-								
-				if (holder.textmode && holder.textmode == "exact") {
-					holder.exact_dimensions = dimensions;
-					draw_params.dimensions = holder.dimensions;
-				}
-				
-				var image = draw(draw_params);
-				el.setAttribute("src", image);
-			}
-		}
-	}
-}
-
-function parse_flags(flags, options) {
-	var ret = {
-		theme: extend(settings.themes.gray, {})
-	};
-	var render = false;
-	for (var fl = flags.length, j = 0; j < fl; j++) {
-		var flag = flags[j];
-		if (app.flags.dimensions.match(flag)) {
-			render = true;
-			ret.dimensions = app.flags.dimensions.output(flag);
-		} else if (app.flags.fluid.match(flag)) {
-			render = true;
-			ret.dimensions = app.flags.fluid.output(flag);
-			ret.fluid = true;
-		} else if (app.flags.textmode.match(flag)) {
-			ret.textmode = app.flags.textmode.output(flag)
-		} else if (app.flags.colors.match(flag)) {
-			ret.theme = app.flags.colors.output(flag);
-		} else if (options.themes[flag]) {
-			//If a theme is specified, it will override custom colors
-			if(options.themes.hasOwnProperty(flag)){
-				ret.theme = extend(options.themes[flag], {});
-			}
-		} else if (app.flags.font.match(flag)) {
-			ret.font = app.flags.font.output(flag);
-		} else if (app.flags.auto.match(flag)) {
-			ret.auto = true;
-		} else if (app.flags.text.match(flag)) {
-			ret.text = app.flags.text.output(flag);
-		}
-	}
-	return render ? ret : false;
-}
-
-
-app.invisible_error_fn = function(fn){
-	return function(el){
-		if(el.hasAttribute("data-holder-invisible")){
-			throw new Error("Holder: invisible placeholder")
-		}
-	}
-}
-
-app.add_theme = function (name, theme) {
-	name != null && theme != null && (settings.themes[name] = theme);
-	return app;
-};
-
-app.add_image = function (src, el) {
-	var node = document.querySelectorAll(el);
-	if (node.length) {
-		for (var i = 0, l = node.length; i < l; i++) {
-			var img = document.createElement("img")
-			img.setAttribute("data-src", src);
-			node[i].appendChild(img);
-		}
-	}
-	return app;
-};
-
-app.run = function (o) {
-
-	instanceConfig = extend({}, systemConfig)
-	preempted = true;
-
-	var options = extend(settings, o),
-		images = [],
-		imageNodes = [],
-		bgnodes = [];
-
-	if(options.use_canvas != null && options.use_canvas){
-		instanceConfig.use_canvas = true;
-		instanceConfig.use_svg = false;
 	}
 	
-	instanceConfig.debounce = (options.debounce != null) ? options.debounce : instanceConfig.debounce;
+	//< v2.4 API compatibility
 
-	if (typeof (options.images) == "string") {
-		imageNodes = document.querySelectorAll(options.images);
-	} else if (window.NodeList && options.images instanceof window.NodeList) {
-		imageNodes = options.images;
-	} else if (window.Node && options.images instanceof window.Node) {
-		imageNodes = [options.images];
-	} else if(window.HTMLCollection && options.images instanceof window.HTMLCollection){
-		imageNodes = options.images
-	}
-
-	if (typeof (options.bgnodes) == "string") {
-		bgnodes = document.querySelectorAll(options.bgnodes);
-	} else if (window.NodeList && options.elements instanceof window.NodeList) {
-		bgnodes = options.bgnodes;
-	} else if (window.Node && options.bgnodes instanceof window.Node) {
-		bgnodes = [options.bgnodes];
-	}
-	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
+	Holder.add_theme = Holder.addTheme;
+	Holder.add_image = Holder.addImage;
+	Holder.invisible_error_fn = Holder.invisibleErrorFn;
 	
-	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
-	for (var l = bgnodes.length, i = 0; i < l; i++) {
-		var src = window.getComputedStyle(bgnodes[i], null)
-			.getPropertyValue("background-image");
-		var flags = src.match(cssregex);
-		var bgsrc = bgnodes[i].getAttribute("data-background-src");
-		if (flags) {
-			var holder = parse_flags(flags[1].split("/"), options);
-			if (holder) {
-				render("background", bgnodes[i], holder, src);
-			}
-		} else if (bgsrc != null) {
-			var holder = parse_flags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
-				.split("/"), options);
-			if (holder) {
-				render("background", bgnodes[i], holder, src);
-			}
-		}
-	}
-	for (l = images.length, i = 0; i < l; i++) {
-		var attr_data_src, attr_src;
-		attr_src = attr_data_src = src = null;
-		try {
-			attr_src = images[i].getAttribute("src");
-			attr_datasrc = images[i].getAttribute("data-src");
-		} catch (e) {}
-		if (attr_datasrc == null && !! attr_src && attr_src.indexOf(options.domain) >= 0) {
-			src = attr_src;
-		} else if ( !! attr_datasrc && attr_datasrc.indexOf(options.domain) >= 0) {
-			src = attr_datasrc;
-		}
-		if (src) {
-			var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
-			if (holder) {
-				if (holder.fluid) {
-					render("fluid", images[i], holder, src)
-				} else {
-					render("image", images[i], holder, src);
-				}
-			}
-		}
-	}
-	return app;
-};
+	//Properties set once on setup
 
-
-if(win.onDomReady){
-onDomReady(function () {
-	var debounce_resizable_update = function () {
-		debounce(function () {
-			resizable_update(null)
-		})
+	app.config = {
+		use_svg: false,
+		use_canvas: false,
+		use_fallback: false,
+		debounce: 100,
+		ratio: 1
 	};
-	if (window.addEventListener) {
-		window.addEventListener("resize", debounce_resizable_update, false);
-		window.addEventListener("orientationchange", debounce_resizable_update, false);
-	} else {
-		window.attachEvent("onresize", debounce_resizable_update)
-	}
-	preempted || app.run({});
 
-	if (typeof window.Turbolinks === "object") {
-		document.addEventListener("page:change", function () {
-			app.run({})
+	//Properties modified during runtime
+
+	app.runtime = {
+		preempted: false,
+		resizableImages: [],
+		debounceTimer: null
+	}
+	
+	//Pre-flight
+
+	var _canvas = document.createElement('canvas');
+	var _ctx = null;
+	if (!_canvas.getContext) {
+		app.config.use_fallback = true;
+	} else {
+		if (_canvas.toDataURL("image/png").indexOf("data:image/png") == -1) {
+			app.config.use_fallback = true;
+		}
+		else{
+			_ctx =  _canvas.getContext("2d");
+		}
+	}
+	
+	var devicePixelRatio = 1,
+	backingStoreRatio = 1;
+	
+	if(!app.config.use_fallback){
+		devicePixelRatio = window.devicePixelRatio || 1;
+		backingStoreRatio = _ctx.webkitBackingStorePixelRatio || _ctx.mozBackingStorePixelRatio || _ctx.msBackingStorePixelRatio || _ctx.oBackingStorePixelRatio || _ctx.backingStorePixelRatio || 1;
+	}
+
+	app.config.ratio = devicePixelRatio / backingStoreRatio;
+
+	if (!!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect) {
+		app.config.use_svg = true;
+		app.config.use_canvas = false;
+	}
+	
+	//Exposing to document and setting up listeners
+
+	register(Holder, "Holder", global);
+	
+	if(global.onDomReady){
+		global.onDomReady(function(){
+			if(!app.runtime.preempted){
+				Holder.run({})
+			}
+			
+			/*
+			var debounce_resizable_update = function () {
+				debounce(function () {
+					resizable_update(null)
+				})
+			};
+			*/
+			
+			if(global.addEventListener){
+				//global.addEventListener("resize", resizable_update, false);
+				//global.addEventListener("orientationchange", resizable_update, false);
+			}
+			else{
+				//global.attachEvent("onresize", resizable_update);
+			}
+			
+			if(typeof global.Turbolinks == "object"){
+				global.document.addEventListener("page:change", function(){
+					app.run({})
+				})
+			}
 		})
 	}
-});
-}
 
-//shallow object property extend
-function extend(a,b){
-	var c={};
-	for(var i in a){
-		if(a.hasOwnProperty(i)){
-			c[i]=a[i];
-		}
+})(function (fn, name, global) {
+	var isAMD = (typeof define === 'function' && define.amd);
+	var isNode = (typeof exports === 'object');
+	var isWeb = !isNode;
+
+	if (isAMD) {
+		define(fn);
+	} else {
+		global[name] = fn;
 	}
-	for(var i in b){
-		if(b.hasOwnProperty(i)){
-			c[i]=b[i];
-		}
-	}
-	return c
-}
-
-return app;
-
-})({}, this));
+}, this);

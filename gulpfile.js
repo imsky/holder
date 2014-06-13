@@ -5,7 +5,7 @@ var header = require('gulp-header');
 var jshint = require('gulp-jshint');
 
 var moment = require('moment');
-var pkg = require("package.json");
+var pkg = require('./package.json');
 
 var banner =
 	'/*!\n\n' +
@@ -31,10 +31,10 @@ gulp.task('jshint', function () {
 		.pipe(jshint.reporter('default'))
 })
 
-gulp.task('scripts', function () {
+gulp.task('scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts)
 		.pipe(concat("holder.js"))
-		.pipe(uglify())
+		//.pipe(uglify())
 		.pipe(header(banner, {
 			pkg: pkg,
 			year: moment().format("YYYY"),
