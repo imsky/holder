@@ -152,12 +152,10 @@ Holder.js - client side image placeholders
 		var smallSide = Math.min(height, width)
 		var scale = 1 / 12;
 		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-		return {
-			height: Math.round(Math.max(fontSize, newHeight))
-		}
+		return Math.round(Math.max(fontSize, newHeight))
 	}
 
-	var canvas_el = (function () {
+	var canvasRenderer = (function () {
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
 
@@ -178,45 +176,7 @@ Holder.js - client side image placeholders
 		}
 	})();
 
-	function drawCanvas(args) {
-		var dimensions = args.dimensions,
-			template = args.template,
-			ratio = args.ratio,
-			holder = args.holder,
-			literal = holder.textmode == 'literal',
-			exact = holder.textmode == 'exact';
-
-		var ts = textSize(dimensions.width, dimensions.height, template.size);
-		var text_height = ts.height;
-		var width = dimensions.width * ratio,
-			height = dimensions.height * ratio;
-		var font = template.font ? template.font : 'Arial,Helvetica,sans-serif';
-		var font_weight = template.fontweight ? template.fontweight : 'bold';
-		font_weight = font_weight == 'normal' ? '' : font_weight;
-
-		var text = template.text ? template.text : (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
-		if (literal) {
-			var dimensions = holder.dimensions;
-			text = dimensions.width + 'x' + dimensions.height;
-		} else if (exact && holder.exact_dimensions) {
-			var dimensions = holder.exact_dimensions;
-			text = (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
-		}
-
-		var string = canvas_el({
-			text: text,
-			width: width,
-			height: height,
-			text_height: text_height,
-			font: font,
-			font_weight: font_weight,
-			template: template
-		})
-
-		return string;
-	}
-
-	var svg_el = (function () {
+	var svgRenderer = (function () {
 		//Prevent IE <9 from initializing SVG renderer
 		if (!window.XMLSerializer) return;
 		var serializer = new XMLSerializer();
@@ -269,33 +229,34 @@ Holder.js - client side image placeholders
 
 			return svg_css + serializer.serializeToString(svg)
 		}
-	})()
+	})();
 
-	function drawSVG(args) {
-		var dimensions = args.dimensions,
-			template = args.template,
-			holder = args.holder,
-			literal = holder.textmode == 'literal',
-			exact = holder.textmode == 'exact';
-
-		var ts = textSize(dimensions.width, dimensions.height, template.size);
-		var text_height = ts.height;
-		var width = dimensions.width,
-			height = dimensions.height;
-
-		var font = template.font ? template.font : 'Arial,Helvetica,sans-serif';
+	function renderToElement(mode, params, el, instanceConfig) {
+		var image = null;
+		
+		var dimensions = params.dimensions;
+		var template = params.template;
+		var holder = params.holder;
+		
+		var width = dimensions.width;
+		var height = dimensions.height;
+		var text_height = textSize(width, height, template.size);
+		
+		var font = template.font ? template.font : 'Arial, Helvetica, sans-serif';
 		var font_weight = template.fontweight ? template.fontweight : 'bold';
-		var text = template.text ? template.text : (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
-
-		if (literal) {
+		var dimensions_caption = Math.floor(width) + 'x' + Math.floor(height);
+		var text = template.text ? template.text : dimensions_caption;
+		
+		if(holder.textmode == 'literal'){
 			var dimensions = holder.dimensions;
 			text = dimensions.width + 'x' + dimensions.height;
-		} else if (exact && holder.exact_dimensions) {
-			var dimensions = holder.exact_dimensions;
-			text = (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
 		}
-
-		var string = svg_el({
+		else if(holder.textmode == 'exact' && holder.exact_dimensions){
+			var dimensions = holder.exact_dimensions;
+			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
+		}
+		
+		var rendererParams = {
 			text: text,
 			width: width,
 			height: height,
@@ -303,18 +264,12 @@ Holder.js - client side image placeholders
 			font: font,
 			font_weight: font_weight,
 			template: template
-		})
-
-		return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(string)));
-	}
-
-	function renderToElement(mode, params, el, instanceConfig) {
-		var image = null;
+		}
 
 		if (instanceConfig.renderer == 'canvas') {
-			image = drawCanvas(params);
+			image = canvasRenderer(rendererParams);
 		} else if (instanceConfig.renderer == 'svg') {
-			image = drawSVG(params);
+			image = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgRenderer(rendererParams))));
 		}
 
 		if (image == null) {
@@ -687,7 +642,7 @@ Holder.js - client side image placeholders
 	if (global.onDomReady) {
 		global.onDomReady(function () {
 			if (!app.runtime.preempted) {
-				Holder.run({})
+				Holder.run({});
 			}
 			if (global.addEventListener) {
 				global.addEventListener('resize', resizeEvent, false);
@@ -698,7 +653,7 @@ Holder.js - client side image placeholders
 
 			if (typeof global.Turbolinks == 'object') {
 				global.document.addEventListener('page:change', function () {
-					app.run({})
+					Holder.run({});
 				})
 			}
 		})
