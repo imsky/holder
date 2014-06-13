@@ -63,12 +63,12 @@ Holder.js - client side image placeholders
 				var flags = src.match(cssregex);
 				var bgsrc = bgnodes[i].getAttribute("data-background-src");
 				if (flags) {
-					var holder = parse_flags(flags[1].split("/"), options);
+					var holder = parseFlags(flags[1].split("/"), options);
 					if (holder) {
 						render("background", bgnodes[i], holder, src, instanceConfig);
 					}
 				} else if (bgsrc != null) {
-					var holder = parse_flags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
+					var holder = parseFlags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
 						.split("/"), options);
 					if (holder) {
 						render("background", bgnodes[i], holder, src, instanceConfig);
@@ -88,7 +88,7 @@ Holder.js - client side image placeholders
 					src = attr_datasrc;
 				}
 				if (src) {
-					var holder = parse_flags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
+					var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
 					if (holder) {
 						if (holder.fluid) {
 							render("fluid", images[i], holder, src, instanceConfig)
@@ -109,7 +109,7 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	function parse_flags(flags, options) {
+	function parseFlags(flags, options) {
 		var ret = {
 			theme: extend(app.settings.themes.gray, {})
 		};
@@ -144,7 +144,7 @@ Holder.js - client side image placeholders
 		return render ? ret : false;
 	}
 
-	function text_size(width, height, fontSize) {
+	function textSize(width, height, fontSize) {
 		height = parseInt(height, 10);
 		width = parseInt(width, 10);
 		var bigSide = Math.max(height, width)
@@ -168,12 +168,12 @@ Holder.js - client side image placeholders
 		}
 
 		/* todo: needs to be generalized
-	var xml = new DOMParser().parseFromString('<xml />', "application/xml")
-	var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
-	xml.insertBefore(css, xml.firstChild);
-	xml.removeChild(xml.documentElement)
-	var svg_css = serializer.serializeToString(xml);
-	*/
+		var xml = new DOMParser().parseFromString('<xml />', "application/xml")
+		var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
+		xml.insertBefore(css, xml.firstChild);
+		xml.removeChild(xml.documentElement)
+		var svg_css = serializer.serializeToString(xml);
+		*/
 
 		var svg_css = "";
 
@@ -199,7 +199,7 @@ Holder.js - client side image placeholders
 			text_el.setAttribute("x", props.width / 2)
 			text_el.setAttribute("y", props.height / 2)
 			textnode_el.nodeValue = props.text
-			text_el.setAttribute("style", css_properties({
+			text_el.setAttribute("style", cssProps({
 				"fill": props.template.foreground,
 				"font-weight": props.font_weight,
 				"font-size": props.text_height + "px",
@@ -220,7 +220,7 @@ Holder.js - client side image placeholders
 			literal = holder.textmode == "literal",
 			exact = holder.textmode == "exact";
 
-		var ts = text_size(dimensions.width, dimensions.height, template.size);
+		var ts = textSize(dimensions.width, dimensions.height, template.size);
 		var text_height = ts.height;
 		var width = dimensions.width * ratio,
 			height = dimensions.height * ratio;
@@ -258,7 +258,7 @@ Holder.js - client side image placeholders
 			literal = holder.textmode == "literal",
 			exact = holder.textmode == "exact";
 
-		var ts = text_size(dimensions.width, dimensions.height, template.size);
+		var ts = textSize(dimensions.width, dimensions.height, template.size);
 		var text_height = ts.height;
 		var width = dimensions.width,
 			height = dimensions.height;
@@ -288,7 +288,17 @@ Holder.js - client side image placeholders
 	}
 
 	function renderToImage(mode, params, el, instanceConfig) {
-		var image = draw(params, instanceConfig);
+		var image = null;
+		if (instanceConfig.use_canvas && !instanceConfig.use_svg) {
+			image = drawCanvas(args);
+		} else {
+			image = drawSVG(args);
+		}
+		
+		if(image == null){
+			throw "Holder: couldn't render placeholder";
+		}
+		
 		if (mode == "background") {
 			el.style.backgroundImage = "url(" + image + ")";
 			el.style.backgroundSize = params.dimensions.width + "px " + params.dimensions.height + "px";
@@ -296,22 +306,6 @@ Holder.js - client side image placeholders
 			el.setAttribute("src", image);
 		}
 		el.setAttribute("data-holder-rendered", true);
-	}
-
-	function draw(args, instanceConfig) {
-		if (instanceConfig.use_canvas && !instanceConfig.use_svg) {
-			try {
-				return drawCanvas(args);
-			} catch (e) {
-				window.console && console.error(e);
-			}
-		} else {
-			try {
-				return drawSVG(args);
-			} catch (e) {
-				window.console && console.error(e);
-			}
-		}
 	}
 
 	function render(mode, el, holder, src, instanceConfig) {
@@ -352,7 +346,7 @@ Holder.js - client side image placeholders
 
 				if (holder.textmode && holder.textmode == "exact") {
 					app.runtime.resizableImages.push(el);
-					resizable_update(el);
+					updateResizableElements(el);
 				}
 			}
 		} else if (mode == "background") {
@@ -382,18 +376,18 @@ Holder.js - client side image placeholders
 				el.style.display = "block";
 			}
 
-			set_initial_dimensions(el)
+			setInitialDimensions(el)
 
 			if (instanceConfig.use_fallback) {
 				el.style.backgroundColor = theme.background;
 			} else {
 				app.runtime.resizableImages.push(el);
-				resizable_update(el);
+				updateResizableElements(el);
 			}
 		}
 	}
 
-	function resizable_update(element) {
+	function updateResizableElements(element) {
 		var images;
 		if (element == null || element.nodeType == null) {
 			images = app.runtime.resizableImages;
@@ -407,7 +401,7 @@ Holder.js - client side image placeholders
 			var el = images[i];
 			if (el.holderData) {
 				var holder = el.holderData;
-				var dimensions = dimension_check(el, Holder.invisibleErrorFn(resizable_update))
+				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements))
 				if (dimensions) {
 					if (holder.fluid) {
 						if (holder.auto) {
@@ -443,7 +437,7 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	function dimension_check(el, callback) {
+	function dimensionCheck(el, callback) {
 		var dimensions = {
 			height: el.clientHeight,
 			width: el.clientWidth
@@ -457,9 +451,9 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	function set_initial_dimensions(el) {
+	function setInitialDimensions(el) {
 		if (el.holderData) {
-			var dimensions = dimension_check(el, Holder.invisibleErrorFn(set_initial_dimensions))
+			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions))
 			if (dimensions) {
 				var holder = el.holderData;
 				holder.initial_dimensions = dimensions;
@@ -597,7 +591,7 @@ Holder.js - client side image placeholders
 		return c
 	}
 
-	function css_properties(props) {
+	function cssProps(props) {
 		var ret = [];
 		for (var p in props) {
 			if (props.hasOwnProperty(p)) {
@@ -618,7 +612,7 @@ Holder.js - client side image placeholders
 	
 	function resizeEvent(){
 		debounce(function(){
-			resizable_update(null);
+			updateResizableElements(null);
 		})
 	}
 
@@ -634,6 +628,7 @@ Holder.js - client side image placeholders
 		use_svg: false,
 		use_canvas: false,
 		use_fallback: false,
+		renderer: "html",
 		debounce: 100,
 		ratio: 1
 	};
