@@ -15,8 +15,8 @@ Holder.js - client side image placeholders
 			var node = document.querySelectorAll(el);
 			if (node.length) {
 				for (var i = 0, l = node.length; i < l; i++) {
-					var img = document.createElement("img")
-					img.setAttribute("data-src", src);
+					var img = document.createElement('img')
+					img.setAttribute('data-src', src);
 					node[i].appendChild(img);
 				}
 			}
@@ -34,13 +34,13 @@ Holder.js - client side image placeholders
 				
 			//< v2.4 API compatibility
 			if(options.use_canvas){
-				instanceConfig.renderer = "canvas";
+				instanceConfig.renderer = 'canvas';
 			}
 			else if(options.use_svg){
-				instanceConfig.renderer = "svg";
+				instanceConfig.renderer = 'svg';
 			}
 
-			if (typeof (options.images) == "string") {
+			if (typeof (options.images) == 'string') {
 				imageNodes = document.querySelectorAll(options.images);
 			} else if (window.NodeList && options.images instanceof window.NodeList) {
 				imageNodes = options.images;
@@ -50,7 +50,7 @@ Holder.js - client side image placeholders
 				imageNodes = options.images
 			}
 
-			if (typeof (options.bgnodes) == "string") {
+			if (typeof (options.bgnodes) == 'string') {
 				bgnodes = document.querySelectorAll(options.bgnodes);
 			} else if (window.NodeList && options.elements instanceof window.NodeList) {
 				bgnodes = options.bgnodes;
@@ -59,21 +59,21 @@ Holder.js - client side image placeholders
 			}
 			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
-			var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
+			var cssregex = new RegExp(options.domain + '\/(.*?)"?\\)');
 			for (var l = bgnodes.length, i = 0; i < l; i++) {
-				var src = window.getComputedStyle(bgnodes[i], null).getPropertyValue("background-image");
+				var src = window.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var flags = src.match(cssregex);
-				var bgsrc = bgnodes[i].getAttribute("data-background-src");
+				var bgsrc = bgnodes[i].getAttribute('data-background-src');
 				if (flags) {
-					var holder = parseFlags(flags[1].split("/"), options);
+					var holder = parseFlags(flags[1].split('/'), options);
 					if (holder) {
-						render("background", bgnodes[i], holder, src, instanceConfig);
+						render('background', bgnodes[i], holder, src, instanceConfig);
 					}
 				} else if (bgsrc != null) {
 					var holder = parseFlags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
-						.split("/"), options);
+						.split('/'), options);
 					if (holder) {
-						render("background", bgnodes[i], holder, src, instanceConfig);
+						render('background', bgnodes[i], holder, src, instanceConfig);
 					}
 				}
 			}
@@ -81,8 +81,8 @@ Holder.js - client side image placeholders
 				var attr_data_src, attr_src;
 				attr_src = attr_data_src = src = null;
 				try {
-					attr_src = images[i].getAttribute("src");
-					attr_datasrc = images[i].getAttribute("data-src");
+					attr_src = images[i].getAttribute('src');
+					attr_datasrc = images[i].getAttribute('data-src');
 				} catch (e) {}
 				if (attr_datasrc == null && !!attr_src && attr_src.indexOf(options.domain) >= 0) {
 					src = attr_src;
@@ -90,12 +90,12 @@ Holder.js - client side image placeholders
 					src = attr_datasrc;
 				}
 				if (src) {
-					var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split("/"), options);
+					var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
 					if (holder) {
 						if (holder.fluid) {
-							render("fluid", images[i], holder, src, instanceConfig)
+							render('fluid', images[i], holder, src, instanceConfig)
 						} else {
-							render("image", images[i], holder, src, instanceConfig);
+							render('image', images[i], holder, src, instanceConfig);
 						}
 					}
 				}
@@ -104,8 +104,8 @@ Holder.js - client side image placeholders
 		},
 		invisibleErrorFn: function (fn) {
 			return function (el) {
-				if (el.hasAttribute("data-holder-invisible")) {
-					throw new Error("Holder: invisible placeholder")
+				if (el.hasAttribute('data-holder-invisible')) {
+					throw 'Holder: invisible placeholder';
 				}
 			}
 		}
@@ -159,18 +159,58 @@ Holder.js - client side image placeholders
 	}
 	
 	var canvas_el = (function(){
-		
+		var canvas = document.createElement('canvas');
 	});
+	
+	function drawCanvas(args) {
+		var ctx = args.ctx,
+			dimensions = args.dimensions,
+			template = args.template,
+			ratio = args.ratio,
+			holder = args.holder,
+			literal = holder.textmode == 'literal',
+			exact = holder.textmode == 'exact';
+
+		var ts = textSize(dimensions.width, dimensions.height, template.size);
+		var text_height = ts.height;
+		var width = dimensions.width * ratio,
+			height = dimensions.height * ratio;
+		var font = template.font ? template.font : 'Arial,Helvetica,sans-serif';
+		var font_weight = template.fontweight ? template.fontweight : 'bold';
+		font_weight = font_weight == 'normal' ? '' : font_weight;
+
+		_canvas.width = width;
+		_canvas.height = height;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+		ctx.fillStyle = template.background;
+		ctx.fillRect(0, 0, width, height);
+		ctx.fillStyle = template.foreground;
+		ctx.font = font_weight + ' ' + text_height + 'px ' + font;
+
+		var text = template.text ? template.text : (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
+		if (literal) {
+			var dimensions = holder.dimensions;
+			text = dimensions.width + 'x' + dimensions.height;
+		} else if (exact && holder.exact_dimensions) {
+			var dimensions = holder.exact_dimensions;
+			text = (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
+		}
+
+		ctx.font = font_weight + ' ' + (text_height * ratio) + 'px ' + font;
+		ctx.fillText(text, (width / 2), (height / 2), width);
+		return _canvas.toDataURL('image/png');
+	}
 
 	var svg_el = (function () {
 		//Prevent IE <9 from initializing SVG renderer
 		if (!window.XMLSerializer) return;
 		var serializer = new XMLSerializer();
-		var svg_ns = "http://www.w3.org/2000/svg"
-		var svg = document.createElementNS(svg_ns, "svg");
+		var svg_ns = 'http://www.w3.org/2000/svg'
+		var svg = document.createElementNS(svg_ns, 'svg');
 		//IE throws an exception if this is set and Chrome requires it to be set
 		if (svg.webkitMatchesSelector) {
-			svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 		}
 
 		/* todo: needs to be generalized
@@ -181,31 +221,31 @@ Holder.js - client side image placeholders
 		var svg_css = serializer.serializeToString(xml);
 		*/
 
-		var svg_css = "";
+		var svg_css = '';
 
-		var bg_el = document.createElementNS(svg_ns, "rect")
-		var text_el = document.createElementNS(svg_ns, "text")
+		var bg_el = document.createElementNS(svg_ns, 'rect')
+		var text_el = document.createElementNS(svg_ns, 'text')
 		var textnode_el = document.createTextNode(null)
-		text_el.setAttribute("text-anchor", "middle")
+		text_el.setAttribute('text-anchor', 'middle')
 		text_el.appendChild(textnode_el)
 		svg.appendChild(bg_el)
 		svg.appendChild(text_el)
 
 		return function (props) {
 			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.text_height)) {
-				throw "Holder: incorrect properties passed to SVG constructor";
+				throw 'Holder: incorrect properties passed to SVG constructor';
 			}
-			svg.setAttribute("width", props.width);
-			svg.setAttribute("height", props.height);
-			svg.setAttribute("viewBox", "0 0 " + props.width + " " + props.height)
-			svg.setAttribute("preserveAspectRatio", "none")
-			bg_el.setAttribute("width", props.width);
-			bg_el.setAttribute("height", props.height);
-			bg_el.setAttribute("fill", props.template.background);
-			text_el.setAttribute("x", props.width / 2)
-			text_el.setAttribute("y", props.height / 2)
+			svg.setAttribute('width', props.width);
+			svg.setAttribute('height', props.height);
+			svg.setAttribute('viewBox', '0 0 ' + props.width + ' ' + props.height)
+			svg.setAttribute('preserveAspectRatio', 'none')
+			bg_el.setAttribute('width', props.width);
+			bg_el.setAttribute('height', props.height);
+			bg_el.setAttribute('fill', props.template.background);
+			text_el.setAttribute('x', props.width / 2)
+			text_el.setAttribute('y', props.height / 2)
 			textnode_el.nodeValue = props.text
-			text_el.setAttribute("style", cssProps({
+			text_el.setAttribute('style', cssProps({
 				"fill": props.template.foreground,
 				"font-weight": props.font_weight,
 				"font-size": props.text_height + "px",
@@ -217,68 +257,28 @@ Holder.js - client side image placeholders
 		}
 	})()
 
-	function drawCanvas(args) {
-		var ctx = args.ctx,
-			dimensions = args.dimensions,
-			template = args.template,
-			ratio = args.ratio,
-			holder = args.holder,
-			literal = holder.textmode == "literal",
-			exact = holder.textmode == "exact";
-
-		var ts = textSize(dimensions.width, dimensions.height, template.size);
-		var text_height = ts.height;
-		var width = dimensions.width * ratio,
-			height = dimensions.height * ratio;
-		var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
-		var font_weight = template.fontweight ? template.fontweight : "bold";
-		font_weight = font_weight == "normal" ? "" : font_weight;
-
-		_canvas.width = width;
-		_canvas.height = height;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillStyle = template.background;
-		ctx.fillRect(0, 0, width, height);
-		ctx.fillStyle = template.foreground;
-		ctx.font = font_weight + " " + text_height + "px " + font;
-
-		var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-		if (literal) {
-			var dimensions = holder.dimensions;
-			text = dimensions.width + "x" + dimensions.height;
-		} else if (exact && holder.exact_dimensions) {
-			var dimensions = holder.exact_dimensions;
-			text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-		}
-
-		ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
-		ctx.fillText(text, (width / 2), (height / 2), width);
-		return _canvas.toDataURL("image/png");
-	}
-
 	function drawSVG(args) {
 		var dimensions = args.dimensions,
 			template = args.template,
 			holder = args.holder,
-			literal = holder.textmode == "literal",
-			exact = holder.textmode == "exact";
+			literal = holder.textmode == 'literal',
+			exact = holder.textmode == 'exact';
 
 		var ts = textSize(dimensions.width, dimensions.height, template.size);
 		var text_height = ts.height;
 		var width = dimensions.width,
 			height = dimensions.height;
 
-		var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
-		var font_weight = template.fontweight ? template.fontweight : "bold";
-		var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
+		var font = template.font ? template.font : 'Arial,Helvetica,sans-serif';
+		var font_weight = template.fontweight ? template.fontweight : 'bold';
+		var text = template.text ? template.text : (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
 
 		if (literal) {
 			var dimensions = holder.dimensions;
-			text = dimensions.width + "x" + dimensions.height;
+			text = dimensions.width + 'x' + dimensions.height;
 		} else if (exact && holder.exact_dimensions) {
 			var dimensions = holder.exact_dimensions;
-			text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
+			text = (Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height));
 		}
 		var string = svg_el({
 			text: text,
@@ -290,43 +290,43 @@ Holder.js - client side image placeholders
 			template: template
 		})
 
-		return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(string)));
+		return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(string)));
 	}
 
 	function renderToElement(mode, params, el, instanceConfig) {
 		var image = null;
 		
-		if (instanceConfig.renderer == "canvas") {
+		if (instanceConfig.renderer == 'canvas') {
 			image = drawCanvas(params);
-		} else if(instanceConfig.renderer == "svg") {
+		} else if(instanceConfig.renderer == 'svg') {
 			image = drawSVG(params);
 		}
 		
 		if(image == null){
-			throw "Holder: couldn't render placeholder";
+			throw 'Holder: couldn\'t render placeholder';
 		}
 		
-		if (mode == "background") {
-			el.style.backgroundImage = "url(" + image + ")";
-			el.style.backgroundSize = params.dimensions.width + "px " + params.dimensions.height + "px";
+		if (mode == 'background') {
+			el.style.backgroundImage = 'url('+ image + ')';
+			el.style.backgroundSize = params.dimensions.width + 'px ' + params.dimensions.height + 'px';
 		} else {
-			el.setAttribute("src", image);
+			el.setAttribute('src', image);
 		}
-		el.setAttribute("data-holder-rendered", true);
+		el.setAttribute('data-holder-rendered', true);
 	}
 
 	function render(mode, el, holder, src, instanceConfig) {
 		var dimensions = holder.dimensions,
 			theme = holder.theme,
 			text = holder.text ? decodeURIComponent(holder.text) : holder.text;
-		var dimensionsCaption = dimensions.width + "x" + dimensions.height;
+		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 		theme = (text ? extend(theme, {
 			text: text
 		}) : theme);
 		theme = (holder.font ? extend(theme, {
 			font: holder.font
 		}) : theme);
-		el.setAttribute("data-src", src);
+		el.setAttribute('data-src', src);
 		holder.theme = theme;
 		el.holderData = holder;
 		el.configData = instanceConfig;
@@ -334,13 +334,13 @@ Holder.js - client side image placeholders
 		//todo: remove this once canvas_el is implemeted
 		var ctx = _ctx;
 
-		if (mode == "image") {
-			el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
-			if (instanceConfig.renderer == "html" || !holder.auto) {
-				el.style.width = dimensions.width + "px";
-				el.style.height = dimensions.height + "px";
+		if (mode == 'image') {
+			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
+			if (instanceConfig.renderer == 'html' || !holder.auto) {
+				el.style.width = dimensions.width + 'px';
+				el.style.height = dimensions.height + 'px';
 			}
-			if (instanceConfig.renderer == "html") {
+			if (instanceConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				renderToElement(mode, {
@@ -351,13 +351,13 @@ Holder.js - client side image placeholders
 					holder: holder
 				}, el, instanceConfig);
 
-				if (holder.textmode && holder.textmode == "exact") {
+				if (holder.textmode && holder.textmode == 'exact') {
 					app.runtime.resizableImages.push(el);
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == "background") {
-			if (instanceConfig.renderer != "html") {
+		} else if (mode == 'background') {
+			if (instanceConfig.renderer != 'html') {
 				renderToElement(mode, {
 						ctx: ctx,
 						dimensions: dimensions,
@@ -367,25 +367,25 @@ Holder.js - client side image placeholders
 					},
 					el, instanceConfig);
 			}
-		} else if (mode == "fluid") {
-			el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
-			if (dimensions.height.slice(-1) == "%") {
+		} else if (mode == 'fluid') {
+			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
+			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height
 			} else if (holder.auto == null || !holder.auto) {
-				el.style.height = dimensions.height + "px"
+				el.style.height = dimensions.height + 'px'
 			}
-			if (dimensions.width.slice(-1) == "%") {
+			if (dimensions.width.slice(-1) == '%') {
 				el.style.width = dimensions.width
 			} else if (holder.auto == null || !holder.auto) {
-				el.style.width = dimensions.width + "px"
+				el.style.width = dimensions.width + 'px'
 			}
-			if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
-				el.style.display = "block";
+			if (el.style.display == 'inline' || el.style.display === '' || el.style.display == 'none') {
+				el.style.display = 'block';
 			}
 
 			setInitialDimensions(el)
 
-			if (instanceConfig.renderer == "html") {
+			if (instanceConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				app.runtime.resizableImages.push(el);
@@ -413,10 +413,10 @@ Holder.js - client side image placeholders
 					if (holder.fluid) {
 						if (holder.auto) {
 							switch (holder.fluid_data.mode) {
-							case "width":
+							case 'width':
 								dimensions.height = dimensions.width / holder.fluid_data.ratio;
 								break;
-							case "height":
+							case 'height':
 								dimensions.width = dimensions.height * holder.fluid_data.ratio;
 								break;
 							}
@@ -434,12 +434,12 @@ Holder.js - client side image placeholders
 						holder: holder
 					};
 
-					if (holder.textmode && holder.textmode == "exact") {
+					if (holder.textmode && holder.textmode == 'exact') {
 						holder.exact_dimensions = dimensions;
 						draw_params.dimensions = holder.dimensions;
 					}
 					
-					renderToElement("image", draw_params, el, el.configData);
+					renderToElement('image', draw_params, el, el.configData);
 				}
 			}
 		}
@@ -451,10 +451,10 @@ Holder.js - client side image placeholders
 			width: el.clientWidth
 		};
 		if (!dimensions.height && !dimensions.width) {
-			el.setAttribute("data-holder-invisible", true)
+			el.setAttribute('data-holder-invisible', true)
 			callback.call(this, el)
 		} else {
-			el.removeAttribute("data-holder-invisible")
+			el.removeAttribute('data-holder-invisible')
 			return dimensions;
 		}
 	}
@@ -466,15 +466,15 @@ Holder.js - client side image placeholders
 				var holder = el.holderData;
 				holder.initial_dimensions = dimensions;
 				holder.fluid_data = {
-					fluid_height: holder.dimensions.height.slice(-1) == "%",
-					fluid_width: holder.dimensions.width.slice(-1) == "%",
+					fluid_height: holder.dimensions.height.slice(-1) == '%',
+					fluid_width: holder.dimensions.width.slice(-1) == '%',
 					mode: null
 				}
 				if (holder.fluid_data.fluid_width && !holder.fluid_data.fluid_height) {
-					holder.fluid_data.mode = "width"
+					holder.fluid_data.mode = 'width'
 					holder.fluid_data.ratio = holder.initial_dimensions.width / parseFloat(holder.dimensions.height)
 				} else if (!holder.fluid_data.fluid_width && holder.fluid_data.fluid_height) {
-					holder.fluid_data.mode = "height";
+					holder.fluid_data.mode = 'height';
 					holder.fluid_data.ratio = parseFloat(holder.dimensions.width) / holder.initial_dimensions.height
 				}
 			}
@@ -509,8 +509,8 @@ Holder.js - client side image placeholders
 			output: function (val) {
 				var exec = this.regex.exec(val);
 				return {
-					foreground: "#" + exec[2],
-					background: "#" + exec[1]
+					foreground: '#' + exec[2],
+					background: '#' + exec[1]
 				}
 			}
 		},
@@ -603,10 +603,10 @@ Holder.js - client side image placeholders
 		var ret = [];
 		for (var p in props) {
 			if (props.hasOwnProperty(p)) {
-				ret.push(p + ":" + props[p])
+				ret.push(p + ':' + props[p])
 			}
 		}
-		return ret.join(";")
+		return ret.join(';')
 	}
 
 	function debounce(fn) {
@@ -633,7 +633,7 @@ Holder.js - client side image placeholders
 	//Properties set once on setup
 
 	app.config = {
-		renderer: "html",
+		renderer: 'html',
 		debounce: 100,
 		ratio: 1
 	};
@@ -651,16 +651,16 @@ Holder.js - client side image placeholders
 	var _canvas = document.createElement('canvas');
 	var _ctx = null;
 	if (_canvas.getContext) {
-		if (_canvas.toDataURL("image/png").indexOf("data:image/png") != -1) {
-			app.config.renderer = "canvas";
-			_ctx = _canvas.getContext("2d");
+		if (_canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
+			app.config.renderer = 'canvas';
+			_ctx = _canvas.getContext('2d');
 		}
 	}
 
 	var devicePixelRatio = 1,
 		backingStoreRatio = 1;
 
-	if (app.config.renderer == "canvas") {
+	if (app.config.renderer == 'canvas') {
 		devicePixelRatio = window.devicePixelRatio || 1;
 		backingStoreRatio = _ctx.webkitBackingStorePixelRatio || _ctx.mozBackingStorePixelRatio || _ctx.msBackingStorePixelRatio || _ctx.oBackingStorePixelRatio || _ctx.backingStorePixelRatio || 1;
 	}
@@ -668,12 +668,12 @@ Holder.js - client side image placeholders
 	app.config.ratio = devicePixelRatio / backingStoreRatio;
 
 	if (!!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect) {
-		app.config.renderer = "svg";
+		app.config.renderer = 'svg';
 	}
 
 	//Exposing to document and setting up listeners
 
-	register(Holder, "Holder", global);
+	register(Holder, 'Holder', global);
 
 	if (global.onDomReady) {
 		global.onDomReady(function () {
@@ -681,14 +681,14 @@ Holder.js - client side image placeholders
 				Holder.run({})
 			}
 			if (global.addEventListener) {
-				global.addEventListener("resize", resizeEvent, false);
-				global.addEventListener("orientationchange", resizeEvent, false);
+				global.addEventListener('resize', resizeEvent, false);
+				global.addEventListener('orientationchange', resizeEvent, false);
 			} else {
-				global.attachEvent("onresize", resizeEvent);
+				global.attachEvent('onresize', resizeEvent);
 			}
 
-			if (typeof global.Turbolinks == "object") {
-				global.document.addEventListener("page:change", function () {
+			if (typeof global.Turbolinks == 'object') {
+				global.document.addEventListener('page:change', function () {
 					app.run({})
 				})
 			}
