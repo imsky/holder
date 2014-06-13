@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.4.0+8fmw1
+Version 2.4.0+8fnbd
 © 2014 Ivan Malopinsky - http://imsky.co
 
 Site:		http://imsky.github.io/holder
@@ -414,9 +414,8 @@ if (!Object.prototype.hasOwnProperty){
 Holder.js - client side image placeholders
 © 2012-2014 Ivan Malopinsky - http://imsky.co
 */
-
 (function (register, global, undefined) {
-	
+
 	var app = {};
 
 	var Holder = {
@@ -521,372 +520,376 @@ Holder.js - client side image placeholders
 			}
 		}
 	}
-	
+
 	function parse_flags(flags, options) {
-	var ret = {
-		theme: extend(app.settings.themes.gray, {})
-	};
-	var render = false;
-	for (var fl = flags.length, j = 0; j < fl; j++) {
-		var flag = flags[j];
-		if (app.flags.dimensions.match(flag)) {
-			render = true;
-			ret.dimensions = app.flags.dimensions.output(flag);
-		} else if (app.flags.fluid.match(flag)) {
-			render = true;
-			ret.dimensions = app.flags.fluid.output(flag);
-			ret.fluid = true;
-		} else if (app.flags.textmode.match(flag)) {
-			ret.textmode = app.flags.textmode.output(flag)
-		} else if (app.flags.colors.match(flag)) {
-			var colors = app.flags.colors.output(flag)
-			ret.theme = extend(colors, ret.theme);
-		} else if (options.themes[flag]) {
-			//If a theme is specified, it will override custom colors
-			if(options.themes.hasOwnProperty(flag)){
-				ret.theme = extend(options.themes[flag], {});
+		var ret = {
+			theme: extend(app.settings.themes.gray, {})
+		};
+		var render = false;
+		for (var fl = flags.length, j = 0; j < fl; j++) {
+			var flag = flags[j];
+			if (app.flags.dimensions.match(flag)) {
+				render = true;
+				ret.dimensions = app.flags.dimensions.output(flag);
+			} else if (app.flags.fluid.match(flag)) {
+				render = true;
+				ret.dimensions = app.flags.fluid.output(flag);
+				ret.fluid = true;
+			} else if (app.flags.textmode.match(flag)) {
+				ret.textmode = app.flags.textmode.output(flag)
+			} else if (app.flags.colors.match(flag)) {
+				var colors = app.flags.colors.output(flag)
+				ret.theme = extend(colors, ret.theme);
+			} else if (options.themes[flag]) {
+				//If a theme is specified, it will override custom colors
+				if (options.themes.hasOwnProperty(flag)) {
+					ret.theme = extend(options.themes[flag], {});
+				}
+			} else if (app.flags.font.match(flag)) {
+				ret.font = app.flags.font.output(flag);
+			} else if (app.flags.auto.match(flag)) {
+				ret.auto = true;
+			} else if (app.flags.text.match(flag)) {
+				ret.text = app.flags.text.output(flag);
 			}
-		} else if (app.flags.font.match(flag)) {
-			ret.font = app.flags.font.output(flag);
-		} else if (app.flags.auto.match(flag)) {
-			ret.auto = true;
-		} else if (app.flags.text.match(flag)) {
-			ret.text = app.flags.text.output(flag);
+		}
+		return render ? ret : false;
+	}
+
+	function text_size(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width)
+		var smallSide = Math.min(height, width)
+		var scale = 1 / 12;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return {
+			height: Math.round(Math.max(fontSize, newHeight))
 		}
 	}
-	return render ? ret : false;
-	}
-	
-	function text_size(width, height, fontSize) {
-	height = parseInt(height, 10);
-	width = parseInt(width, 10);
-	var bigSide = Math.max(height, width)
-	var smallSide = Math.min(height, width)
-	var scale = 1 / 12;
-	var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-	return {
-		height: Math.round(Math.max(fontSize, newHeight))
-	}
-}
 
-var svg_el = (function(){
-	//Prevent IE <9 from initializing SVG renderer
-	if(!window.XMLSerializer) return;
-	var serializer = new XMLSerializer();
-	var svg_ns = "http://www.w3.org/2000/svg"
-	var svg = document.createElementNS(svg_ns, "svg");
-	//IE throws an exception if this is set and Chrome requires it to be set
-	if(svg.webkitMatchesSelector){
-		svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-	}
-	
-	/* todo: needs to be generalized
+	var svg_el = (function () {
+		//Prevent IE <9 from initializing SVG renderer
+		if (!window.XMLSerializer) return;
+		var serializer = new XMLSerializer();
+		var svg_ns = "http://www.w3.org/2000/svg"
+		var svg = document.createElementNS(svg_ns, "svg");
+		//IE throws an exception if this is set and Chrome requires it to be set
+		if (svg.webkitMatchesSelector) {
+			svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+		}
+
+		/* todo: needs to be generalized
 	var xml = new DOMParser().parseFromString('<xml />', "application/xml")
 	var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
 	xml.insertBefore(css, xml.firstChild);
 	xml.removeChild(xml.documentElement)
 	var svg_css = serializer.serializeToString(xml);
 	*/
-	
-	var svg_css = "";
-	
-	var bg_el = document.createElementNS(svg_ns, "rect")
-	var text_el = document.createElementNS(svg_ns, "text")
-	var textnode_el = document.createTextNode(null)
-	text_el.setAttribute("text-anchor", "middle")
-	text_el.appendChild(textnode_el)
-	svg.appendChild(bg_el)
-	svg.appendChild(text_el)
 
-	return function(props){
-		if(isNaN(props.width) || isNaN(props.height) || isNaN(props.text_height)){
-			throw "Holder: incorrect properties passed to SVG constructor";
+		var svg_css = "";
+
+		var bg_el = document.createElementNS(svg_ns, "rect")
+		var text_el = document.createElementNS(svg_ns, "text")
+		var textnode_el = document.createTextNode(null)
+		text_el.setAttribute("text-anchor", "middle")
+		text_el.appendChild(textnode_el)
+		svg.appendChild(bg_el)
+		svg.appendChild(text_el)
+
+		return function (props) {
+			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.text_height)) {
+				throw "Holder: incorrect properties passed to SVG constructor";
+			}
+			svg.setAttribute("width", props.width);
+			svg.setAttribute("height", props.height);
+			svg.setAttribute("viewBox", "0 0 " + props.width + " " + props.height)
+			svg.setAttribute("preserveAspectRatio", "none")
+			bg_el.setAttribute("width", props.width);
+			bg_el.setAttribute("height", props.height);
+			bg_el.setAttribute("fill", props.template.background);
+			text_el.setAttribute("x", props.width / 2)
+			text_el.setAttribute("y", props.height / 2)
+			textnode_el.nodeValue = props.text
+			text_el.setAttribute("style", css_properties({
+				"fill": props.template.foreground,
+				"font-weight": props.font_weight,
+				"font-size": props.text_height + "px",
+				"font-family": props.font,
+				"dominant-baseline": "central"
+			}))
+
+			return svg_css + serializer.serializeToString(svg)
 		}
-		svg.setAttribute("width",props.width);
-		svg.setAttribute("height", props.height);
-		svg.setAttribute("viewBox", "0 0 "+props.width+" "+props.height)
-		svg.setAttribute("preserveAspectRatio", "none")
-		bg_el.setAttribute("width", props.width);
-		bg_el.setAttribute("height", props.height);
-		bg_el.setAttribute("fill", props.template.background);
-		text_el.setAttribute("x", props.width/2)
-		text_el.setAttribute("y", props.height/2)
-		textnode_el.nodeValue=props.text
-		text_el.setAttribute("style", css_properties({
-		"fill": props.template.foreground,
-		"font-weight": props.font_weight,
-		"font-size": props.text_height+"px",
-		"font-family":props.font,
-		"dominant-baseline":"central"
-		}))
-		
-		return svg_css + serializer.serializeToString(svg)
-	}
-})()
+	})()
 
-function drawCanvas(args) {
-	var ctx = args.ctx,
-		dimensions = args.dimensions,
-		template = args.template,
-		ratio = args.ratio,
-		holder = args.holder,
-		literal = holder.textmode == "literal",
-		exact = holder.textmode == "exact";
+	function drawCanvas(args) {
+		var ctx = args.ctx,
+			dimensions = args.dimensions,
+			template = args.template,
+			ratio = args.ratio,
+			holder = args.holder,
+			literal = holder.textmode == "literal",
+			exact = holder.textmode == "exact";
 
-	var ts = text_size(dimensions.width, dimensions.height, template.size);
-	var text_height = ts.height;
-	var width = dimensions.width * ratio,
-		height = dimensions.height * ratio;
-	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
-	var font_weight = template.fontweight ? template.fontweight : "bold";
-	font_weight = font_weight == "normal" ? "" : font_weight;
-	
-	_canvas.width = width;
-	_canvas.height = height;
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	ctx.fillStyle = template.background;
-	ctx.fillRect(0, 0, width, height);
-	ctx.fillStyle = template.foreground;
-	ctx.font = font_weight + " " + text_height + "px " + font;
-	
-	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	if (literal) {
-		var dimensions = holder.dimensions;
-		text = dimensions.width + "x" + dimensions.height;
-	}
-	else if(exact && holder.exact_dimensions){
-		var dimensions = holder.exact_dimensions;
-		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	}
+		var ts = text_size(dimensions.width, dimensions.height, template.size);
+		var text_height = ts.height;
+		var width = dimensions.width * ratio,
+			height = dimensions.height * ratio;
+		var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+		var font_weight = template.fontweight ? template.fontweight : "bold";
+		font_weight = font_weight == "normal" ? "" : font_weight;
 
-	ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
-	ctx.fillText(text, (width / 2), (height / 2), width);
-	return _canvas.toDataURL("image/png");
-}
+		_canvas.width = width;
+		_canvas.height = height;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillStyle = template.background;
+		ctx.fillRect(0, 0, width, height);
+		ctx.fillStyle = template.foreground;
+		ctx.font = font_weight + " " + text_height + "px " + font;
 
-function drawSVG(args){
-	var dimensions = args.dimensions,
-		template = args.template,
-		holder = args.holder,
-		literal = holder.textmode == "literal",
-		exact = holder.textmode == "exact";
-
-	var ts = text_size(dimensions.width, dimensions.height, template.size);
-	var text_height = ts.height;
-	var width = dimensions.width,
-		height = dimensions.height;
-		
-	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
-	var font_weight = template.fontweight ? template.fontweight : "bold";
-	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	
-	if (literal) {
-		var dimensions = holder.dimensions;
-		text = dimensions.width + "x" + dimensions.height;
-	}
-	else if(exact && holder.exact_dimensions){
-		var dimensions = holder.exact_dimensions;
-		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	}
-	var string = svg_el({
-		text: text, 
-		width:width, 
-		height:height, 
-		text_height:text_height, 
-		font:font,
-		font_weight:font_weight,
-		template:template
-	})
-	
-	return "data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(string)));
-}
-
-function renderToImage(mode, params, el, instanceConfig){
-	var image = draw(params, instanceConfig);
-	if(mode == "background"){
-		el.style.backgroundImage = "url(" + image + ")";
-		el.style.backgroundSize = params.dimensions.width + "px " + params.dimensions.height + "px";
-	}
-	else{
-		el.setAttribute("src", image);
-	}
-	el.setAttribute("data-holder-rendered", true);
-}
-
-function draw(args, instanceConfig) {
-	if(instanceConfig.use_canvas && !instanceConfig.use_svg){
-		try {
-			return drawCanvas(args);
+		var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
+		if (literal) {
+			var dimensions = holder.dimensions;
+			text = dimensions.width + "x" + dimensions.height;
+		} else if (exact && holder.exact_dimensions) {
+			var dimensions = holder.exact_dimensions;
+			text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 		}
-		catch(e){
-			window.console && console.error(e);
-		}
-	}
-	else{
-		try {
-			return drawSVG(args);
-		}
-		catch(e){
-			window.console && console.error(e);
-		}
-	}
-}
 
-function render(mode, el, holder, src, instanceConfig) {
-	var dimensions = holder.dimensions,
-		theme = holder.theme,
-		text = holder.text ? decodeURIComponent(holder.text) : holder.text;
-	var dimensionsCaption = dimensions.width + "x" + dimensions.height;
-	theme = (text ? extend(theme, {
-		text: text
-	}) : theme);
-	theme = (holder.font ? extend(theme, {
-		font: holder.font
-	}) : theme);
-	el.setAttribute("data-src", src);
-	holder.theme = theme;
-	el.holderData = holder;
-	
-	//todo: remove this once canvas_el is implemeted
-	var ctx = _ctx;
-	
-	if (mode == "image") {
-		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
-		if (instanceConfig.use_fallback || !holder.auto) {
-			el.style.width = dimensions.width + "px";
-			el.style.height = dimensions.height + "px";
+		ctx.font = font_weight + " " + (text_height * ratio) + "px " + font;
+		ctx.fillText(text, (width / 2), (height / 2), width);
+		return _canvas.toDataURL("image/png");
+	}
+
+	function drawSVG(args) {
+		var dimensions = args.dimensions,
+			template = args.template,
+			holder = args.holder,
+			literal = holder.textmode == "literal",
+			exact = holder.textmode == "exact";
+
+		var ts = text_size(dimensions.width, dimensions.height, template.size);
+		var text_height = ts.height;
+		var width = dimensions.width,
+			height = dimensions.height;
+
+		var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
+		var font_weight = template.fontweight ? template.fontweight : "bold";
+		var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
+
+		if (literal) {
+			var dimensions = holder.dimensions;
+			text = dimensions.width + "x" + dimensions.height;
+		} else if (exact && holder.exact_dimensions) {
+			var dimensions = holder.exact_dimensions;
+			text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 		}
-		if (instanceConfig.use_fallback) {
-			el.style.backgroundColor = theme.background;
+		var string = svg_el({
+			text: text,
+			width: width,
+			height: height,
+			text_height: text_height,
+			font: font,
+			font_weight: font_weight,
+			template: template
+		})
+
+		return "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(string)));
+	}
+
+	function renderToImage(mode, params, el, instanceConfig) {
+		var image = draw(params, instanceConfig);
+		if (mode == "background") {
+			el.style.backgroundImage = "url(" + image + ")";
+			el.style.backgroundSize = params.dimensions.width + "px " + params.dimensions.height + "px";
 		} else {
-			renderToImage(mode, {ctx: ctx, dimensions: dimensions, template: theme, ratio: app.config.ratio, holder: holder}, el, instanceConfig);
-			
-			if(holder.textmode && holder.textmode == "exact"){
-				app.runtime.resizableImages.push(el);
-				//resizable_update(el);
+			el.setAttribute("src", image);
+		}
+		el.setAttribute("data-holder-rendered", true);
+	}
+
+	function draw(args, instanceConfig) {
+		if (instanceConfig.use_canvas && !instanceConfig.use_svg) {
+			try {
+				return drawCanvas(args);
+			} catch (e) {
+				window.console && console.error(e);
+			}
+		} else {
+			try {
+				return drawSVG(args);
+			} catch (e) {
+				window.console && console.error(e);
 			}
 		}
-	} else if (mode == "background") {
-		if (!instanceConfig.use_fallback) {
-			renderToImage(mode, {ctx:ctx, dimensions: dimensions, template: theme, ratio: app.config.ratio, holder: holder},
-				el, instanceConfig);
-		}
-	} else if (mode == "fluid") {
-		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
-		if (dimensions.height.slice(-1) == "%") {
-			el.style.height = dimensions.height
-		} else if(holder.auto == null || !holder.auto){
-			el.style.height = dimensions.height + "px"
-		}
-		if (dimensions.width.slice(-1) == "%") {
-			el.style.width = dimensions.width
-		} else if(holder.auto == null || !holder.auto){
-			el.style.width = dimensions.width + "px"
-		}
-		if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
-			el.style.display = "block";
-		}
-		
-		set_initial_dimensions(el)
-		
-		if (instanceConfig.use_fallback) {
-			el.style.backgroundColor = theme.background;
-		} else {
-			app.runtime.resizableImages.push(el);
-			//resizable_update(el);
-		}
 	}
-}
 
-function resizable_update(element) {
-	var images;
-	if (element == null || element.nodeType == null) {
-		images = app.runtime.resizableImages;
-	} else {
-		images = [element]
-	}
-	for (var i in images) {
-		if (!images.hasOwnProperty(i)) {
-			continue;
-		}
-		var el = images[i];
-		if (el.holderData) {
-			var holder = el.holderData;
-			var dimensions = dimension_check(el, Holder.invisibleErrorFn(resizable_update))
-			if (dimensions) {
-				if (holder.fluid) {
-					if (holder.auto) {
-						switch (holder.fluid_data.mode) {
-						case "width":
-							dimensions.height = dimensions.width / holder.fluid_data.ratio;
-							break;
-						case "height":
-							dimensions.width = dimensions.height * holder.fluid_data.ratio;
-							break;
-						}
-					}
-				}
-				
-				//todo: remove once canvas_el is implemented
-				var ctx = _ctx;
-				
-				var draw_params = {
+	function render(mode, el, holder, src, instanceConfig) {
+		var dimensions = holder.dimensions,
+			theme = holder.theme,
+			text = holder.text ? decodeURIComponent(holder.text) : holder.text;
+		var dimensionsCaption = dimensions.width + "x" + dimensions.height;
+		theme = (text ? extend(theme, {
+			text: text
+		}) : theme);
+		theme = (holder.font ? extend(theme, {
+			font: holder.font
+		}) : theme);
+		el.setAttribute("data-src", src);
+		holder.theme = theme;
+		el.holderData = holder;
+		el.configData = instanceConfig;
+
+		//todo: remove this once canvas_el is implemeted
+		var ctx = _ctx;
+
+		if (mode == "image") {
+			el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
+			if (instanceConfig.use_fallback || !holder.auto) {
+				el.style.width = dimensions.width + "px";
+				el.style.height = dimensions.height + "px";
+			}
+			if (instanceConfig.use_fallback) {
+				el.style.backgroundColor = theme.background;
+			} else {
+				renderToImage(mode, {
 					ctx: ctx,
 					dimensions: dimensions,
-					template: holder.theme,
+					template: theme,
 					ratio: app.config.ratio,
 					holder: holder
-				};
-								
+				}, el, instanceConfig);
+
 				if (holder.textmode && holder.textmode == "exact") {
-					holder.exact_dimensions = dimensions;
-					draw_params.dimensions = holder.dimensions;
+					app.runtime.resizableImages.push(el);
+					resizable_update(el);
 				}
-				
-				renderToImage(draw_params, el);
+			}
+		} else if (mode == "background") {
+			if (!instanceConfig.use_fallback) {
+				renderToImage(mode, {
+						ctx: ctx,
+						dimensions: dimensions,
+						template: theme,
+						ratio: app.config.ratio,
+						holder: holder
+					},
+					el, instanceConfig);
+			}
+		} else if (mode == "fluid") {
+			el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensionsCaption + "]" : dimensionsCaption);
+			if (dimensions.height.slice(-1) == "%") {
+				el.style.height = dimensions.height
+			} else if (holder.auto == null || !holder.auto) {
+				el.style.height = dimensions.height + "px"
+			}
+			if (dimensions.width.slice(-1) == "%") {
+				el.style.width = dimensions.width
+			} else if (holder.auto == null || !holder.auto) {
+				el.style.width = dimensions.width + "px"
+			}
+			if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
+				el.style.display = "block";
+			}
+
+			set_initial_dimensions(el)
+
+			if (instanceConfig.use_fallback) {
+				el.style.backgroundColor = theme.background;
+			} else {
+				app.runtime.resizableImages.push(el);
+				resizable_update(el);
 			}
 		}
 	}
-}
 
-function dimension_check(el, callback) {
-	var dimensions = {
-		height: el.clientHeight,
-		width: el.clientWidth
-	};
-	if (!dimensions.height && !dimensions.width) {
-		el.setAttribute("data-holder-invisible", true)
-		callback.call(this, el)
-	}
-	else{
-		el.removeAttribute("data-holder-invisible")
-		return dimensions;
-	}
-}
+	function resizable_update(element) {
+		var images;
+		if (element == null || element.nodeType == null) {
+			images = app.runtime.resizableImages;
+		} else {
+			images = [element]
+		}
+		for (var i in images) {
+			if (!images.hasOwnProperty(i)) {
+				continue;
+			}
+			var el = images[i];
+			if (el.holderData) {
+				var holder = el.holderData;
+				var dimensions = dimension_check(el, Holder.invisibleErrorFn(resizable_update))
+				if (dimensions) {
+					if (holder.fluid) {
+						if (holder.auto) {
+							switch (holder.fluid_data.mode) {
+							case "width":
+								dimensions.height = dimensions.width / holder.fluid_data.ratio;
+								break;
+							case "height":
+								dimensions.width = dimensions.height * holder.fluid_data.ratio;
+								break;
+							}
+						}
+					}
 
-function set_initial_dimensions(el){
-	if(el.holderData){
-		var dimensions = dimension_check(el, Holder.invisibleErrorFn(set_initial_dimensions))
-		if(dimensions){
-			var holder = el.holderData;
-			holder.initial_dimensions = dimensions;
-			holder.fluid_data = {
-				fluid_height: holder.dimensions.height.slice(-1) == "%",
-				fluid_width: holder.dimensions.width.slice(-1) == "%",
-				mode: null
-			}
-			if(holder.fluid_data.fluid_width && !holder.fluid_data.fluid_height){
-				holder.fluid_data.mode = "width"
-				holder.fluid_data.ratio = holder.initial_dimensions.width / parseFloat(holder.dimensions.height)
-			}
-			else if(!holder.fluid_data.fluid_width && holder.fluid_data.fluid_height){
-				holder.fluid_data.mode = "height";
-				holder.fluid_data.ratio = parseFloat(holder.dimensions.width) / holder.initial_dimensions.height
+					//todo: remove once canvas_el is implemented
+					var ctx = _ctx;
+
+					var draw_params = {
+						ctx: ctx,
+						dimensions: dimensions,
+						template: holder.theme,
+						ratio: app.config.ratio,
+						holder: holder
+					};
+
+					if (holder.textmode && holder.textmode == "exact") {
+						holder.exact_dimensions = dimensions;
+						draw_params.dimensions = holder.dimensions;
+					}
+					renderToImage("image", draw_params, el, el.configData);
+				}
 			}
 		}
 	}
-}
+
+	function dimension_check(el, callback) {
+		var dimensions = {
+			height: el.clientHeight,
+			width: el.clientWidth
+		};
+		if (!dimensions.height && !dimensions.width) {
+			el.setAttribute("data-holder-invisible", true)
+			callback.call(this, el)
+		} else {
+			el.removeAttribute("data-holder-invisible")
+			return dimensions;
+		}
+	}
+
+	function set_initial_dimensions(el) {
+		if (el.holderData) {
+			var dimensions = dimension_check(el, Holder.invisibleErrorFn(set_initial_dimensions))
+			if (dimensions) {
+				var holder = el.holderData;
+				holder.initial_dimensions = dimensions;
+				holder.fluid_data = {
+					fluid_height: holder.dimensions.height.slice(-1) == "%",
+					fluid_width: holder.dimensions.width.slice(-1) == "%",
+					mode: null
+				}
+				if (holder.fluid_data.fluid_width && !holder.fluid_data.fluid_height) {
+					holder.fluid_data.mode = "width"
+					holder.fluid_data.ratio = holder.initial_dimensions.width / parseFloat(holder.dimensions.height)
+				} else if (!holder.fluid_data.fluid_width && holder.fluid_data.fluid_height) {
+					holder.fluid_data.mode = "height";
+					holder.fluid_data.ratio = parseFloat(holder.dimensions.width) / holder.initial_dimensions.height
+				}
+			}
+		}
+	}
 
 	//Configuration
 
@@ -1016,25 +1019,27 @@ function set_initial_dimensions(el){
 		return ret.join(";")
 	}
 
-	function debounce(config, fn) {
-		if (config.debounce) {
-			if (!app.runtime.debounceTimer) fn.call(this);
-			if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
-			app.runtime.debounceTimer = setTimeout(function () {
-				app.runtime.debounceTimer = null;
-				fn.call(this)
-			}, app.config.debounce);
-		} else {
+	function debounce(fn) {
+		if (!app.runtime.debounceTimer) fn.call(this);
+		if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
+		app.runtime.debounceTimer = setTimeout(function () {
+			app.runtime.debounceTimer = null;
 			fn.call(this)
-		}
+		}, app.config.debounce);
 	}
 	
+	function resizeEvent(){
+		debounce(function(){
+			resizable_update(null);
+		})
+	}
+
 	//< v2.4 API compatibility
 
 	Holder.add_theme = Holder.addTheme;
 	Holder.add_image = Holder.addImage;
 	Holder.invisible_error_fn = Holder.invisibleErrorFn;
-	
+
 	//Properties set once on setup
 
 	app.config = {
@@ -1052,7 +1057,7 @@ function set_initial_dimensions(el){
 		resizableImages: [],
 		debounceTimer: null
 	}
-	
+
 	//Pre-flight
 
 	var _canvas = document.createElement('canvas');
@@ -1062,16 +1067,15 @@ function set_initial_dimensions(el){
 	} else {
 		if (_canvas.toDataURL("image/png").indexOf("data:image/png") == -1) {
 			app.config.use_fallback = true;
-		}
-		else{
-			_ctx =  _canvas.getContext("2d");
+		} else {
+			_ctx = _canvas.getContext("2d");
 		}
 	}
-	
+
 	var devicePixelRatio = 1,
-	backingStoreRatio = 1;
-	
-	if(!app.config.use_fallback){
+		backingStoreRatio = 1;
+
+	if (!app.config.use_fallback) {
 		devicePixelRatio = window.devicePixelRatio || 1;
 		backingStoreRatio = _ctx.webkitBackingStorePixelRatio || _ctx.mozBackingStorePixelRatio || _ctx.msBackingStorePixelRatio || _ctx.oBackingStorePixelRatio || _ctx.backingStorePixelRatio || 1;
 	}
@@ -1082,35 +1086,25 @@ function set_initial_dimensions(el){
 		app.config.use_svg = true;
 		app.config.use_canvas = false;
 	}
-	
+
 	//Exposing to document and setting up listeners
 
 	register(Holder, "Holder", global);
-	
-	if(global.onDomReady){
-		global.onDomReady(function(){
-			if(!app.runtime.preempted){
+
+	if (global.onDomReady) {
+		global.onDomReady(function () {
+			if (!app.runtime.preempted) {
 				Holder.run({})
 			}
-			
-			/*
-			var debounce_resizable_update = function () {
-				debounce(function () {
-					resizable_update(null)
-				})
-			};
-			*/
-			
-			if(global.addEventListener){
-				//global.addEventListener("resize", resizable_update, false);
-				//global.addEventListener("orientationchange", resizable_update, false);
+			if (global.addEventListener) {
+				global.addEventListener("resize", resizeEvent, false);
+				global.addEventListener("orientationchange", resizeEvent, false);
+			} else {
+				global.attachEvent("onresize", resizeEvent);
 			}
-			else{
-				//global.attachEvent("onresize", resizable_update);
-			}
-			
-			if(typeof global.Turbolinks == "object"){
-				global.document.addEventListener("page:change", function(){
+
+			if (typeof global.Turbolinks == "object") {
+				global.document.addEventListener("page:change", function () {
 					app.run({})
 				})
 			}
