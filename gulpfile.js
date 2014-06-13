@@ -34,7 +34,7 @@ gulp.task('jshint', function () {
 gulp.task('scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts)
 		.pipe(concat("holder.js"))
-		//.pipe(uglify())
+		.pipe(uglify())
 		.pipe(header(banner, {
 			pkg: pkg,
 			year: moment().format("YYYY"),

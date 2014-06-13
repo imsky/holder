@@ -650,7 +650,7 @@ Holder.js - client side image placeholders
 		preempted: false,
 		resizableImages: [],
 		debounceTimer: null
-	}
+	};
 
 	//Pre-flight
 
