@@ -7,10 +7,24 @@ Holder.js - client side image placeholders
 	var app = {};
 
 	var Holder = {
+		
+		/**
+		 * Adds a theme to default settings
+		 * 
+		 * @param {string} name Theme name
+		 * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
+		 */
 		addTheme: function (name, theme) {
 			name != null && theme != null && (app.settings.themes[name] = theme);
 			return this;
 		},
+		
+		/**
+		 * Appends a placeholder to an element
+		 * 
+		 * @param {string} src Placeholder URL string
+		 * @param {string} el Selector of target element
+		 */
 		addImage: function (src, el) {
 			var node = document.querySelectorAll(el);
 			if (node.length) {
@@ -22,6 +36,12 @@ Holder.js - client side image placeholders
 			}
 			return this;
 		},
+		
+		/**
+		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
+		 * 
+		 * @param {Object} instanceOptions Options object, can contain domain, themes, images, and bgnodes properties
+		 */
 		run: function (instanceOptions) {
 			var instanceConfig = extend({}, app.config)
 
@@ -78,48 +98,47 @@ Holder.js - client side image placeholders
 			}
 
 			for (l = images.length, i = 0; i < l; i++) {
-				(function (image, options, instanceConfig) {
-					var attr_data_src, attr_src;
-					attr_src = attr_data_src = src = null;
-					var attr_rendered = null;
+				var attr_datasrc, attr_src;
+				attr_src = attr_datasrc = src = null;
+				var attr_rendered = null;
+				
+				var image = images[i];
 
-					try {
-						attr_src = image.getAttribute('src');
-						attr_datasrc = image.getAttribute('data-src');
-						attr_rendered = image.getAttribute('data-holder-rendered');
-					} catch (e) {}
+				try {
+					attr_src = image.getAttribute('src');
+					attr_datasrc = image.getAttribute('data-src');
+					attr_rendered = image.getAttribute('data-holder-rendered');
+				} catch (e) {}
 
-					var hasSrc = attr_src != null;
-					var hasDataSrc = attr_datasrc != null;
-					var rendered = attr_rendered != null && attr_rendered == "true";
+				var hasSrc = attr_src != null;
+				var hasDataSrc = attr_datasrc != null;
+				var rendered = attr_rendered != null && attr_rendered == "true";
 
-					if (hasSrc) {
-						if (attr_src.indexOf(options.domain) === 0) {
-							parseHolder(options, instanceConfig, attr_src, image);
-						} else if (hasDataSrc && attr_datasrc.indexOf(options.domain) === 0) {
-							if (rendered) {
-								parseHolder(options, instanceConfig, attr_datasrc, image);
-							} else {
-								imageExists({
-									src: attr_src,
-									options: options,
-									instanceConfig: instanceConfig,
-									dataSrc: attr_datasrc,
-									image: image
-								}, function (exists, config) {
-									if (!exists) {
-										parseHolder(config.options, config.instanceConfig, config.dataSrc, config.image);
-									}
-								})
-							}
-						}
-					} else if (hasDataSrc) {
-						if (attr_datasrc.indexOf(options.domain) === 0) {
+				if (hasSrc) {
+					if (attr_src.indexOf(options.domain) === 0) {
+						parseHolder(options, instanceConfig, attr_src, image);
+					} else if (hasDataSrc && attr_datasrc.indexOf(options.domain) === 0) {
+						if (rendered) {
 							parseHolder(options, instanceConfig, attr_datasrc, image);
+						} else {
+							imageExists({
+								src: attr_src,
+								options: options,
+								instanceConfig: instanceConfig,
+								dataSrc: attr_datasrc,
+								image: image
+							}, function (exists, config) {
+								if (!exists) {
+									parseHolder(config.options, config.instanceConfig, config.dataSrc, config.image);
+								}
+							})
 						}
 					}
-
-				})(images[i], options, instanceConfig);
+				} else if (hasDataSrc) {
+					if (attr_datasrc.indexOf(options.domain) === 0) {
+						parseHolder(options, instanceConfig, attr_datasrc, image);
+					}
+				}
 			}
 			return this;
 		},
@@ -132,7 +151,16 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	function parseHolder(options, instanceConfig, src, el, FLAG) {
+	/**
+	 * Processes provided source attribute and sets up the appropriate rendering workflow
+	 * 
+	 * @private
+	 * @param options Instance options from Holder.run
+	 * @param instanceConfig Instance configuration
+	 * @param src Image URL
+	 * @param el Image DOM element
+	 */
+	function parseHolder(options, instanceConfig, src, el) {
 		var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
 
 		if (holder) {
@@ -144,6 +172,13 @@ Holder.js - client side image placeholders
 		}
 	}
 
+	/**
+	 * Processes an array of flags
+	 * 
+	 * @private
+	 * @param flags Flag array
+	 * @param options Instance options from Holder.run
+	 */
 	function parseFlags(flags, options) {
 		var ret = {
 			theme: extend(app.settings.themes.gray, {})
@@ -179,6 +214,14 @@ Holder.js - client side image placeholders
 		return render ? ret : false;
 	}
 
+	/**
+	 * Adaptive text sizing function
+	 * 
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
 	function textSize(width, height, fontSize) {
 		height = parseInt(height, 10);
 		width = parseInt(width, 10);
@@ -265,6 +308,15 @@ Holder.js - client side image placeholders
 		}
 	})();
 
+	/**
+	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
+	 * 
+	 * @private
+	 * @param mode Placeholder mode, either background or image
+	 * @param params Placeholder-specific parameters
+	 * @param el Image DOM element
+	 * @param instanceConfig Instance configuration
+	 */
 	function renderToElement(mode, params, el, instanceConfig) {
 		var image = null;
 
@@ -318,6 +370,16 @@ Holder.js - client side image placeholders
 		el.setAttribute('data-holder-rendered', true);
 	}
 
+	/**
+	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
+	 * 
+	 * @private
+	 * @param mode Placeholder mode, either background or image
+	 * @param el Image DOM element
+	 * @param holder Placeholder-specific configuration
+	 * @param src Image URL string
+	 * @param instanceConfig Instance configuration
+	 */
 	function render(mode, el, holder, src, instanceConfig) {
 		var dimensions = holder.dimensions,
 			theme = holder.theme,
@@ -392,6 +454,12 @@ Holder.js - client side image placeholders
 		}
 	}
 
+	/**
+	 * Iterates over resizable (fluid or auto) placeholders and renders them
+	 * 
+	 * @private
+	 * @param element Optional element selector, specified only if a specific element needs to be re-rendered
+	 */
 	function updateResizableElements(element) {
 		var images;
 		if (element == null || element.nodeType == null) {
@@ -439,6 +507,13 @@ Holder.js - client side image placeholders
 		}
 	}
 
+	/**
+	 * Checks if an element is visible
+	 * 
+	 * @private
+	 * @param el DOM element
+	 * @param callback Callback function executed if the element is invisible
+	 */
 	function dimensionCheck(el, callback) {
 		var dimensions = {
 			height: el.clientHeight,
@@ -453,6 +528,12 @@ Holder.js - client side image placeholders
 		}
 	}
 
+	/**
+	 * Sets up aspect ratio metadata for fluid placeholders, in order to preserve proportions when resizing
+	 * 
+	 * @private
+	 * @param el Image DOM element
+	 */
 	function setInitialDimensions(el) {
 		if (el.holderData) {
 			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions))
@@ -578,6 +659,13 @@ Holder.js - client side image placeholders
 
 	//Helpers
 
+	/**
+	 * Shallow object clone and merge
+	 * 
+	 * @param a Object A
+	 * @param b Object B
+	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
+	 */
 	function extend(a, b) {
 		var c = {};
 		for (var i in a) {
@@ -593,6 +681,11 @@ Holder.js - client side image placeholders
 		return c
 	}
 
+	/**
+	 * Takes a k/v list of CSS properties and returns a rule
+	 * 
+	 * @param props CSS properties object
+	 */
 	function cssProps(props) {
 		var ret = [];
 		for (var p in props) {
@@ -603,6 +696,11 @@ Holder.js - client side image placeholders
 		return ret.join(';')
 	}
 
+	/**
+	 * Prevents a function from being called too often, waits until a timer elapses to call it again
+	 * 
+	 * @param fn Function to call
+	 */
 	function debounce(fn) {
 		if (!app.runtime.debounceTimer) fn.call(this);
 		if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
@@ -612,12 +710,21 @@ Holder.js - client side image placeholders
 		}, app.config.debounce);
 	}
 
+	/**
+	 * Holder-specific resize/orientation change callback, debounced to prevent excessive execution
+	 */
 	function resizeEvent() {
 		debounce(function () {
 			updateResizableElements(null);
 		})
 	}
 
+	/**
+	 * Checks if an image exists
+	 * 
+	 * @param params Configuration object, must specify at least a src key
+	 * @param callback Callback to call once image status has been found
+	 */
 	function imageExists(params, callback) {
 		var image = new Image();
 		image.onerror = function () {

@@ -17,8 +17,8 @@ Installing
 * [Composer](https://packagist.org/): `php composer.phar update imsky/holder`
 * [NuGet](http://www.nuget.org/): `Install-Package Holder.js`
 
-How to use it
--------------
+Usage
+-----
 
 Include ``holder.js`` in your HTML:
 
