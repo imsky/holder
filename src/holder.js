@@ -635,7 +635,7 @@ Holder.js - client side image placeholders
 		}
 	})();
 
-	//Exposing to document and setting up listeners
+	//Exposing to environment and setting up listeners
 
 	register(Holder, 'Holder', global);
 

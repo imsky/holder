@@ -3,11 +3,17 @@ Holder
 
 ![](http://imsky.github.io/holder/images/header.png)
 
-Holder uses SVG and `canvas` to render image placeholders on the client side.
+Holder renders image placeholders on the client side using SVG.
 
 [Bootstrap](http://getbootstrap.com) uses Holder in documentation.
 
-You can install Holder using [Bower](http://bower.io/): `bower install holderjs`
+Installing
+----------
+
+* [Bower](http://bower.io/): `bower install holderjs`
+* [Meteor](http://atmospherejs.com/): `mrt add holder`
+* [Composer](https://packagist.org/): `php composer.phar update imsky/holder`
+* [NuGet](http://www.nuget.org/): `Install-Package Holder.js`
 
 How to use it
 -------------
