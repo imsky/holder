@@ -76,28 +76,50 @@ Holder.js - client side image placeholders
 					}
 				}
 			}
+
 			for (l = images.length, i = 0; i < l; i++) {
-				var attr_data_src, attr_src;
-				attr_src = attr_data_src = src = null;
-				try {
-					attr_src = images[i].getAttribute('src');
-					attr_datasrc = images[i].getAttribute('data-src');
-				} catch (e) {}
-				if (attr_datasrc == null && !!attr_src && attr_src.indexOf(options.domain) >= 0) {
-					src = attr_src;
-				} else if (!!attr_datasrc && attr_datasrc.indexOf(options.domain) >= 0) {
-					src = attr_datasrc;
-				}
-				if (src) {
-					var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
-					if (holder) {
-						if (holder.fluid) {
-							render('fluid', images[i], holder, src, instanceConfig)
-						} else {
-							render('image', images[i], holder, src, instanceConfig);
+				(function (image, options, instanceConfig) {
+					var attr_data_src, attr_src;
+					attr_src = attr_data_src = src = null;
+					var attr_rendered = null;
+
+					try {
+						attr_src = image.getAttribute('src');
+						attr_datasrc = image.getAttribute('data-src');
+						attr_rendered = image.getAttribute('data-holder-rendered');
+					} catch (e) {}
+
+					var hasSrc = attr_src != null;
+					var hasDataSrc = attr_datasrc != null;
+					var rendered = attr_rendered != null && attr_rendered == "true";
+
+					if (hasSrc) {
+						if (attr_src.indexOf(options.domain) === 0) {
+							parseHolder(options, instanceConfig, attr_src, image);
+						} else if (hasDataSrc && attr_datasrc.indexOf(options.domain) === 0) {
+							if (rendered) {
+								parseHolder(options, instanceConfig, attr_datasrc, image);
+							} else {
+								imageExists({
+									src: attr_src,
+									options: options,
+									instanceConfig: instanceConfig,
+									dataSrc: attr_datasrc,
+									image: image
+								}, function (exists, config) {
+									if (!exists) {
+										parseHolder(config.options, config.instanceConfig, config.dataSrc, config.image);
+									}
+								})
+							}
+						}
+					} else if (hasDataSrc) {
+						if (attr_datasrc.indexOf(options.domain) === 0) {
+							parseHolder(options, instanceConfig, attr_datasrc, image);
 						}
 					}
-				}
+
+				})(images[i], options, instanceConfig);
 			}
 			return this;
 		},
@@ -106,6 +128,18 @@ Holder.js - client side image placeholders
 				if (el.hasAttribute('data-holder-invisible')) {
 					throw 'Holder: invisible placeholder';
 				}
+			}
+		}
+	}
+
+	function parseHolder(options, instanceConfig, src, el, FLAG) {
+		var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
+
+		if (holder) {
+			if (holder.fluid) {
+				render('fluid', el, holder, src, instanceConfig)
+			} else {
+				render('image', el, holder, src, instanceConfig);
 			}
 		}
 	}
@@ -233,29 +267,28 @@ Holder.js - client side image placeholders
 
 	function renderToElement(mode, params, el, instanceConfig) {
 		var image = null;
-		
+
 		var dimensions = params.dimensions;
 		var template = params.template;
 		var holder = params.holder;
-		
+
 		var width = dimensions.width;
 		var height = dimensions.height;
 		var text_height = textSize(width, height, template.size);
-		
+
 		var font = template.font ? template.font : 'Arial, Helvetica, sans-serif';
 		var font_weight = template.fontweight ? template.fontweight : 'bold';
 		var dimensions_caption = Math.floor(width) + 'x' + Math.floor(height);
 		var text = template.text ? template.text : dimensions_caption;
-		
-		if(holder.textmode == 'literal'){
+
+		if (holder.textmode == 'literal') {
 			var dimensions = holder.dimensions;
 			text = dimensions.width + 'x' + dimensions.height;
-		}
-		else if(holder.textmode == 'exact' && holder.exact_dimensions){
+		} else if (holder.textmode == 'exact' && holder.exact_dimensions) {
 			var dimensions = holder.exact_dimensions;
 			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
 		}
-		
+
 		var rendererParams = {
 			text: text,
 			width: width,
@@ -583,6 +616,17 @@ Holder.js - client side image placeholders
 		debounce(function () {
 			updateResizableElements(null);
 		})
+	}
+
+	function imageExists(params, callback) {
+		var image = new Image();
+		image.onerror = function () {
+			callback.call(this, false, params);
+		}
+		image.onload = function () {
+			callback.call(this, true, params);
+		}
+		image.src = params.src;
 	}
 
 	//< v2.4 API compatibility
