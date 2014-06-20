@@ -61,26 +61,26 @@ Holder.js - client side image placeholders
 
 			if (typeof (options.images) == 'string') {
 				imageNodes = document.querySelectorAll(options.images);
-			} else if (window.NodeList && options.images instanceof window.NodeList) {
+			} else if (global.NodeList && options.images instanceof global.NodeList) {
 				imageNodes = options.images;
-			} else if (window.Node && options.images instanceof window.Node) {
+			} else if (global.Node && options.images instanceof global.Node) {
 				imageNodes = [options.images];
-			} else if (window.HTMLCollection && options.images instanceof window.HTMLCollection) {
+			} else if (global.HTMLCollection && options.images instanceof global.HTMLCollection) {
 				imageNodes = options.images
 			}
 
 			if (typeof (options.bgnodes) == 'string') {
 				bgnodes = document.querySelectorAll(options.bgnodes);
-			} else if (window.NodeList && options.elements instanceof window.NodeList) {
+			} else if (global.NodeList && options.elements instanceof global.NodeList) {
 				bgnodes = options.bgnodes;
-			} else if (window.Node && options.bgnodes instanceof window.Node) {
+			} else if (global.Node && options.bgnodes instanceof global.Node) {
 				bgnodes = [options.bgnodes];
 			}
 			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
 			var cssregex = new RegExp(options.domain + '\/(.*?)"?\\)');
 			for (var l = bgnodes.length, i = 0; i < l; i++) {
-				var src = window.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
+				var src = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var flags = src.match(cssregex);
 				var bgsrc = bgnodes[i].getAttribute('data-background-src');
 				if (flags) {
@@ -164,11 +164,7 @@ Holder.js - client side image placeholders
 		var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
 
 		if (holder) {
-			if (holder.fluid) {
-				render('fluid', el, holder, src, instanceConfig)
-			} else {
-				render('image', el, holder, src, instanceConfig);
-			}
+			render(holder.fluid ? 'fluid' : 'image', el, holder, src, instanceConfig);
 		}
 	}
 
@@ -255,7 +251,7 @@ Holder.js - client side image placeholders
 
 	var svgRenderer = (function () {
 		//Prevent IE <9 from initializing SVG renderer
-		if (!window.XMLSerializer) return;
+		if (!global.XMLSerializer) return;
 		var serializer = new XMLSerializer();
 		var svg_ns = 'http://www.w3.org/2000/svg'
 		var svg = document.createElementNS(svg_ns, 'svg');
@@ -775,7 +771,7 @@ Holder.js - client side image placeholders
 		}
 
 		if (app.config.renderer == 'canvas') {
-			devicePixelRatio = window.devicePixelRatio || 1;
+			devicePixelRatio = global.devicePixelRatio || 1;
 			backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 		}
 
