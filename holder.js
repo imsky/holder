@@ -481,6 +481,11 @@ function parse_flags(flags, options) {
 			ret.auto = true;
 		} else if (app.flags.text.match(flag)) {
 			ret.text = app.flags.text.output(flag);
+		} else if (flag === 'random') {
+			//choose a random theme
+			var themes = Object.keys(options.themes),
+				theme = themes[Math.floor(Math.random()*themes.length)];
+			ret.theme = extend(options.themes[theme], {});
 		}
 	}
 	return render ? ret : false;
@@ -664,5 +669,18 @@ if (!Object.prototype.hasOwnProperty)
 		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
 	}
     /*jshint +W001, +W103 */
+		
+//Object.keys polyfill - http://stackoverflow.com/questions/18912932/object-keys-not-working-in-internet-explorer
+if (!Object.keys) {
+  Object.keys = function(obj) {
+    var keys = [];
+    for (var i in obj) {
+      if (obj.hasOwnProperty(i)) {
+        keys.push(i);
+      }
+    }
+    return keys;
+  };
+}
 
 })(Holder, window);
