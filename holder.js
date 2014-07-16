@@ -669,20 +669,18 @@ if (!Object.prototype.hasOwnProperty)
 		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
 	}
     /*jshint +W001, +W103 */
-
-})(Holder, window);
-
+		
 //Object.keys polyfill - http://stackoverflow.com/questions/18912932/object-keys-not-working-in-internet-explorer
 if (!Object.keys) {
   Object.keys = function(obj) {
     var keys = [];
-
     for (var i in obj) {
       if (obj.hasOwnProperty(i)) {
         keys.push(i);
       }
     }
-
     return keys;
   };
 }
+
+})(Holder, window);
