@@ -224,7 +224,7 @@ function draw_canvas(args) {
 	ctx.fillRect(0, 0, width, height);
 	ctx.fillStyle = template.foreground;
 	ctx.font = font_weight + " " + text_height + "px " + font;
-	
+
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	if (literal) {
 		var dimensions = holder.dimensions;
@@ -255,11 +255,11 @@ function draw_svg(args){
 	var text_height = ts.height;
 	var width = dimensions.width,
 		height = dimensions.height;
-		
+
 	var font = template.font ? template.font : "Arial,Helvetica,sans-serif";
 	var font_weight = template.fontweight ? template.fontweight : "bold";
 	var text = template.text ? template.text : (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
-	
+
 	if (literal) {
 		var dimensions = holder.dimensions;
 		text = dimensions.width + "x" + dimensions.height;
@@ -269,10 +269,10 @@ function draw_svg(args){
 		text = (Math.floor(dimensions.width) + "x" + Math.floor(dimensions.height));
 	}
 	var string = svg_el({
-		text: text, 
-		width:width, 
-		height:height, 
-		text_height:text_height, 
+		text: text,
+		width:width,
+		height:height,
+		text_height:text_height,
 		font:font,
 		font_weight:font_weight,
 		template:template
@@ -303,7 +303,7 @@ function render(mode, el, holder, src) {
 	el.setAttribute("data-src", src);
 	holder.theme = theme;
 	el.holder_data = holder;
-	
+
 	if (mode == "image") {
 		el.setAttribute("alt", text ? text : theme.text ? theme.text + " [" + dimensions_caption + "]" : dimensions_caption);
 		if (instance_config.use_fallback || !holder.auto) {
@@ -314,12 +314,12 @@ function render(mode, el, holder, src) {
 			el.style.backgroundColor = theme.background;
 		} else {
 			el.setAttribute("src", draw({ctx: ctx, dimensions: dimensions, template: theme, ratio:ratio, holder: holder}));
-			
+
 			if(holder.textmode && holder.textmode == "exact"){
 				resizable_images.push(el);
 				resizable_update(el);
 			}
-			
+
 		}
 	} else if (mode == "background") {
 		if (!instance_config.use_fallback) {
@@ -341,9 +341,9 @@ function render(mode, el, holder, src) {
 		if (el.style.display == "inline" || el.style.display === "" || el.style.display == "none") {
 			el.style.display = "block";
 		}
-		
+
 		set_initial_dimensions(el)
-		
+
 		if (instance_config.use_fallback) {
 			el.style.backgroundColor = theme.background;
 		} else {
@@ -432,7 +432,7 @@ function resizable_update(element) {
 						}
 					}
 				}
-				
+
 				var draw_params = {
 					ctx: ctx,
 					dimensions: dimensions,
@@ -440,12 +440,12 @@ function resizable_update(element) {
 					ratio: ratio,
 					holder: holder
 				};
-								
+
 				if (holder.textmode && holder.textmode == "exact") {
 					holder.exact_dimensions = dimensions;
 					draw_params.dimensions = holder.dimensions;
 				}
-				
+
 				el.setAttribute("src", draw(draw_params));
 			}
 		}
@@ -537,7 +537,7 @@ app.run = function (o) {
 		instance_config.use_canvas = true;
 		instance_config.use_svg = false;
 	}
-	
+
 	instance_config.debounce = (options.debounce != null) ? options.debounce : instance_config.debounce;
 
 	if (typeof (options.images) == "string") {
@@ -558,7 +558,7 @@ app.run = function (o) {
 		bgnodes = [options.bgnodes];
 	}
 	for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
-	
+
 	var cssregex = new RegExp(options.domain + "\/(.*?)\"?\\)");
 	for (var l = bgnodes.length, i = 0; i < l; i++) {
 		var src = window.getComputedStyle(bgnodes[i], null)
@@ -669,7 +669,7 @@ if (!Object.prototype.hasOwnProperty)
 		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
 	}
     /*jshint +W001, +W103 */
-		
+
 //Object.keys polyfill - http://stackoverflow.com/questions/18912932/object-keys-not-working-in-internet-explorer
 if (!Object.keys) {
   Object.keys = function(obj) {
