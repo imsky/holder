@@ -14,6 +14,10 @@
 </style>
 </head>
 <body>
+	<div class="thumb">
+<img data-src="holder.js/400x400/text:hello there world, how are you this fine evening?">
+	</div>
+<!--
 <div class="thumb">
 	<img data-src="holder.js/300x200">
 	<div class="caption">
@@ -36,6 +40,12 @@
 	<img data-src="holder.js/300x200/sky/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
 	<div class="caption">
 		 Placeholder with lengthy text
+	</div>
+</div>
+<div class="thumb">
+	<img data-src="holder.canvas/300x200/industrial/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
+	<div class="caption">
+		Canvas placeholder with lengthy text
 	</div>
 </div>
 <div class="thumb">
@@ -87,15 +97,7 @@
 		<code>&lt;div&gt;</code> with <code>data-background-src</code> placeholder
 	</div>
 </div>
-<div class="thumb">
-<!--
-	<div class="holderjs" style="background:url(?holder.js/100%x100%/#ff0000:#ffffff);width:200px;height:100px">
--->
-	</div>
-	<div class="caption">
-		<code>&lt;div&gt;</code> with fluid background placeholder
-	</div>
-</div>
+
 <div class="thumb">
 	<div id="thumb1">
 	</div>
@@ -147,12 +149,13 @@
 		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
 </div>
+-->
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../holder.js"></script>
 <!--
 <script src="require.js" data-main="test.js"></script>
 -->
-<script>
+<script>/*
 Holder.add_image("holder.js/250x120/sky", "#thumb1").run();
 Holder.add_theme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
@@ -161,6 +164,10 @@ Holder.add_theme("custom", {foreground: "#fff", background: "#000", size: 15}).r
 Holder.add_theme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
 	domain: "fontawesome.holder"
 })
+Holder.run({
+	domain: "holder.canvas",
+	use_canvas: true
+});*/
 //Holder.run({use_canvas:true})
 </script>
 </body>

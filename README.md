@@ -55,7 +55,13 @@ Customizing themes
 Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
 
 ```js
-Holder.add_theme("dark", {background:"#000", foreground:"#aaa", size:11, font: "Monaco", fontweight:"normal"})
+Holder.add_theme("dark", {
+  background: "#000",
+  foreground: "#aaa",
+  size: 11,
+  font: "Monaco",
+  fontweight: "normal"
+});
 ```
 
 Using custom themes
@@ -90,16 +96,16 @@ You can use Holder in different areas on different images with custom themes:
 
 ```js
 Holder.run({
-    domain: "example.com",
-    themes: {
-        "simple":{
-            background:"#fff",
-            foreground:"#000",
-            size:12
-            }
-    },
-    images: "#new"
-    })
+  domain: "example.com",
+  themes: {
+    "simple": {
+      background: "#fff",
+      foreground: "#000",
+      size: 12
+    }
+  },
+  images: "#new"
+});
 ```
 
 Using custom colors on specific images
@@ -125,7 +131,7 @@ You can specify custom text using the ``text:`` operator:
 If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
 
 ```js
-Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" })
+Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" });
 ```
 
 Fluid placeholders
@@ -173,7 +179,7 @@ Customizing only the settings you need
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
 ```js
-Holder.run({domain:"example.com"})
+Holder.run({domain:"example.com"});
 ```
 
 Using custom settings on load
@@ -187,7 +193,11 @@ Inserting an image with optional custom theme
 You can add a placeholder programmatically by chaining Holder calls:
 
 ```js
-Holder.add_theme("new",{foreground:"#ccc", background:"#000", size:10}).add_image("holder.js/200x100/new", "body").run()
+Holder.add_theme("new", {
+  foreground: "#ccc",
+  background: "#000",
+  size: 10
+}).add_image("holder.js/200x100/new", "body").run();
 ```
 
 The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
@@ -198,7 +208,7 @@ Changing rendering engine
 By default, Holder renders placeholders using SVG, however it has a fallback `canvas` engine that it uses in case the browser lacks SVG support. If you'd like to force `canvas` rendering, you can do it like so:
 
 ```js
-Holder.run({use_canvas:true})
+Holder.run({use_canvas:true});
 ```
 
 Using with ``lazyload.js``
