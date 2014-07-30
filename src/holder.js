@@ -155,6 +155,36 @@ Holder.js - client side image placeholders
 		}
 	}
 
+	var SceneGraph = function(properties) {		
+		var SceneNode = augment.defclass({
+			constructor: function(){
+				this.parent = null;
+				this.children = {};
+				this.name = null;
+				this.translate = {x:0, y:0};
+				this.scale = {x:0, y:0};
+				this.properties = {width:0, height:0};
+			}
+		});
+
+		var RootNode = augment(SceneNode, function(_super){
+			this.constructor = function(width, height){
+				_super.constructor.call(this);
+				this.properties.width = properties.width;
+				this.properties.height = properties.height;
+			}
+		});
+
+		var SceneShape = augment(SceneNode, function(_super){
+			this.constructor = function(){
+				_super.constructor.call(this);
+				this.properties.fill = '#000';
+			}
+		});
+		
+		var root = new RootNode();
+	}
+
 	/**
 	 * Processes provided source attribute and sets up the appropriate rendering workflow
 	 * 
@@ -322,7 +352,7 @@ Holder.js - client side image placeholders
 
 		var dimensions = params.dimensions;
 		var template = params.theme;
-		var holder = params.flags;
+		var flags = params.flags;
 
 		var width = dimensions.width;
 		var height = dimensions.height;
@@ -333,11 +363,11 @@ Holder.js - client side image placeholders
 		var dimensions_caption = Math.floor(width) + 'x' + Math.floor(height);
 		var text = template.text ? template.text : dimensions_caption;
 
-		if (holder.textmode == 'literal') {
-			var dimensions = holder.dimensions;
+		if (flags.textmode == 'literal') {
+			var dimensions = flags.dimensions;
 			text = dimensions.width + 'x' + dimensions.height;
-		} else if (holder.textmode == 'exact' && holder.exact_dimensions) {
-			var dimensions = holder.exact_dimensions;
+		} else if (flags.textmode == 'exact' && flags.exact_dimensions) {
+			var dimensions = flags.exact_dimensions;
 			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
 		}
 
