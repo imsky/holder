@@ -7,10 +7,10 @@ Holder.js - client side image placeholders
 	var app = {};
 
 	var Holder = {
-		
+
 		/**
 		 * Adds a theme to default settings
-		 * 
+		 *
 		 * @param {string} name Theme name
 		 * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
 		 */
@@ -21,7 +21,7 @@ Holder.js - client side image placeholders
 
 		/**
 		 * Appends a placeholder to an element
-		 * 
+		 *
 		 * @param {string} src Placeholder URL string
 		 * @param {string} el Selector of target element
 		 */
@@ -39,7 +39,7 @@ Holder.js - client side image placeholders
 
 		/**
 		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
-		 * 
+		 *
 		 * @param {Object} instanceOptions Options object, can contain domain, themes, images, and bgnodes properties
 		 */
 		run: function (instanceOptions) {
@@ -79,7 +79,7 @@ Holder.js - client side image placeholders
 			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
-			
+
 			for (var l = bgnodes.length, i = 0; i < l; i++) {
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
@@ -106,7 +106,7 @@ Holder.js - client side image placeholders
 				var attr_datasrc, attr_src;
 				attr_src = attr_datasrc = src = null;
 				var attr_rendered = null;
-				
+
 				var image = images[i];
 
 				try {
@@ -155,7 +155,7 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	var SceneGraph = function(properties) {		
+	var SceneGraph = function(properties) {
 		var SceneNode = augment.defclass({
 			constructor: function(){
 				this.parent = null;
@@ -179,13 +179,13 @@ Holder.js - client side image placeholders
 				this.properties = {width:0, height:0, fill:'#000'};
 			}
 		});
-		
+
 		var root = new RootNode();
 	}
 
 	/**
 	 * Processes provided source attribute and sets up the appropriate rendering workflow
-	 * 
+	 *
 	 * @private
 	 * @param options Instance options from Holder.run
 	 * @param instanceConfig Instance configuration
@@ -202,7 +202,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Processes an array of flags
-	 * 
+	 *
 	 * @private
 	 * @param flags Flag array
 	 * @param options Instance options from Holder.run
@@ -241,10 +241,10 @@ Holder.js - client side image placeholders
 		}
 		return render ? ret : false;
 	}
-	
+
 	/**
 	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
-	 * 
+	 *
 	 * @private
 	 * @param mode Placeholder mode, either background or image
 	 * @param params Placeholder-specific parameters
@@ -306,7 +306,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
-	 * 
+	 *
 	 * @private
 	 * @param mode Placeholder mode, either background or image
 	 * @param el Image DOM element
@@ -321,7 +321,7 @@ Holder.js - client side image placeholders
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 
 		var extensions = {};
-		
+
 		if(text){
 			extensions.text = text;
 		}
@@ -330,7 +330,7 @@ Holder.js - client side image placeholders
 		}
 
 		theme = extend(theme, extensions);
-		
+
 		if(mode == 'background'){
 			if(el.getAttribute('data-background-src') == null){
 				el.setAttribute('data-background-src', src);
@@ -339,7 +339,7 @@ Holder.js - client side image placeholders
 		else{
 			el.setAttribute('data-src', src);
 		}
-		
+
 		flags.theme = theme;
 		el.holderData = {
 			flags: flags,
@@ -349,7 +349,7 @@ Holder.js - client side image placeholders
 		if(mode == 'image' || mode == 'fluid'){
 			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
 		}
-		
+
 		if (mode == 'image') {
 			if (instanceConfig.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
@@ -408,7 +408,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Iterates over resizable (fluid or auto) placeholders and renders them
-	 * 
+	 *
 	 * @private
 	 * @param element Optional element selector, specified only if a specific element needs to be re-rendered
 	 */
@@ -462,7 +462,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Checks if an element is visible
-	 * 
+	 *
 	 * @private
 	 * @param el DOM element
 	 * @param callback Callback function executed if the element is invisible
@@ -483,7 +483,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Sets up aspect ratio metadata for fluid placeholders, in order to preserve proportions when resizing
-	 * 
+	 *
 	 * @private
 	 * @param el Image DOM element
 	 */
@@ -499,7 +499,7 @@ Holder.js - client side image placeholders
 					mode: null,
 					initialDimensions: dimensions
 				}
-				
+
 				if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
 					fluidConfig.mode = 'width'
 					fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height)
@@ -507,7 +507,7 @@ Holder.js - client side image placeholders
 					fluidConfig.mode = 'height';
 					fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height
 				}
-				
+
 				el.holderData.fluidConfig = fluidConfig;
 			}
 		}
@@ -515,7 +515,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Adaptive text sizing function
-	 * 
+	 *
 	 * @private
 	 * @param width Parent width
 	 * @param height Parent height
@@ -723,7 +723,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Shallow object clone and merge
-	 * 
+	 *
 	 * @param a Object A
 	 * @param b Object B
 	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
@@ -745,7 +745,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Takes a k/v list of CSS properties and returns a rule
-	 * 
+	 *
 	 * @param props CSS properties object
 	 */
 	function cssProps(props) {
@@ -760,7 +760,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Prevents a function from being called too often, waits until a timer elapses to call it again
-	 * 
+	 *
 	 * @param fn Function to call
 	 */
 	function debounce(fn) {
@@ -783,7 +783,7 @@ Holder.js - client side image placeholders
 
 	/**
 	 * Checks if an image exists
-	 * 
+	 *
 	 * @param params Configuration object, must specify at least a src key
 	 * @param callback Callback to call once image status has been found
 	 */
