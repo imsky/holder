@@ -117,14 +117,15 @@ Holder.js - client side image placeholders
 
 				var hasSrc = attr_src != null;
 				var hasDataSrc = attr_datasrc != null;
+				var hasDataSrcURL = hasDataSrc && attr_datasrc.indexOf(options.domain) === 0;
 				var rendered = attr_rendered != null && attr_rendered == "true";
 
 				if (hasSrc) {
 					if (attr_src.indexOf(options.domain) === 0) {
-						parseHolder(options, instanceConfig, attr_src, image);
-					} else if (hasDataSrc && attr_datasrc.indexOf(options.domain) === 0) {
+						processImageElement(options, instanceConfig, attr_src, image);
+					} else if (hasDataSrcURL) {
 						if (rendered) {
-							parseHolder(options, instanceConfig, attr_datasrc, image);
+							processImageElement(options, instanceConfig, attr_datasrc, image);
 						} else {
 							imageExists({
 								src: attr_src,
@@ -134,15 +135,13 @@ Holder.js - client side image placeholders
 								image: image
 							}, function (exists, config) {
 								if (!exists) {
-									parseHolder(config.options, config.instanceConfig, config.dataSrc, config.image);
+									processImageElement(config.options, config.instanceConfig, config.dataSrc, config.image);
 								}
-							})
+							});
 						}
 					}
-				} else if (hasDataSrc) {
-					if (attr_datasrc.indexOf(options.domain) === 0) {
-						parseHolder(options, instanceConfig, attr_datasrc, image);
-					}
+				} else if (hasDataSrcURL) {
+						processImageElement(options, instanceConfig, attr_datasrc, image);
 				}
 			}
 			return this;
@@ -165,11 +164,11 @@ Holder.js - client side image placeholders
 	 * @param src Image URL
 	 * @param el Image DOM element
 	 */
-	function parseHolder(options, instanceConfig, src, el) {
-		var holder = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
+	function processImageElement(options, instanceConfig, src, el) {
+		var holderFlags = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
 
-		if (holder) {
-			render(holder.fluid ? 'fluid' : 'image', el, holder, src, instanceConfig);
+		if (holderFlags) {
+			render(holder.fluid ? 'fluid' : 'image', el, holderFlags, src, instanceConfig);
 		}
 	}
 
@@ -318,7 +317,7 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 * @param instanceConfig Instance configuration
 	 */
-	function renderToElement(mode, params, el, instanceConfig) {
+	function modifyElement(mode, params, el, instanceConfig) {
 		var image = null;
 
 		var dimensions = params.dimensions;
@@ -386,13 +385,18 @@ Holder.js - client side image placeholders
 			theme = holder.theme,
 			text = holder.text ? decodeURIComponent(holder.text) : holder.text;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
-		theme = (text ? extend(theme, {
-			text: text
-		}) : theme);
-		theme = (holder.font ? extend(theme, {
-			font: holder.font
-		}) : theme);
 
+		var extensions = {};
+		
+		if(text){
+			extensions.text = text;
+		}
+		if(holder.font){
+			extensions.font = holder.font;
+		}
+
+		theme = extend(theme, extensions);
+		
 		if(mode == 'background'){
 			if(el.getAttribute('data-background-src') == null){
 				el.setAttribute('data-background-src', src);
@@ -415,7 +419,7 @@ Holder.js - client side image placeholders
 			if (instanceConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
-				renderToElement(mode, {
+				modifyElement(mode, {
 					dimensions: dimensions,
 					template: theme,
 					ratio: app.config.ratio,
@@ -429,7 +433,7 @@ Holder.js - client side image placeholders
 			}
 		} else if (mode == 'background') {
 			if (instanceConfig.renderer != 'html') {
-				renderToElement(mode, {
+				modifyElement(mode, {
 						dimensions: dimensions,
 						template: theme,
 						ratio: app.config.ratio,
@@ -499,7 +503,7 @@ Holder.js - client side image placeholders
 						}
 					}
 
-					var draw_params = {
+					var drawParams = {
 						dimensions: dimensions,
 						template: holder.theme,
 						ratio: app.config.ratio,
@@ -508,10 +512,10 @@ Holder.js - client side image placeholders
 
 					if (holder.textmode && holder.textmode == 'exact') {
 						holder.exact_dimensions = dimensions;
-						draw_params.dimensions = holder.dimensions;
+						drawParams.dimensions = holder.dimensions;
 					}
 
-					renderToElement('image', draw_params, el, el.configData);
+					modifyElement('image', drawParams, el, el.configData);
 				}
 			}
 		}
