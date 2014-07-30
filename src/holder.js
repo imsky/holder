@@ -168,7 +168,7 @@ Holder.js - client side image placeholders
 		var holderFlags = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
 
 		if (holderFlags) {
-			render(holder.fluid ? 'fluid' : 'image', el, holderFlags, src, instanceConfig);
+			render(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, instanceConfig);
 		}
 	}
 
@@ -321,8 +321,8 @@ Holder.js - client side image placeholders
 		var image = null;
 
 		var dimensions = params.dimensions;
-		var template = params.template;
-		var holder = params.holder;
+		var template = params.theme;
+		var holder = params.flags;
 
 		var width = dimensions.width;
 		var height = dimensions.height;
@@ -376,14 +376,14 @@ Holder.js - client side image placeholders
 	 * @private
 	 * @param mode Placeholder mode, either background or image
 	 * @param el Image DOM element
-	 * @param holder Placeholder-specific configuration
+	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
 	 * @param instanceConfig Instance configuration
 	 */
-	function render(mode, el, holder, src, instanceConfig) {
-		var dimensions = holder.dimensions,
-			theme = holder.theme,
-			text = holder.text ? decodeURIComponent(holder.text) : holder.text;
+	function render(mode, el, flags, src, instanceConfig) {
+		var dimensions = flags.dimensions,
+			theme = flags.theme,
+			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 
 		var extensions = {};
@@ -391,8 +391,8 @@ Holder.js - client side image placeholders
 		if(text){
 			extensions.text = text;
 		}
-		if(holder.font){
-			extensions.font = holder.font;
+		if(flags.font){
+			extensions.font = flags.font;
 		}
 
 		theme = extend(theme, extensions);
@@ -406,13 +406,18 @@ Holder.js - client side image placeholders
 			el.setAttribute('data-src', src);
 		}
 		
-		holder.theme = theme;
-		el.holderData = holder;
-		el.configData = instanceConfig;
+		flags.theme = theme;
+		el.holderData = {
+			flags: flags,
+			instanceConfig: instanceConfig
+		};
 
-		if (mode == 'image') {
+		if(mode == 'image' || mode == 'fluid'){
 			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
-			if (instanceConfig.renderer == 'html' || !holder.auto) {
+		}
+		
+		if (mode == 'image') {
+			if (instanceConfig.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
 				el.style.height = dimensions.height + 'px';
 			}
@@ -421,12 +426,12 @@ Holder.js - client side image placeholders
 			} else {
 				modifyElement(mode, {
 					dimensions: dimensions,
-					template: theme,
+					theme: theme,
 					ratio: app.config.ratio,
-					holder: holder
+					flags: flags
 				}, el, instanceConfig);
 
-				if (holder.textmode && holder.textmode == 'exact') {
+				if (flags.textmode && flags.textmode == 'exact') {
 					app.runtime.resizableImages.push(el);
 					updateResizableElements(el);
 				}
@@ -435,29 +440,28 @@ Holder.js - client side image placeholders
 			if (instanceConfig.renderer != 'html') {
 				modifyElement(mode, {
 						dimensions: dimensions,
-						template: theme,
+						theme: theme,
 						ratio: app.config.ratio,
-						holder: holder
+						flags: flags
 					},
 					el, instanceConfig);
 			}
 		} else if (mode == 'fluid') {
-			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
 			if (dimensions.height.slice(-1) == '%') {
-				el.style.height = dimensions.height
-			} else if (holder.auto == null || !holder.auto) {
-				el.style.height = dimensions.height + 'px'
+				el.style.height = dimensions.height;
+			} else if (flags.auto == null || !flags.auto) {
+				el.style.height = dimensions.height + 'px';
 			}
 			if (dimensions.width.slice(-1) == '%') {
-				el.style.width = dimensions.width
-			} else if (holder.auto == null || !holder.auto) {
-				el.style.width = dimensions.width + 'px'
+				el.style.width = dimensions.width;
+			} else if (flags.auto == null || !flags.auto) {
+				el.style.width = dimensions.width + 'px';
 			}
 			if (el.style.display == 'inline' || el.style.display === '' || el.style.display == 'none') {
 				el.style.display = 'block';
 			}
 
-			setInitialDimensions(el)
+			setInitialDimensions(el);
 
 			if (instanceConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
@@ -487,17 +491,17 @@ Holder.js - client side image placeholders
 			}
 			var el = images[i];
 			if (el.holderData) {
-				var holder = el.holderData;
+				var flags = el.holderData.flags;
 				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements))
 				if (dimensions) {
-					if (holder.fluid) {
-						if (holder.auto) {
-							switch (holder.fluid_data.mode) {
+					if (flags.fluid) {
+						if (flags.auto) {
+							switch (flags.fluid_data.mode) {
 							case 'width':
-								dimensions.height = dimensions.width / holder.fluid_data.ratio;
+								dimensions.height = dimensions.width / flags.fluid_data.ratio;
 								break;
 							case 'height':
-								dimensions.width = dimensions.height * holder.fluid_data.ratio;
+								dimensions.width = dimensions.height * flags.fluid_data.ratio;
 								break;
 							}
 						}
@@ -505,17 +509,17 @@ Holder.js - client side image placeholders
 
 					var drawParams = {
 						dimensions: dimensions,
-						template: holder.theme,
+						theme: flags.theme,
 						ratio: app.config.ratio,
-						holder: holder
+						flags: flags
 					};
 
-					if (holder.textmode && holder.textmode == 'exact') {
-						holder.exact_dimensions = dimensions;
-						drawParams.dimensions = holder.dimensions;
+					if (flags.textmode && flags.textmode == 'exact') {
+						flags.exact_dimensions = dimensions;
+						drawParams.dimensions = flags.dimensions;
 					}
 
-					modifyElement('image', drawParams, el, el.configData);
+					modifyElement('image', drawParams, el, el.holderData.instanceConfig);
 				}
 			}
 		}
@@ -552,7 +556,7 @@ Holder.js - client side image placeholders
 		if (el.holderData) {
 			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions))
 			if (dimensions) {
-				var holder = el.holderData;
+				var holder = el.holderData.flags;
 				holder.initial_dimensions = dimensions;
 				holder.fluid_data = {
 					fluid_height: holder.dimensions.height.slice(-1) == '%',
