@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "moment": "^2.6.0",
-    "gulp": "^3.6.2",
+    "gulp": "*",
     "gulp-uglify": "^0.3.0",
     "gulp-concat": "^2.2.0",
     "gulp-header": "^1.0.2",

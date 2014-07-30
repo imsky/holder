@@ -39,9 +39,17 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/200x150" src="image.jpg">
+	<script>
+	var r = Math.random();
+	if(r > 0.5){
+	document.write('<img data-src="holder.js/200x150" src="missing.jpg" style="width:200px;height:150px;outline:solid 3px red">');
+	}
+	else{
+	document.write('<img data-src="holder.js/200x150" src="image.jpg" style="width:200px;height:150px;outline:solid 3px green">');
+	}
+	</script>
 	<div class="caption">
-		Placeholder with missing image source
+		Placeholder with (randomly) missing image source
 	</div>
 </div>
 <div class="thumb">
@@ -67,10 +75,16 @@
 	</div>
 </div>
 <div class="thumb">
-	<div class="holderjs" style="background:url(?holder.js/200x100/#ff0000:#ffffff);width:200px;height:100px">
+	<div class="holderjs" style="background:url(?holder.js/200x150/#111155:#aabbcc/text:Background%20placeholder);width:200px;height:150px">
 	</div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with background placeholder
+	</div>
+</div>
+<div class="thumb">
+	<div class="holderjs" style="width:100px;height:100px" data-background-src="holder.js/100x100/#f0f0f0:#ff0000"></div>
+	<div class="caption">
+		<code>&lt;div&gt;</code> with <code>data-background-src</code> placeholder
 	</div>
 </div>
 <div class="thumb">
@@ -130,7 +144,7 @@
 <div class="thumb">
 	<img data-src="holder.js/300x200">
 	<div class="caption">
-		 Plain placeholder
+		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
 </div>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>

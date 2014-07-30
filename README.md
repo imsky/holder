@@ -5,7 +5,7 @@ Holder
 
 Holder renders image placeholders on the client side using SVG.
 
-Used by [Bootstrap](http://getbootstrap.com) and [many other sites](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop).
+Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many other sites](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop).
 
 Installing
 ----------

@@ -18,7 +18,7 @@ Holder.js - client side image placeholders
 			name != null && theme != null && (app.settings.themes[name] = theme);
 			return this;
 		},
-		
+
 		/**
 		 * Appends a placeholder to an element
 		 * 
@@ -36,7 +36,7 @@ Holder.js - client side image placeholders
 			}
 			return this;
 		},
-		
+
 		/**
 		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
 		 * 
@@ -78,21 +78,26 @@ Holder.js - client side image placeholders
 			}
 			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
-			var cssregex = new RegExp(options.domain + '\/(.*?)"?\\)');
+			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
+			
 			for (var l = bgnodes.length, i = 0; i < l; i++) {
-				var src = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
-				var flags = src.match(cssregex);
-				var bgsrc = bgnodes[i].getAttribute('data-background-src');
-				if (flags) {
-					var holder = parseFlags(flags[1].split('/'), options);
-					if (holder) {
-						render('background', bgnodes[i], holder, src, instanceConfig);
+				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
+				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
+				var holderURL = null;
+				if(backgroundImageMatch == null){
+					var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
+					if(dataBackgroundImage != null){
+						holderURL = dataBackgroundImage;
 					}
-				} else if (bgsrc != null) {
-					var holder = parseFlags(bgsrc.substr(bgsrc.lastIndexOf(options.domain) + options.domain.length + 1)
-						.split('/'), options);
-					if (holder) {
-						render('background', bgnodes[i], holder, src, instanceConfig);
+				}
+				else{
+					holderURL = options.domain + "/" + backgroundImageMatch[1];
+				}
+
+				if(holderURL != null){
+					var holderFlags = parseFlags(holderURL.split('/'), options);
+					if(holderFlags){
+						render('background', bgnodes[i], holderFlags, holderURL, instanceConfig);
 					}
 				}
 			}
@@ -193,7 +198,7 @@ Holder.js - client side image placeholders
 				ret.textmode = app.flags.textmode.output(flag)
 			} else if (app.flags.colors.match(flag)) {
 				var colors = app.flags.colors.output(flag)
-				ret.theme = extend(colors, ret.theme);
+				ret.theme = extend(ret.theme, colors);
 			} else if (options.themes[flag]) {
 				//If a theme is specified, it will override custom colors
 				if (options.themes.hasOwnProperty(flag)) {
@@ -241,7 +246,7 @@ Holder.js - client side image placeholders
 
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
-			ctx.font = props.font_weight + ' ' + (props.text_height * app.config.ratio) + 'px ' + props.font;
+			ctx.font = props.fontWeight + ' ' + (props.textHeight * app.config.ratio) + 'px ' + props.font;
 			ctx.fillStyle = props.template.foreground;
 			ctx.fillText(props.text, (props.width / 2), (props.height / 2), props.width);
 
@@ -279,7 +284,7 @@ Holder.js - client side image placeholders
 		svg.appendChild(text_el)
 
 		return function (props) {
-			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.text_height)) {
+			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
 				throw 'Holder: incorrect properties passed to SVG constructor';
 			}
 			svg.setAttribute('width', props.width);
@@ -294,11 +299,11 @@ Holder.js - client side image placeholders
 			textnode_el.nodeValue = props.text
 			text_el.setAttribute('style', cssProps({
 				"fill": props.template.foreground,
-				"font-weight": props.font_weight,
-				"font-size": props.text_height + "px",
+				"font-weight": props.fontWeight,
+				"font-size": props.textHeight + "px",
 				"font-family": props.font,
 				"dominant-baseline": "central"
-			}))
+			}));
 
 			return svg_css + serializer.serializeToString(svg)
 		}
@@ -322,10 +327,10 @@ Holder.js - client side image placeholders
 
 		var width = dimensions.width;
 		var height = dimensions.height;
-		var text_height = textSize(width, height, template.size);
+		var textHeight = textSize(width, height, template.size);
 
 		var font = template.font ? template.font : 'Arial, Helvetica, sans-serif';
-		var font_weight = template.fontweight ? template.fontweight : 'bold';
+		var fontWeight = template.fontweight ? template.fontweight : 'bold';
 		var dimensions_caption = Math.floor(width) + 'x' + Math.floor(height);
 		var text = template.text ? template.text : dimensions_caption;
 
@@ -341,9 +346,9 @@ Holder.js - client side image placeholders
 			text: text,
 			width: width,
 			height: height,
-			text_height: text_height,
+			textHeight: textHeight,
 			font: font,
-			font_weight: font_weight,
+			fontWeight: fontWeight,
 			template: template
 		}
 
@@ -387,7 +392,16 @@ Holder.js - client side image placeholders
 		theme = (holder.font ? extend(theme, {
 			font: holder.font
 		}) : theme);
-		el.setAttribute('data-src', src);
+
+		if(mode == 'background'){
+			if(el.getAttribute('data-background-src') == null){
+				el.setAttribute('data-background-src', src);
+			}
+		}
+		else{
+			el.setAttribute('data-src', src);
+		}
+		
 		holder.theme = theme;
 		el.holderData = holder;
 		el.configData = instanceConfig;
