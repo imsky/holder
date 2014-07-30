@@ -163,22 +163,20 @@ Holder.js - client side image placeholders
 				this.name = null;
 				this.translate = {x:0, y:0};
 				this.scale = {x:0, y:0};
-				this.properties = {width:0, height:0};
 			}
 		});
 
 		var RootNode = augment(SceneNode, function(_super){
 			this.constructor = function(width, height){
 				_super.constructor.call(this);
-				this.properties.width = properties.width;
-				this.properties.height = properties.height;
+				this.properties = {width:properties.width, height:properties.height};
 			}
 		});
 
 		var SceneShape = augment(SceneNode, function(_super){
 			this.constructor = function(){
 				_super.constructor.call(this);
-				this.properties.fill = '#000';
+				this.properties = {width:0, height:0, fill:'#000'};
 			}
 		});
 		
@@ -243,101 +241,7 @@ Holder.js - client side image placeholders
 		}
 		return render ? ret : false;
 	}
-
-	/**
-	 * Adaptive text sizing function
-	 * 
-	 * @private
-	 * @param width Parent width
-	 * @param height Parent height
-	 * @param fontSize Requested text size
-	 */
-	function textSize(width, height, fontSize) {
-		height = parseInt(height, 10);
-		width = parseInt(width, 10);
-		var bigSide = Math.max(height, width)
-		var smallSide = Math.min(height, width)
-		var scale = 1 / 12;
-		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-		return Math.round(Math.max(fontSize, newHeight))
-	}
-
-	var canvasRenderer = (function () {
-		var canvas = document.createElement('canvas');
-		var ctx = canvas.getContext('2d');
-
-		return function (props) {
-			canvas.width = props.width;
-			canvas.height = props.height;
-
-			ctx.fillStyle = props.template.background;
-			ctx.fillRect(0, 0, props.width, props.height);
-
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.font = props.fontWeight + ' ' + (props.textHeight * app.config.ratio) + 'px ' + props.font;
-			ctx.fillStyle = props.template.foreground;
-			ctx.fillText(props.text, (props.width / 2), (props.height / 2), props.width);
-
-			return canvas.toDataURL('image/png');
-		}
-	})();
-
-	var svgRenderer = (function () {
-		//Prevent IE <9 from initializing SVG renderer
-		if (!global.XMLSerializer) return;
-		var serializer = new XMLSerializer();
-		var svg_ns = 'http://www.w3.org/2000/svg'
-		var svg = document.createElementNS(svg_ns, 'svg');
-		//IE throws an exception if this is set and Chrome requires it to be set
-		if (svg.webkitMatchesSelector) {
-			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-		}
-
-		/* todo: needs to be generalized
-		var xml = new DOMParser().parseFromString('<xml />', "application/xml")
-		var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
-		xml.insertBefore(css, xml.firstChild);
-		xml.removeChild(xml.documentElement)
-		var svg_css = serializer.serializeToString(xml);
-		*/
-
-		var svg_css = '';
-
-		var bg_el = document.createElementNS(svg_ns, 'rect')
-		var text_el = document.createElementNS(svg_ns, 'text')
-		var textnode_el = document.createTextNode(null)
-		text_el.setAttribute('text-anchor', 'middle')
-		text_el.appendChild(textnode_el)
-		svg.appendChild(bg_el)
-		svg.appendChild(text_el)
-
-		return function (props) {
-			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
-				throw 'Holder: incorrect properties passed to SVG constructor';
-			}
-			svg.setAttribute('width', props.width);
-			svg.setAttribute('height', props.height);
-			svg.setAttribute('viewBox', '0 0 ' + props.width + ' ' + props.height)
-			svg.setAttribute('preserveAspectRatio', 'none')
-			bg_el.setAttribute('width', props.width);
-			bg_el.setAttribute('height', props.height);
-			bg_el.setAttribute('fill', props.template.background);
-			text_el.setAttribute('x', props.width / 2)
-			text_el.setAttribute('y', props.height / 2)
-			textnode_el.nodeValue = props.text
-			text_el.setAttribute('style', cssProps({
-				"fill": props.template.foreground,
-				"font-weight": props.fontWeight,
-				"font-size": props.textHeight + "px",
-				"font-family": props.font,
-				"dominant-baseline": "central"
-			}));
-
-			return svg_css + serializer.serializeToString(svg)
-		}
-	})();
-
+	
 	/**
 	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
 	 * 
@@ -525,13 +429,14 @@ Holder.js - client side image placeholders
 				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements))
 				if (dimensions) {
 					if (flags.fluid) {
+						var fluidConfig = el.holderData.fluidConfig;
 						if (flags.auto) {
-							switch (flags.fluid_data.mode) {
+							switch (fluidConfig.mode) {
 							case 'width':
-								dimensions.height = dimensions.width / flags.fluid_data.ratio;
+								dimensions.height = dimensions.width / fluidConfig.ratio;
 								break;
 							case 'height':
-								dimensions.width = dimensions.height * flags.fluid_data.ratio;
+								dimensions.width = dimensions.height * fluidConfig.ratio;
 								break;
 							}
 						}
@@ -586,23 +491,132 @@ Holder.js - client side image placeholders
 		if (el.holderData) {
 			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions))
 			if (dimensions) {
-				var holder = el.holderData.flags;
-				holder.initial_dimensions = dimensions;
-				holder.fluid_data = {
-					fluid_height: holder.dimensions.height.slice(-1) == '%',
-					fluid_width: holder.dimensions.width.slice(-1) == '%',
-					mode: null
+				var flags = el.holderData.flags;
+
+				var fluidConfig = {
+					fluidHeight: flags.dimensions.height.slice(-1) == '%',
+					fluidWidth: flags.dimensions.width.slice(-1) == '%',
+					mode: null,
+					initialDimensions: dimensions
 				}
-				if (holder.fluid_data.fluid_width && !holder.fluid_data.fluid_height) {
-					holder.fluid_data.mode = 'width'
-					holder.fluid_data.ratio = holder.initial_dimensions.width / parseFloat(holder.dimensions.height)
-				} else if (!holder.fluid_data.fluid_width && holder.fluid_data.fluid_height) {
-					holder.fluid_data.mode = 'height';
-					holder.fluid_data.ratio = parseFloat(holder.dimensions.width) / holder.initial_dimensions.height
+				
+				if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
+					fluidConfig.mode = 'width'
+					fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height)
+				} else if (!fluidConfig.fluidWidth && fluidConfig.fluidHeight) {
+					fluidConfig.mode = 'height';
+					fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height
 				}
+				
+				el.holderData.fluidConfig = fluidConfig;
 			}
 		}
 	}
+
+	/**
+	 * Adaptive text sizing function
+	 * 
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
+	function textSize(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width)
+		var smallSide = Math.min(height, width)
+		var scale = 1 / 12;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return Math.round(Math.max(fontSize, newHeight))
+	}
+
+	var stagingRenderer = (function(){
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+		var svg_ns = 'http://www.w3.org/2000/svg'
+		var svg = document.createElementNS(svg_ns, 'svg');
+
+		return function (graph){
+			//return how wide the main text group is, along with space length
+		}
+	})();
+
+	var canvasRenderer = (function () {
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+
+		return function (props) {
+			canvas.width = props.width;
+			canvas.height = props.height;
+
+			ctx.fillStyle = props.template.background;
+			ctx.fillRect(0, 0, props.width, props.height);
+
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle';
+			ctx.font = props.fontWeight + ' ' + (props.textHeight * app.config.ratio) + 'px ' + props.font;
+			ctx.fillStyle = props.template.foreground;
+			ctx.fillText(props.text, (props.width / 2), (props.height / 2), props.width);
+
+			return canvas.toDataURL('image/png');
+		}
+	})();
+
+	var svgRenderer = (function () {
+		//Prevent IE <9 from initializing SVG renderer
+		if (!global.XMLSerializer) return;
+		var serializer = new XMLSerializer();
+		var svg_ns = 'http://www.w3.org/2000/svg'
+		var svg = document.createElementNS(svg_ns, 'svg');
+		//IE throws an exception if this is set and Chrome requires it to be set
+		if (svg.webkitMatchesSelector) {
+			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+		}
+
+		/* todo: needs to be generalized
+		var xml = new DOMParser().parseFromString('<xml />', "application/xml")
+		var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
+		xml.insertBefore(css, xml.firstChild);
+		xml.removeChild(xml.documentElement)
+		var svg_css = serializer.serializeToString(xml);
+		*/
+
+		var svg_css = '';
+
+		var bg_el = document.createElementNS(svg_ns, 'rect')
+		var text_el = document.createElementNS(svg_ns, 'text')
+		var textnode_el = document.createTextNode(null)
+		text_el.setAttribute('text-anchor', 'middle')
+		text_el.appendChild(textnode_el)
+		svg.appendChild(bg_el)
+		svg.appendChild(text_el)
+
+		return function (props) {
+			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
+				throw 'Holder: incorrect properties passed to SVG constructor';
+			}
+			svg.setAttribute('width', props.width);
+			svg.setAttribute('height', props.height);
+			svg.setAttribute('viewBox', '0 0 ' + props.width + ' ' + props.height)
+			svg.setAttribute('preserveAspectRatio', 'none')
+			bg_el.setAttribute('width', props.width);
+			bg_el.setAttribute('height', props.height);
+			bg_el.setAttribute('fill', props.template.background);
+			text_el.setAttribute('x', props.width / 2)
+			text_el.setAttribute('y', props.height / 2)
+			textnode_el.nodeValue = props.text
+			text_el.setAttribute('style', cssProps({
+				"fill": props.template.foreground,
+				"font-weight": props.fontWeight,
+				"font-size": props.textHeight + "px",
+				"font-family": props.font,
+				"dominant-baseline": "central"
+			}));
+
+			return svg_css + serializer.serializeToString(svg)
+		}
+	})();
 
 	//Configuration
 
