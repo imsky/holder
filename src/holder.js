@@ -697,7 +697,6 @@ Holder.js - client side image placeholders
 					svg.style.zIndex = "-9999";
 					svg.setAttribute('width', 0);
 					svg.setAttribute('height', 0);
-					window.STAGING = svg;
 				}
 				
 				var sceneText = rootNode.children.sceneText;
@@ -713,13 +712,12 @@ Holder.js - client side image placeholders
 				var bbox = text_el.getBBox();
 				
 				var wordCount = sceneText.properties.text.split(" ").length;
-				var spaceCount = wordCount - 1;
-				
+
 				textnode_el.nodeValue = sceneText.properties.text.replace(/[ ]+/g, '');
 				var computedNoSpaceLength = text_el.getComputedTextLength();
 
 				var diffLength = bbox.width - computedNoSpaceLength;
-				var spaceWidth = Math.round(diffLength / spaceCount);
+				var spaceWidth = Math.round(diffLength / wordCount);
 
 				var lineCount = Math.ceil(bbox.width / rootNode.properties.width);
 
