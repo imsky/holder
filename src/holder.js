@@ -95,7 +95,7 @@ Holder.js - client side image placeholders
 				}
 
 				if(holderURL != null){
-					var holderFlags = parseFlags(holderURL.split('/'), options);
+					var holderFlags = parseURL(holderURL, options);
 					if(holderFlags){
 						render('background', bgnodes[i], holderFlags, holderURL, instanceConfig);
 					}
@@ -267,7 +267,7 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 */
 	function processImageElement(options, instanceConfig, src, el) {
-		var holderFlags = parseFlags(src.substr(src.lastIndexOf(options.domain) + options.domain.length + 1).split('/'), options);
+		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 
 		if (holderFlags) {
 			render(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, instanceConfig);
@@ -275,17 +275,18 @@ Holder.js - client side image placeholders
 	}
 
 	/**
-	 * Processes an array of flags
+	 * Processes a Holder URL and extracts flags
 	 *
 	 * @private
-	 * @param flags Flag array
+	 * @param url URL
 	 * @param options Instance options from Holder.run
 	 */
-	function parseFlags(flags, options) {
+	function parseURL(url, options) {
 		var ret = {
 			theme: extend(app.settings.themes.gray, {})
 		};
 		var render = false;
+		var flags = url.split('/');
 		for (var fl = flags.length, j = 0; j < fl; j++) {
 			var flag = flags[j];
 			if (app.flags.dimensions.match(flag)) {
