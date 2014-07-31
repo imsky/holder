@@ -16,6 +16,7 @@ Holder.js - client side image placeholders
 		 */
 		addTheme: function (name, theme) {
 			name != null && theme != null && (app.settings.themes[name] = theme);
+			delete app.cache.themeKeys;
 			return this;
 		},
 
@@ -186,7 +187,7 @@ Holder.js - client side image placeholders
 	 */
 	function parseURL(url, options) {
 		var ret = {
-			theme: extend(app.settings.themes.gray, {})
+			theme: extend(app.settings.themes.gray, null)
 		};
 		var render = false;
 		var flags = url.split('/');
@@ -204,10 +205,11 @@ Holder.js - client side image placeholders
 			} else if (app.flags.colors.match(flag)) {
 				var colors = app.flags.colors.output(flag)
 				ret.theme = extend(ret.theme, colors);
+			//todo: convert implicit theme use to a theme: flag
 			} else if (options.themes[flag]) {
 				//If a theme is specified, it will override custom colors
 				if (options.themes.hasOwnProperty(flag)) {
-					ret.theme = extend(options.themes[flag], {});
+					ret.theme = extend(options.themes[flag], null);
 				}
 			} else if (app.flags.font.match(flag)) {
 				ret.font = app.flags.font.output(flag);
@@ -215,6 +217,12 @@ Holder.js - client side image placeholders
 				ret.auto = true;
 			} else if (app.flags.text.match(flag)) {
 				ret.text = app.flags.text.output(flag);
+			} else if (app.flags.random.match(flag)) {
+				if(app.cache.themeKeys == null){
+					app.cache.themeKeys = Object.keys(options.themes);
+				}
+				var theme = app.cache.themeKeys[0|Math.random()*app.cache.themeKeys.length];
+				ret.theme = extend(options.themes[theme], null);
 			}
 		}
 		return render ? ret : false;
@@ -748,6 +756,10 @@ Holder.js - client side image placeholders
 			output: function (val) {
 				return this.regex.exec(val)[1];
 			}
+		},
+		//todo: document random flag
+		random: {
+			regex: /^random$/
 		}
 	}
 
@@ -812,9 +824,11 @@ Holder.js - client side image placeholders
 				c[i] = a[i];
 			}
 		}
-		for (var i in b) {
-			if (b.hasOwnProperty(i)) {
-				c[i] = b[i];
+		if(b != null){
+			for (var i in b) {
+				if (b.hasOwnProperty(i)) {
+					c[i] = b[i];
+				}
 			}
 		}
 		return c
@@ -997,6 +1011,8 @@ Holder.js - client side image placeholders
 		supportsCanvas: false,
 		supportsSVG: false
 	};
+
+	app.cache = {};
 
 	//Properties modified during runtime
 
