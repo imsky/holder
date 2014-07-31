@@ -879,7 +879,8 @@ Holder.js - client side image placeholders
 
 	var SceneGraph = function(sceneProperties) {
 		var nodeCount = 1;
-		
+
+		//todo: move merge to helpers section
 		function merge(parent, child){
 			for(var prop in child){
 				parent[prop] = child[prop];
