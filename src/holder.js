@@ -618,12 +618,12 @@ Holder.js - client side image placeholders
 				
 				var sceneText = rootNode.children.sceneText;
 				stagingText.setAttribute('y', sceneText.properties.size);
-				stagingText.style = cssProps({
+				stagingText.setAttribute('style', cssProps({
 					'font-weight': sceneText.properties.weight,
 					'font-size': sceneText.properties.size + 'px',
 					'font-family': sceneText.properties.font,
 					'dominant-baseline': 'middle'
-				});
+				}));
 
 				//Get bounding box for the whole string (total width and height)
 				stagingTextNode.nodeValue = sceneText.properties.text;
