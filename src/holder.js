@@ -540,6 +540,9 @@ Holder.js - client side image placeholders
 		return Math.round(Math.max(fontSize, newHeight))
 	}
 
+	//Constants
+
+	var SVG_NS = 'http://www.w3.org/2000/svg';
 
 	/**
 	 * Generic SVG element creation function
@@ -550,13 +553,12 @@ Holder.js - client side image placeholders
 	 * @param height Document height
 	 */
 	function initSVG(svg, width, height){
-		var svg_ns = 'http://www.w3.org/2000/svg';
 		if(svg == null){
-			svg = document.createElementNS(svg_ns, 'svg');
+			svg = document.createElementNS(SVG_NS, 'svg');
 		}
 		//IE throws an exception if this is set and Chrome requires it to be set
 		if (svg.webkitMatchesSelector) {
-			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+			svg.setAttribute('xmlns', SVG_NS)
 		}
 		svg.setAttribute('width', width);
 		svg.setAttribute('height', height);
@@ -588,14 +590,14 @@ Holder.js - client side image placeholders
 	}
 
 	var stagingRenderer = (function(){
-		//todo: hoist svg namespace to globally accessible object
-		var svg_ns = 'http://www.w3.org/2000/svg';
 		var svg = null;
-		var text_el = document.createElementNS(svg_ns, 'text');
-		var textnode_el = document.createTextNode(null);
-		text_el.setAttribute('x', 0);
-		text_el.setAttribute('y', 0);
-		text_el.appendChild(textnode_el);
+		var stagingText = document.createElementNS(SVG_NS, 'text');
+		var tnode = function(text){
+			return document.createTextNode(text);
+		}
+		var stagingTextNode = tnode(null);
+		stagingText.setAttribute('x', 0);
+		stagingText.appendChild(stagingTextNode);
 		return function (rootNode){
 			if(app.config.supportsSVG){
 				var firstTimeSetup = false;
@@ -604,45 +606,60 @@ Holder.js - client side image placeholders
 				}
 				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
 				if(firstTimeSetup){
-					svg.appendChild(text_el);
+					svg.appendChild(stagingText);
 					document.body.appendChild(svg);
 					svg.style.visibility = 'hidden';
 					svg.style.position = 'absolute';
 					svg.style.top = '0px';
 					svg.style.left = '0px';
-					svg.style.zIndex = '-9999';
 					svg.setAttribute('width', 0);
 					svg.setAttribute('height', 0);
 				}
 				
 				var sceneText = rootNode.children.sceneText;
-				text_el.setAttribute('y', sceneText.properties.size);
-				text_el.setAttribute('style', cssProps({
+				stagingText.setAttribute('y', sceneText.properties.size);
+				stagingText.style = cssProps({
 					'font-weight': sceneText.properties.weight,
 					'font-size': sceneText.properties.size + 'px',
 					'font-family': sceneText.properties.font,
 					'dominant-baseline': 'middle'
-				}));
-				
-				textnode_el.nodeValue = sceneText.properties.text;
-				var bbox = text_el.getBBox();
-				
-				var wordCount = sceneText.properties.text.split(' ').length;
+				});
 
-				textnode_el.nodeValue = sceneText.properties.text.replace(/[ ]+/g, '');
-				var computedNoSpaceLength = text_el.getComputedTextLength();
+				//Get bounding box for the whole string (total width and height)
+				stagingTextNode.nodeValue = sceneText.properties.text;
+				var stagingTextBBox = stagingText.getBBox();
 
-				var diffLength = bbox.width - computedNoSpaceLength;
-				var spaceWidth = Math.round(diffLength / Math.max(1, wordCount-1));
+				//Get line count and split the string into words
+				var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
+				var words = sceneText.properties.text.split(' ');
 
-				var lineCount = Math.ceil(bbox.width / rootNode.properties.width);
+				//Get bounding box for the string with spaces removed
+				stagingTextNode.nodeValue = sceneText.properties.text.replace(/[ ]+/g, '');
+				var computedNoSpaceLength = stagingText.getComputedTextLength();
 
-				//todo: generate array of word bounding boxes
+				//Compute average space width
+				var diffLength = stagingTextBBox.width - computedNoSpaceLength;
+				var spaceWidth = Math.round(diffLength / Math.max(1, words.length-1));
+
+				//Get widths for every word with space only if there is more than one line
+				var wordWidths = [];
+				if(lineCount > 1){
+					stagingTextNode.nodeValue = '';
+					for(var i = 0; i < words.length; i++){
+						stagingTextNode.nodeValue = words[i];
+						var bbox = stagingText.getBBox();
+						wordWidths.push({
+							text: words[i],
+							width: bbox.width
+						});
+					}
+				}
 
 				return {
 					spaceWidth: spaceWidth,
 					lineCount: lineCount,
-					boundingBox: bbox
+					boundingBox: stagingTextBBox,
+					words: wordWidths
 				};
 			}
 			else{
@@ -676,10 +693,9 @@ Holder.js - client side image placeholders
 		//Prevent IE <9 from initializing SVG renderer
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0,0);
-		var svg_ns = 'http://www.w3.org/2000/svg'
-		
-		var bg_el = document.createElementNS(svg_ns, 'rect')
-		var text_el = document.createElementNS(svg_ns, 'text')
+
+		var bg_el = document.createElementNS(SVG_NS, 'rect')
+		var text_el = document.createElementNS(SVG_NS, 'text')
 		var textnode_el = document.createTextNode(null)
 		text_el.setAttribute('text-anchor', 'middle')
 		text_el.appendChild(textnode_el)
@@ -1039,7 +1055,7 @@ Holder.js - client side image placeholders
 
 		app.config.ratio = devicePixelRatio / backingStoreRatio;
 
-		if (!!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect) {
+		if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
 			app.config.renderer = 'svg';
 			app.config.supportsSVG = true;
 		}
