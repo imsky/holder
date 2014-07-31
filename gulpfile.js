@@ -27,7 +27,7 @@ var paths = {
 }
 
 gulp.task('jshint', function () {
-	return gulp.src(paths.scripts)
+	return gulp.src(paths.scripts[paths.scripts.length - 1])
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'))
 });

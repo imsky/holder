@@ -16,7 +16,7 @@ Holder.js - client side image placeholders
 		 */
 		addTheme: function (name, theme) {
 			name != null && theme != null && (app.settings.themes[name] = theme);
-			delete app.cache.themeKeys;
+			delete app.runtime.cache.themeKeys;
 			return this;
 		},
 
@@ -78,22 +78,25 @@ Holder.js - client side image placeholders
 				bgnodes = [options.bgnodes];
 			}
 			
-			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
+			for (i = 0; i < imageNodes.length; i++){
+				images.push(imageNodes[i]);
+			}
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
 
-			for (var l = bgnodes.length, i = 0; i < l; i++) {
+			for (var i = 0; i < bgnodes.length; i++) {
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
 				var holderURL = null;
 				if(backgroundImageMatch == null){
+					//todo: document data-background-src
 					var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
 					if(dataBackgroundImage != null){
 						holderURL = dataBackgroundImage;
 					}
 				}
 				else{
-					holderURL = options.domain + "/" + backgroundImageMatch[1];
+					holderURL = options.domain + '/' + backgroundImageMatch[1];
 				}
 
 				if(holderURL != null){
@@ -104,8 +107,8 @@ Holder.js - client side image placeholders
 				}
 			}
 
-			for (l = images.length, i = 0; i < l; i++) {
-				var attr_datasrc, attr_src;
+			for (i = 0; i < images.length; i++) {
+				var attr_datasrc, attr_src, src;
 				attr_src = attr_datasrc = src = null;
 				var attr_rendered = null;
 
@@ -120,7 +123,7 @@ Holder.js - client side image placeholders
 				var hasSrc = attr_src != null;
 				var hasDataSrc = attr_datasrc != null;
 				var hasDataSrcURL = hasDataSrc && attr_datasrc.indexOf(options.domain) === 0;
-				var rendered = attr_rendered != null && attr_rendered == "true";
+				var rendered = attr_rendered != null && attr_rendered == 'true';
 
 				if (hasSrc) {
 					if (attr_src.indexOf(options.domain) === 0) {
@@ -218,10 +221,10 @@ Holder.js - client side image placeholders
 			} else if (app.flags.text.match(flag)) {
 				ret.text = app.flags.text.output(flag);
 			} else if (app.flags.random.match(flag)) {
-				if(app.cache.themeKeys == null){
-					app.cache.themeKeys = Object.keys(options.themes);
+				if(app.runtime.cache.themeKeys == null){
+					app.runtime.cache.themeKeys = Object.keys(options.themes);
 				}
-				var theme = app.cache.themeKeys[0|Math.random()*app.cache.themeKeys.length];
+				var theme = app.runtime.cache.themeKeys[0|Math.random()*app.runtime.cache.themeKeys.length];
 				ret.theme = extend(options.themes[theme], null);
 			}
 		}
@@ -254,10 +257,10 @@ Holder.js - client side image placeholders
 		var text = template.text ? template.text : dimensions_caption;
 
 		if (flags.textmode == 'literal') {
-			var dimensions = flags.dimensions;
+			dimensions = flags.dimensions;
 			text = dimensions.width + 'x' + dimensions.height;
 		} else if (flags.textmode == 'exact' && flags.exact_dimensions) {
-			var dimensions = flags.exact_dimensions;
+			dimensions = flags.exact_dimensions;
 			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
 		}
 
@@ -266,9 +269,9 @@ Holder.js - client side image placeholders
 			height: height
 		});
 
-		var sceneText = new sceneGraph.TextGroup("sceneText", {
+		var sceneText = new sceneGraph.TextGroup('sceneText', {
 			text: text,
-			align: "center",
+			align: 'center',
 			font: font,
 			size: textHeight,
 			//size: template.size,
@@ -603,11 +606,11 @@ Holder.js - client side image placeholders
 				if(firstTimeSetup){
 					svg.appendChild(text_el);
 					document.body.appendChild(svg);
-					svg.style.visibility = "hidden";
-					svg.style.position = "absolute";
-					svg.style.top = "0px";
-					svg.style.left = "0px";
-					svg.style.zIndex = "-9999";
+					svg.style.visibility = 'hidden';
+					svg.style.position = 'absolute';
+					svg.style.top = '0px';
+					svg.style.left = '0px';
+					svg.style.zIndex = '-9999';
 					svg.setAttribute('width', 0);
 					svg.setAttribute('height', 0);
 				}
@@ -615,24 +618,26 @@ Holder.js - client side image placeholders
 				var sceneText = rootNode.children.sceneText;
 				text_el.setAttribute('y', sceneText.properties.size);
 				text_el.setAttribute('style', cssProps({
-					"font-weight": sceneText.properties.weight,
-					"font-size": sceneText.properties.size + "px",
-					"font-family": sceneText.properties.font,
-					"dominant-baseline": "middle"
+					'font-weight': sceneText.properties.weight,
+					'font-size': sceneText.properties.size + 'px',
+					'font-family': sceneText.properties.font,
+					'dominant-baseline': 'middle'
 				}));
 				
 				textnode_el.nodeValue = sceneText.properties.text;
 				var bbox = text_el.getBBox();
 				
-				var wordCount = sceneText.properties.text.split(" ").length;
+				var wordCount = sceneText.properties.text.split(' ').length;
 
 				textnode_el.nodeValue = sceneText.properties.text.replace(/[ ]+/g, '');
 				var computedNoSpaceLength = text_el.getComputedTextLength();
 
 				var diffLength = bbox.width - computedNoSpaceLength;
-				var spaceWidth = Math.round(diffLength / wordCount);
+				var spaceWidth = Math.round(diffLength / Math.max(1, wordCount-1));
 
 				var lineCount = Math.ceil(bbox.width / rootNode.properties.width);
+
+				//todo: generate array of word bounding boxes
 
 				return {
 					spaceWidth: spaceWidth,
@@ -693,11 +698,11 @@ Holder.js - client side image placeholders
 			text_el.setAttribute('y', props.height / 2)
 			textnode_el.nodeValue = props.text
 			text_el.setAttribute('style', cssProps({
-				"fill": props.template.foreground,
-				"font-weight": props.fontWeight,
-				"font-size": props.textHeight + "px",
-				"font-family": props.font,
-				"dominant-baseline": "central"
+				'fill': props.template.foreground,
+				'font-weight': props.fontWeight,
+				'font-size': props.textHeight + 'px',
+				'font-family': props.font,
+				'dominant-baseline': 'central'
 			}));
 			return serializeSVG(svg, null);
 		}
@@ -771,38 +776,38 @@ Holder.js - client side image placeholders
 	}
 
 	app.settings = {
-		domain: "holder.js",
-		images: "img",
-		bgnodes: ".holderjs",
+		domain: 'holder.js',
+		images: 'img',
+		bgnodes: '.holderjs',
 		themes: {
-			"gray": {
-				background: "#eee",
-				foreground: "#aaa",
+			'gray': {
+				background: '#eee',
+				foreground: '#aaa',
 				size: 12
 			},
-			"social": {
-				background: "#3a5a97",
-				foreground: "#fff",
+			'social': {
+				background: '#3a5a97',
+				foreground: '#fff',
 				size: 12
 			},
-			"industrial": {
-				background: "#434A52",
-				foreground: "#C2F200",
+			'industrial': {
+				background: '#434A52',
+				foreground: '#C2F200',
 				size: 12
 			},
-			"sky": {
-				background: "#0D8FDB",
-				foreground: "#fff",
+			'sky': {
+				background: '#0D8FDB',
+				foreground: '#fff',
 				size: 12
 			},
-			"vine": {
-				background: "#39DBAC",
-				foreground: "#1E292C",
+			'vine': {
+				background: '#39DBAC',
+				foreground: '#1E292C',
 				size: 12
 			},
-			"lava": {
-				background: "#F8591A",
-				foreground: "#1C2846",
+			'lava': {
+				background: '#F8591A',
+				foreground: '#1C2846',
 				size: 12
 			}
 		}
@@ -819,15 +824,15 @@ Holder.js - client side image placeholders
 	 */
 	function extend(a, b) {
 		var c = {};
-		for (var i in a) {
-			if (a.hasOwnProperty(i)) {
-				c[i] = a[i];
+		for (var x in a) {
+			if (a.hasOwnProperty(x)) {
+				c[x] = a[x];
 			}
 		}
 		if(b != null){
-			for (var i in b) {
-				if (b.hasOwnProperty(i)) {
-					c[i] = b[i];
+			for (var y in b) {
+				if (b.hasOwnProperty(y)) {
+					c[y] = b[y];
 				}
 			}
 		}
@@ -907,7 +912,7 @@ Holder.js - client side image placeholders
 				nodeCount++;
 				this.parent = null;
 				this.children = {};
-				this.name = "node" + nodeCount;
+				this.name = 'node' + nodeCount;
 				if(name != null){
 					this.name = name;
 				}
@@ -921,12 +926,12 @@ Holder.js - client side image placeholders
 					child.parent = this;
 				}
 				else{
-					throw "SceneGraph: child with that name already exists: "+name;
+					throw 'SceneGraph: child with that name already exists: '+name;
 				}
 			},
 			remove: function(name){
 				if(this.children[name] == null){
-					throw "SceneGraph: child with that name doesn't exist: "+name;
+					throw 'SceneGraph: child with that name doesn\'t exist: '+name;
 				}
 				else{
 					child.parent = null;
@@ -955,8 +960,8 @@ Holder.js - client side image placeholders
 				if(properties != null){
 					merge(this.properties, properties);
 				}
-				else if(typeof name !== "string"){
-					throw "SceneGraph: non-string assigned to node name";
+				else if(typeof name !== 'string'){
+					throw 'SceneGraph: non-string assigned to node name';
 				}
 			}
 		});
@@ -964,17 +969,6 @@ Holder.js - client side image placeholders
 		var TextGroup = augment(SceneShape, function(_super){
 			this.constructor = function(name, properties){
 				_super.constructor.call(this, name, properties);
-			},
-			this.textAsWords = function(){
-				this.removeAll();
-				var words = this.properties.text.split(" ");
-				for(var i = 0; i < words.length; i++){
-					this.add(new TextNode(words[i]));
-				}
-			}
-			this.textAsSentence = function(){
-				this.removeAll();
-				this.add(new TextNode(this.properties.text));
 			}
 		});
 
@@ -1012,14 +1006,13 @@ Holder.js - client side image placeholders
 		supportsSVG: false
 	};
 
-	app.cache = {};
-
 	//Properties modified during runtime
 
 	app.runtime = {
 		preempted: false,
 		resizableImages: [],
-		debounceTimer: null
+		debounceTimer: null,
+		cache: {}
 	};
 
 	//Pre-flight
