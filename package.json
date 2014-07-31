@@ -35,6 +35,7 @@
     "gulp-uglify": "^0.3.0",
     "gulp-concat": "^2.2.0",
     "gulp-header": "^1.0.2",
-    "gulp-jshint": "^1.6.1"
+    "gulp-jshint": "^1.6.1",
+    "gulp-todo": "^0.3.8"
   }
 }

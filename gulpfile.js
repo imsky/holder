@@ -3,6 +3,7 @@ var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var header = require('gulp-header');
 var jshint = require('gulp-jshint');
+var todo = require('gulp-todo');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -29,7 +30,13 @@ gulp.task('jshint', function () {
 	return gulp.src(paths.scripts)
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'))
-})
+});
+
+gulp.task('todo', function(){
+	return gulp.src(paths.scripts)
+		.pipe(todo())
+		.pipe(gulp.dest('./'))
+});
 
 gulp.task('scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts)
@@ -41,6 +48,6 @@ gulp.task('scripts', ['jshint'], function () {
 			build: build
 		}))
 		.pipe(gulp.dest("./"))
-})
+});
 
-gulp.task('default', ['jshint', 'scripts']);
+gulp.task('default', ['todo', 'jshint', 'scripts']);

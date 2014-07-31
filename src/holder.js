@@ -76,6 +76,7 @@ Holder.js - client side image placeholders
 			} else if (global.Node && options.bgnodes instanceof global.Node) {
 				bgnodes = [options.bgnodes];
 			}
+			
 			for (i = 0, l = imageNodes.length; i < l; i++) images.push(imageNodes[i]);
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
@@ -127,6 +128,7 @@ Holder.js - client side image placeholders
 						if (rendered) {
 							processImageElement(options, instanceConfig, attr_datasrc, image);
 						} else {
+							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
 								src: attr_src,
 								options: options,
@@ -146,114 +148,15 @@ Holder.js - client side image placeholders
 			}
 			return this;
 		},
+		
+		//todo: document invisibleErrorFn for 2.4
+		//todo: remove invisibleErrorFn for 2.5
 		invisibleErrorFn: function (fn) {
 			return function (el) {
 				if (el.hasAttribute('data-holder-invisible')) {
 					throw 'Holder: invisible placeholder';
 				}
 			}
-		}
-	}
-
-	var SceneGraph = function(sceneProperties) {
-		var nodeCount = 1;
-		
-		function merge(parent, child){
-			for(var prop in child){
-				parent[prop] = child[prop];
-			}
-			return parent;
-		}
-		
-		var SceneNode = augment.defclass({
-			constructor: function(name){
-				nodeCount++;
-				this.parent = null;
-				this.children = {};
-				this.name = "node" + nodeCount;
-				if(name != null){
-					this.name = name;
-				}
-				this.translate = {x:0, y:0};
-				this.scale = {x:0, y:0};
-			},
-			add: function(child){
-				var name = child.name;
-				if(this.children[name] == null){
-					this.children[name] = child;
-					child.parent = this;
-				}
-				else{
-					throw "SceneGraph: child with that name already exists: "+name;
-				}
-			},
-			remove: function(name){
-				if(this.children[name] == null){
-					throw "SceneGraph: child with that name doesn't exist: "+name;
-				}
-				else{
-					child.parent = null;
-					delete this.children[name];
-				}
-			},
-			removeAll: function(){
-				for(var child in this.children){
-					this.children[child].parent = null;
-					delete this.children[child];
-				}
-			}
-		});
-
-		var RootNode = augment(SceneNode, function(_super){
-			this.constructor = function(){
-				_super.constructor.call(this);
-				this.properties = sceneProperties;
-			}
-		});
-
-		var SceneShape = augment(SceneNode, function(_super){
-			this.constructor = function(name, properties){
-				_super.constructor.call(this, name);
-				this.properties = {width:0, height:0, fill:'#000'};
-				if(properties != null){
-					merge(this.properties, properties);
-				}
-				else if(typeof name !== "string"){
-					throw "SceneGraph: non-string assigned to node name";
-				}
-			}
-		});
-
-		var TextGroup = augment(SceneShape, function(_super){
-			this.constructor = function(name, properties){
-				_super.constructor.call(this, name, properties);
-			},
-			this.textAsWords = function(){
-				this.removeAll();
-				var words = this.properties.text.split(" ");
-				for(var i = 0; i < words.length; i++){
-					this.add(new TextNode(words[i]));
-				}
-			}
-			this.textAsSentence = function(){
-				this.removeAll();
-				this.add(new TextNode(this.properties.text));
-			}
-		});
-
-		var TextNode = augment(SceneShape, function(_super){
-			this.constructor = function(text){
-				_super.constructor.call(this);
-				this.properties.text = text;
-			}
-		});
-
-		var root = new RootNode();
-
-		return {
-			SceneShape: SceneShape,
-			TextGroup: TextGroup,
-			root: root
 		}
 	}
 
@@ -661,7 +564,7 @@ Holder.js - client side image placeholders
 	function serializeSVG(svg, stylesheets){
 		if (!global.XMLSerializer) return;
 		var serializer = new XMLSerializer();
-		/* todo: needs to be generalized
+		/* todo: process stylesheets variable
 		var xml = new DOMParser().parseFromString('<xml />', "application/xml")
 		var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
 		xml.insertBefore(css, xml.firstChild);
@@ -674,6 +577,7 @@ Holder.js - client side image placeholders
 	}
 
 	var stagingRenderer = (function(){
+		//todo: hoist svg namespace to globally accessible object
 		var svg_ns = 'http://www.w3.org/2000/svg';
 		var svg = null;
 		var text_el = document.createElementNS(svg_ns, 'text');
@@ -971,6 +875,112 @@ Holder.js - client side image placeholders
 		image.src = params.src;
 	}
 
+	// Scene graph
+
+	var SceneGraph = function(sceneProperties) {
+		var nodeCount = 1;
+		
+		function merge(parent, child){
+			for(var prop in child){
+				parent[prop] = child[prop];
+			}
+			return parent;
+		}
+		
+		var SceneNode = augment.defclass({
+			constructor: function(name){
+				nodeCount++;
+				this.parent = null;
+				this.children = {};
+				this.name = "node" + nodeCount;
+				if(name != null){
+					this.name = name;
+				}
+				this.translate = {x:0, y:0};
+				this.scale = {x:0, y:0};
+			},
+			add: function(child){
+				var name = child.name;
+				if(this.children[name] == null){
+					this.children[name] = child;
+					child.parent = this;
+				}
+				else{
+					throw "SceneGraph: child with that name already exists: "+name;
+				}
+			},
+			remove: function(name){
+				if(this.children[name] == null){
+					throw "SceneGraph: child with that name doesn't exist: "+name;
+				}
+				else{
+					child.parent = null;
+					delete this.children[name];
+				}
+			},
+			removeAll: function(){
+				for(var child in this.children){
+					this.children[child].parent = null;
+					delete this.children[child];
+				}
+			}
+		});
+
+		var RootNode = augment(SceneNode, function(_super){
+			this.constructor = function(){
+				_super.constructor.call(this);
+				this.properties = sceneProperties;
+			}
+		});
+
+		var SceneShape = augment(SceneNode, function(_super){
+			this.constructor = function(name, properties){
+				_super.constructor.call(this, name);
+				this.properties = {width:0, height:0, fill:'#000'};
+				if(properties != null){
+					merge(this.properties, properties);
+				}
+				else if(typeof name !== "string"){
+					throw "SceneGraph: non-string assigned to node name";
+				}
+			}
+		});
+
+		var TextGroup = augment(SceneShape, function(_super){
+			this.constructor = function(name, properties){
+				_super.constructor.call(this, name, properties);
+			},
+			this.textAsWords = function(){
+				this.removeAll();
+				var words = this.properties.text.split(" ");
+				for(var i = 0; i < words.length; i++){
+					this.add(new TextNode(words[i]));
+				}
+			}
+			this.textAsSentence = function(){
+				this.removeAll();
+				this.add(new TextNode(this.properties.text));
+			}
+		});
+
+		var TextNode = augment(SceneShape, function(_super){
+			this.constructor = function(text){
+				_super.constructor.call(this);
+				this.properties.text = text;
+			}
+		});
+
+		var root = new RootNode();
+
+		//todo: serialize scene graph
+
+		return {
+			SceneShape: SceneShape,
+			TextGroup: TextGroup,
+			root: root
+		}
+	}
+
 	//< v2.4 API compatibility
 
 	Holder.add_theme = Holder.addTheme;
@@ -1057,6 +1067,7 @@ Holder.js - client side image placeholders
 	if (isAMD) {
 		define(fn);
 	} else {
+		//todo: npm/browserify registration
 		global[name] = fn;
 	}
 }, this);
