@@ -251,16 +251,17 @@ Holder.js - client side image placeholders
 		var height = dimensions.height;
 		var textHeight = textSize(width, height, template.size);
 
+		//todo: mark the placeholder for canvas re-render if font is defined
 		var font = template.font ? template.font : 'Arial, Helvetica, sans-serif';
 		var fontWeight = template.fontweight ? template.fontweight : 'bold';
-		var dimensions_caption = Math.floor(width) + 'x' + Math.floor(height);
-		var text = template.text ? template.text : dimensions_caption;
+		var dimensionsCaption = Math.floor(width) + 'x' + Math.floor(height);
+		var text = template.text ? template.text : dimensionsCaption;
 
 		if (flags.textmode == 'literal') {
 			dimensions = flags.dimensions;
 			text = dimensions.width + 'x' + dimensions.height;
-		} else if (flags.textmode == 'exact' && flags.exact_dimensions) {
-			dimensions = flags.exact_dimensions;
+		} else if (flags.textmode == 'exact' && flags.exactDimensions) {
+			dimensions = flags.exactDimensions;
 			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
 		}
 
@@ -379,16 +380,14 @@ Holder.js - client side image placeholders
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == 'background') {
-			if (instanceConfig.renderer != 'html') {
-				modifyElement(mode, {
-						dimensions: dimensions,
-						theme: theme,
-						ratio: app.config.ratio,
-						flags: flags
-					},
-					el, instanceConfig);
-			}
+		} else if (mode == 'background' && instanceConfig.renderer != 'html') {
+			modifyElement(mode, {
+					dimensions: dimensions,
+					theme: theme,
+					ratio: app.config.ratio,
+					flags: flags
+				},
+				el, instanceConfig);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height;
@@ -437,17 +436,15 @@ Holder.js - client side image placeholders
 				var flags = el.holderData.flags;
 				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements))
 				if (dimensions) {
-					if (flags.fluid) {
+					if (flags.fluid && flags.auto) {
 						var fluidConfig = el.holderData.fluidConfig;
-						if (flags.auto) {
-							switch (fluidConfig.mode) {
-							case 'width':
-								dimensions.height = dimensions.width / fluidConfig.ratio;
-								break;
-							case 'height':
-								dimensions.width = dimensions.height * fluidConfig.ratio;
-								break;
-							}
+						switch (fluidConfig.mode) {
+						case 'width':
+							dimensions.height = dimensions.width / fluidConfig.ratio;
+							break;
+						case 'height':
+							dimensions.width = dimensions.height * fluidConfig.ratio;
+							break;
 						}
 					}
 
@@ -459,7 +456,7 @@ Holder.js - client side image placeholders
 					};
 
 					if (flags.textmode && flags.textmode == 'exact') {
-						flags.exact_dimensions = dimensions;
+						flags.exactDimensions = dimensions;
 						drawParams.dimensions = flags.dimensions;
 					}
 
@@ -590,22 +587,22 @@ Holder.js - client side image placeholders
 	}
 
 	var stagingRenderer = (function(){
-		var svg = null;
-		var stagingText = document.createElementNS(SVG_NS, 'text');
-		var tnode = function(text){
-			return document.createTextNode(text);
-		}
-		var stagingTextNode = tnode(null);
-		stagingText.setAttribute('x', 0);
-		stagingText.appendChild(stagingTextNode);
+		var svg = null, stagingText = null, stagingTextNode = null;
 		return function (rootNode){
 			if(app.config.supportsSVG){
 				var firstTimeSetup = false;
+				var tnode = function(text){
+						return document.createTextNode(text);
+					}
 				if(svg == null) {
 					firstTimeSetup = true;
 				}
 				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
 				if(firstTimeSetup){
+					stagingText = document.createElementNS(SVG_NS, 'text');
+					stagingTextNode = tnode(null);
+					stagingText.setAttribute('x', 0);
+					stagingText.appendChild(stagingTextNode);
 					svg.appendChild(stagingText);
 					document.body.appendChild(svg);
 					svg.style.visibility = 'hidden';
@@ -663,6 +660,7 @@ Holder.js - client side image placeholders
 				};
 			}
 			else{
+				//todo: canvas fallback for measuring text on android 2.3
 				return false;
 			}
 		}
