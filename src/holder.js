@@ -270,7 +270,17 @@ Holder.js - client side image placeholders
 			height: height
 		});
 
-		var sceneText = new sceneGraph.TextGroup('sceneText', {
+		var Shape = sceneGraph.Shape;
+
+		var sceneBackground = new Shape.Rectangle('sceneBg', {
+			width: width,
+			height: height,
+			fill: template.background
+		});
+
+		sceneGraph.root.add(sceneBackground);
+
+		var sceneText = new Shape.Group('sceneText', {
 			text: text,
 			align: 'center',
 			font: font,
@@ -282,7 +292,8 @@ Holder.js - client side image placeholders
 
 		sceneGraph.root.add(sceneText);
 
-		var textInfo = stagingRenderer(sceneGraph.root);
+		var textInfo = stagingRenderer(sceneGraph);
+
 		//todo: split and align the scene text according to textInfo parameters
 			
 		var rendererParams = {
@@ -588,7 +599,8 @@ Holder.js - client side image placeholders
 
 	var stagingRenderer = (function(){
 		var svg = null, stagingText = null, stagingTextNode = null;
-		return function (rootNode){
+		return function (graph){
+			var rootNode = graph.root;
 			if(app.config.supportsSVG){
 				var firstTimeSetup = false;
 				var tnode = function(text){
@@ -930,8 +942,6 @@ Holder.js - client side image placeholders
 				if(name != null){
 					this.name = name;
 				}
-				this.translate = {x:0, y:0};
-				this.scale = {x:0, y:0};
 			},
 			add: function(child){
 				var name = child.name;
@@ -960,46 +970,50 @@ Holder.js - client side image placeholders
 			}
 		});
 
-		var RootNode = augment(SceneNode, function(_super){
+		var RootNode = augment(SceneNode, function(uber){
 			this.constructor = function(){
-				_super.constructor.call(this);
+				uber.constructor.call(this, 'root');
 				this.properties = sceneProperties;
 			}
 		});
 
-		var SceneShape = augment(SceneNode, function(_super){
-			this.constructor = function(name, properties){
-				_super.constructor.call(this, name);
+		var Shape = augment(SceneNode, function(uber){
+			function constructor(name, props){
+				uber.constructor.call(this, name);
 				this.properties = {width:0, height:0, fill:'#000'};
-				if(properties != null){
-					merge(this.properties, properties);
+				if(props != null){
+					merge(this.properties, props);
 				}
 				else if(typeof name !== 'string'){
-					throw 'SceneGraph: non-string assigned to node name';
+					throw 'SceneGraph: invalid node name';
 				}
 			}
-		});
 
-		var TextGroup = augment(SceneShape, function(_super){
-			this.constructor = function(name, properties){
-				_super.constructor.call(this, name, properties);
-			}
-		});
+			this.Group = augment.extend(this, {
+				constructor: constructor
+			});
 
-		var TextNode = augment(SceneShape, function(_super){
-			this.constructor = function(text){
-				_super.constructor.call(this);
-				this.properties.text = text;
-			}
+			this.Rectangle = augment.extend(this, {
+				constructor: constructor
+			});
+
+			this.Text = augment.extend(this, {
+				constructor: function(text){
+					constructor.call(this);
+					this.properties.text = text;
+				}
+			});
 		});
 
 		var root = new RootNode();
 
-		//todo: serialize scene graph
+		function serialize(){
+			return JSON.stringify(root);
+		}
 
 		return {
-			SceneShape: SceneShape,
-			TextGroup: TextGroup,
+			Shape: Shape,
+			serialize: serialize,
 			root: root
 		}
 	}
