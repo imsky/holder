@@ -23,7 +23,7 @@ var build = (function(){
 })()
 
 var paths = {
-	scripts: ["src/ondomready/ondomready.js", "src/polyfills.js", "src/augment.js", "src/holder.js"]
+	scripts: ["src/ondomready.js", "src/polyfills.js", "src/augment.js", "src/holder.js"]
 }
 
 gulp.task('jshint', function () {
