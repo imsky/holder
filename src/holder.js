@@ -30,7 +30,7 @@ Holder.js - client side image placeholders
 			var node = document.querySelectorAll(el);
 			if (node.length) {
 				for (var i = 0, l = node.length; i < l; i++) {
-					var img = document.createElement('img')
+					var img = document.createElement('img');
 					img.setAttribute('data-src', src);
 					node[i].appendChild(img);
 				}
@@ -44,7 +44,7 @@ Holder.js - client side image placeholders
 		 * @param {Object} instanceOptions Options object, can contain domain, themes, images, and bgnodes properties
 		 */
 		run: function (instanceOptions) {
-			var localConfig = extend({}, app.config)
+			var localConfig = extend({}, app.config);
 
 			app.runtime.preempted = true;
 
@@ -67,7 +67,7 @@ Holder.js - client side image placeholders
 			} else if (global.Node && options.images instanceof global.Node) {
 				imageNodes = [options.images];
 			} else if (global.HTMLCollection && options.images instanceof global.HTMLCollection) {
-				imageNodes = options.images
+				imageNodes = options.images;
 			}
 
 			if (typeof (options.bgnodes) == 'string') {
@@ -160,9 +160,9 @@ Holder.js - client side image placeholders
 				if (el.hasAttribute('data-holder-invisible')) {
 					throw 'Holder: invisible placeholder';
 				}
-			}
+			};
 		}
-	}
+	};
 
 	/**
 	 * Processes provided source attribute and sets up the appropriate rendering workflow
@@ -204,9 +204,9 @@ Holder.js - client side image placeholders
 				ret.dimensions = app.flags.fluid.output(flag);
 				ret.fluid = true;
 			} else if (app.flags.textmode.match(flag)) {
-				ret.textmode = app.flags.textmode.output(flag)
+				ret.textmode = app.flags.textmode.output(flag);
 			} else if (app.flags.colors.match(flag)) {
-				var colors = app.flags.colors.output(flag)
+				var colors = app.flags.colors.output(flag);
 				ret.theme = extend(ret.theme, colors);
 			//todo: convert implicit theme use to a theme: flag
 			} else if (options.themes[flag]) {
@@ -231,13 +231,32 @@ Holder.js - client side image placeholders
 		return render ? ret : false;
 	}
 
+	/**
+	 * Adaptive text sizing function
+	 *
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
+	function textSize(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width);
+		var smallSide = Math.min(height, width);
+		var scale = 1 / 12;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return Math.round(Math.max(fontSize, newHeight));
+	}
+	
+	//todo: jsdoc buildSceneGraph
 	function buildSceneGraph(scene){
-
-		scene.font = {};
-		scene.font.family = scene.template.font ? scene.template.font : 'Arial, Helvetica, Open Sans, sans-serif';
-		scene.font.size = textSize(scene.width, scene.height, scene.template.size);
-		scene.font.weight = scene.template.fontweight ? scene.template.fontweight : 'bold';
-		scene.text = scene.template.text ? scene.template.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+		scene.font = {
+			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
+			size: textSize(scene.width, scene.height, scene.theme.size),
+			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
+		};
+		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
 
 		switch(scene.flags.textmode){
 			case 'literal':
@@ -256,28 +275,28 @@ Holder.js - client side image placeholders
 
 		var Shape = sceneGraph.Shape;
 
-		var sceneBackground = new Shape.Rectangle('sceneBg', {
+		var sceneBackground = new Shape.Rect('sceneBg', {
 			width: scene.width,
 			height: scene.height,
-			fill: scene.template.background
+			fill: scene.theme.background
 		});
 
 		sceneGraph.root.add(sceneBackground);
-		/*
+
 		var sceneText = new Shape.Group('sceneText', {
-			text: text,
+			text: scene.text,
 			align: 'center',
-			font: font,
-			size: textHeight,
+			font: scene.font,
+			size: scene.font.size,
 			//size: template.size,
-			weight: fontWeight,
-			fill: template.foreground
+			weight: scene.font.weight,
+			fill: scene.theme.foreground
 		});
 
 		sceneGraph.root.add(sceneText);
 
 		var textInfo = stagingRenderer(sceneGraph);
-		*/
+		
 		//todo: split and align the scene text according to textInfo parameters
 	}
 
@@ -313,11 +332,12 @@ Holder.js - client side image placeholders
 			text = Math.floor(flags.exactDimensions.width) + 'x' + Math.floor(flags.exactDimensions.height);
 		}
 
+		//todo: move generation of scene up to flag generation to reduce extra object creation
 		var scene = {
 			width: params.dimensions.width,
 			height: params.dimensions.height,
-			template: params.theme,
-			flags: flags
+			theme: params.theme,
+			flags: params.flags
 		};
 
 		var sceneGraph = buildSceneGraph(scene);
@@ -330,12 +350,15 @@ Holder.js - client side image placeholders
 			font: font,
 			fontWeight: fontWeight,
 			template: template
-		}
+		};
 
-		if (localConfig.renderer == 'canvas') {
-			image = canvasRenderer(rendererParams);
-		} else if (localConfig.renderer == 'svg') {
-			image = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgRenderer(rendererParams))));
+		switch(localConfig.renderer){
+			case 'canvas':
+				image = canvasRenderer(rendererParams);
+			break;
+			case 'svg':
+				image = svgRenderer(rendererParams);
+			break;
 		}
 
 		if (image == null) {
@@ -462,7 +485,7 @@ Holder.js - client side image placeholders
 		if (element == null || element.nodeType == null) {
 			images = app.runtime.resizableImages;
 		} else {
-			images = [element]
+			images = [element];
 		}
 		for (var i in images) {
 			if (!images.hasOwnProperty(i)) {
@@ -471,7 +494,7 @@ Holder.js - client side image placeholders
 			var el = images[i];
 			if (el.holderData) {
 				var flags = el.holderData.flags;
-				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements))
+				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements));
 				if (dimensions) {
 					if (flags.fluid && flags.auto) {
 						var fluidConfig = el.holderData.fluidConfig;
@@ -516,10 +539,10 @@ Holder.js - client side image placeholders
 			width: el.clientWidth
 		};
 		if (!dimensions.height && !dimensions.width) {
-			el.setAttribute('data-holder-invisible', true)
-			callback.call(this, el)
+			el.setAttribute('data-holder-invisible', true);
+			callback.call(this, el);
 		} else {
-			el.removeAttribute('data-holder-invisible')
+			el.removeAttribute('data-holder-invisible');
 			return dimensions;
 		}
 	}
@@ -532,7 +555,7 @@ Holder.js - client side image placeholders
 	 */
 	function setInitialDimensions(el) {
 		if (el.holderData) {
-			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions))
+			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions));
 			if (dimensions) {
 				var flags = el.holderData.flags;
 
@@ -541,40 +564,20 @@ Holder.js - client side image placeholders
 					fluidWidth: flags.dimensions.width.slice(-1) == '%',
 					mode: null,
 					initialDimensions: dimensions
-				}
+				};
 
 				if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
-					fluidConfig.mode = 'width'
-					fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height)
+					fluidConfig.mode = 'width';
+					fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height);
 				} else if (!fluidConfig.fluidWidth && fluidConfig.fluidHeight) {
 					fluidConfig.mode = 'height';
-					fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height
+					fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height;
 				}
 
 				el.holderData.fluidConfig = fluidConfig;
 			}
 		}
 	}
-
-	/**
-	 * Adaptive text sizing function
-	 *
-	 * @private
-	 * @param width Parent width
-	 * @param height Parent height
-	 * @param fontSize Requested text size
-	 */
-	function textSize(width, height, fontSize) {
-		height = parseInt(height, 10);
-		width = parseInt(width, 10);
-		var bigSide = Math.max(height, width)
-		var smallSide = Math.min(height, width)
-		var scale = 1 / 12;
-		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-		return Math.round(Math.max(fontSize, newHeight))
-	}
-
-	//Constants
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -592,12 +595,12 @@ Holder.js - client side image placeholders
 		}
 		//IE throws an exception if this is set and Chrome requires it to be set
 		if (svg.webkitMatchesSelector) {
-			svg.setAttribute('xmlns', SVG_NS)
+			svg.setAttribute('xmlns', SVG_NS);
 		}
 		svg.setAttribute('width', width);
 		svg.setAttribute('height', height);
-		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height)
-		svg.setAttribute('preserveAspectRatio', 'none')
+		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+		svg.setAttribute('preserveAspectRatio', 'none');
 		return svg;
 	}
 
@@ -620,7 +623,7 @@ Holder.js - client side image placeholders
 		*/
 
 		var svg_css = '';
-		return svg_css + serializer.serializeToString(svg)
+		return svg_css + serializer.serializeToString(svg);
 	}
 
 	var stagingRenderer = (function(){
@@ -631,7 +634,7 @@ Holder.js - client side image placeholders
 				var firstTimeSetup = false;
 				var tnode = function(text){
 						return document.createTextNode(text);
-					}
+					};
 				if(svg == null) {
 					firstTimeSetup = true;
 				}
@@ -701,7 +704,7 @@ Holder.js - client side image placeholders
 				//todo: canvas fallback for measuring text on android 2.3
 				return false;
 			}
-		}
+		};
 	})();
 
 	var canvasRenderer = (function () {
@@ -722,7 +725,7 @@ Holder.js - client side image placeholders
 			ctx.fillText(props.text, (props.width / 2), (props.height / 2));
 
 			return canvas.toDataURL('image/png');
-		}
+		};
 	})();
 
 	var svgRenderer = (function () {
@@ -730,13 +733,13 @@ Holder.js - client side image placeholders
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0,0);
 
-		var bg_el = document.createElementNS(SVG_NS, 'rect')
-		var text_el = document.createElementNS(SVG_NS, 'text')
-		var textnode_el = document.createTextNode(null)
-		text_el.setAttribute('text-anchor', 'middle')
-		text_el.appendChild(textnode_el)
-		svg.appendChild(bg_el)
-		svg.appendChild(text_el)
+		var bg_el = document.createElementNS(SVG_NS, 'rect');
+		var text_el = document.createElementNS(SVG_NS, 'text');
+		var textnode_el = document.createTextNode(null);
+		text_el.setAttribute('text-anchor', 'middle');
+		text_el.appendChild(textnode_el);
+		svg.appendChild(bg_el);
+		svg.appendChild(text_el);
 
 		return function (props) {
 			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
@@ -746,9 +749,9 @@ Holder.js - client side image placeholders
 			bg_el.setAttribute('width', props.width);
 			bg_el.setAttribute('height', props.height);
 			bg_el.setAttribute('fill', props.template.background);
-			text_el.setAttribute('x', props.width / 2)
-			text_el.setAttribute('y', props.height / 2)
-			textnode_el.nodeValue = props.text
+			text_el.setAttribute('x', props.width / 2);
+			text_el.setAttribute('y', props.height / 2);
+			textnode_el.nodeValue = props.text;
 			text_el.setAttribute('style', cssProps({
 				'fill': props.template.foreground,
 				'font-weight': props.fontWeight,
@@ -756,8 +759,9 @@ Holder.js - client side image placeholders
 				'font-family': props.font,
 				'dominant-baseline': 'central'
 			}));
-			return serializeSVG(svg, null);
-		}
+			
+			return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
+		};
 	})();
 
 	//Configuration
@@ -770,7 +774,7 @@ Holder.js - client side image placeholders
 				return {
 					width: +exec[1],
 					height: +exec[2]
-				}
+				};
 			}
 		},
 		fluid: {
@@ -780,7 +784,7 @@ Holder.js - client side image placeholders
 				return {
 					width: exec[1],
 					height: exec[2]
-				}
+				};
 			}
 		},
 		colors: {
@@ -790,7 +794,7 @@ Holder.js - client side image placeholders
 				return {
 					foreground: '#' + exec[2],
 					background: '#' + exec[1]
-				}
+				};
 			}
 		},
 		text: {
@@ -818,13 +822,13 @@ Holder.js - client side image placeholders
 		random: {
 			regex: /^random$/
 		}
-	}
+	};
 
 	for (var flag in app.flags) {
 		if (!app.flags.hasOwnProperty(flag)) continue;
 		app.flags[flag].match = function (val) {
-			return val.match(this.regex)
-		}
+			return val.match(this.regex);
+		};
 	}
 
 	app.settings = {
@@ -888,7 +892,7 @@ Holder.js - client side image placeholders
 				}
 			}
 		}
-		return c
+		return c;
 	}
 
 	/**
@@ -900,10 +904,10 @@ Holder.js - client side image placeholders
 		var ret = [];
 		for (var p in props) {
 			if (props.hasOwnProperty(p)) {
-				ret.push(p + ':' + props[p])
+				ret.push(p + ':' + props[p]);
 			}
 		}
-		return ret.join(';')
+		return ret.join(';');
 	}
 
 	/**
@@ -916,7 +920,7 @@ Holder.js - client side image placeholders
 		if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
 		app.runtime.debounceTimer = setTimeout(function () {
 			app.runtime.debounceTimer = null;
-			fn.call(this)
+			fn.call(this);
 		}, app.config.debounce);
 	}
 
@@ -926,7 +930,7 @@ Holder.js - client side image placeholders
 	function resizeEvent() {
 		debounce(function () {
 			updateResizableElements(null);
-		})
+		});
 	}
 
 	/**
@@ -939,10 +943,10 @@ Holder.js - client side image placeholders
 		var image = new Image();
 		image.onerror = function () {
 			callback.call(this, false, params);
-		}
+		};
 		image.onload = function () {
 			callback.call(this, true, params);
-		}
+		};
 		image.src = params.src;
 	}
 
@@ -964,10 +968,13 @@ Holder.js - client side image placeholders
 				nodeCount++;
 				this.parent = null;
 				this.children = {};
-				this.name = 'node' + nodeCount;
+				this.name = 'n' + nodeCount;
 				if(name != null){
 					this.name = name;
 				}
+				this.x = 0;
+				this.y = 0;
+				this.z = 0;
 			},
 			add: function(child){
 				var name = child.name;
@@ -1000,7 +1007,7 @@ Holder.js - client side image placeholders
 			this.constructor = function(){
 				uber.constructor.call(this, 'root');
 				this.properties = sceneProperties;
-			}
+			};
 		});
 
 		var Shape = augment(SceneNode, function(uber){
@@ -1016,18 +1023,21 @@ Holder.js - client side image placeholders
 			}
 
 			this.Group = augment.extend(this, {
-				constructor: constructor
+				constructor: constructor,
+				type: 'group'
 			});
 
-			this.Rectangle = augment.extend(this, {
-				constructor: constructor
+			this.Rect = augment.extend(this, {
+				constructor: constructor,
+				type: 'rect'
 			});
 
 			this.Text = augment.extend(this, {
 				constructor: function(text){
 					constructor.call(this);
 					this.properties.text = text;
-				}
+				},
+				type: 'text'
 			});
 		});
 
@@ -1041,8 +1051,8 @@ Holder.js - client side image placeholders
 			Shape: Shape,
 			serialize: serialize,
 			root: root
-		}
-	}
+		};
+	};
 
 	//< v2.4 API compatibility
 
@@ -1118,9 +1128,9 @@ Holder.js - client side image placeholders
 			if (typeof global.Turbolinks == 'object') {
 				global.document.addEventListener('page:change', function () {
 					Holder.run({});
-				})
+				});
 			}
-		})
+		});
 	}
 
 })(function (fn, name, global) {
