@@ -44,7 +44,7 @@ Holder.js - client side image placeholders
 		 * @param {Object} instanceOptions Options object, can contain domain, themes, images, and bgnodes properties
 		 */
 		run: function (instanceOptions) {
-			var instanceConfig = extend({}, app.config)
+			var localConfig = extend({}, app.config)
 
 			app.runtime.preempted = true;
 
@@ -55,9 +55,9 @@ Holder.js - client side image placeholders
 
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
-				instanceConfig.renderer = 'canvas';
+				localConfig.renderer = 'canvas';
 			} else if (options.use_svg) {
-				instanceConfig.renderer = 'svg';
+				localConfig.renderer = 'svg';
 			}
 
 			if (typeof (options.images) == 'string') {
@@ -102,7 +102,7 @@ Holder.js - client side image placeholders
 				if(holderURL != null){
 					var holderFlags = parseURL(holderURL, options);
 					if(holderFlags){
-						render('background', bgnodes[i], holderFlags, holderURL, instanceConfig);
+						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, localConfig);
 					}
 				}
 			}
@@ -127,27 +127,27 @@ Holder.js - client side image placeholders
 
 				if (hasSrc) {
 					if (attr_src.indexOf(options.domain) === 0) {
-						processImageElement(options, instanceConfig, attr_src, image);
+						processImageElement(options, localConfig, attr_src, image);
 					} else if (hasDataSrcURL) {
 						if (rendered) {
-							processImageElement(options, instanceConfig, attr_datasrc, image);
+							processImageElement(options, localConfig, attr_datasrc, image);
 						} else {
 							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
 								src: attr_src,
 								options: options,
-								instanceConfig: instanceConfig,
+								localConfig: localConfig,
 								dataSrc: attr_datasrc,
 								image: image
 							}, function (exists, config) {
 								if (!exists) {
-									processImageElement(config.options, config.instanceConfig, config.dataSrc, config.image);
+									processImageElement(config.options, config.localConfig, config.dataSrc, config.image);
 								}
 							});
 						}
 					}
 				} else if (hasDataSrcURL) {
-						processImageElement(options, instanceConfig, attr_datasrc, image);
+						processImageElement(options, localConfig, attr_datasrc, image);
 				}
 			}
 			return this;
@@ -169,15 +169,15 @@ Holder.js - client side image placeholders
 	 *
 	 * @private
 	 * @param options Instance options from Holder.run
-	 * @param instanceConfig Instance configuration
+	 * @param localConfig Instance configuration
 	 * @param src Image URL
 	 * @param el Image DOM element
 	 */
-	function processImageElement(options, instanceConfig, src, el) {
+	function processImageElement(options, localConfig, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 
 		if (holderFlags) {
-			render(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, instanceConfig);
+			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, localConfig);
 		}
 	}
 
@@ -231,6 +231,56 @@ Holder.js - client side image placeholders
 		return render ? ret : false;
 	}
 
+	function buildSceneGraph(scene){
+
+		scene.font = {};
+		scene.font.family = scene.template.font ? scene.template.font : 'Arial, Helvetica, Open Sans, sans-serif';
+		scene.font.size = textSize(scene.width, scene.height, scene.template.size);
+		scene.font.weight = scene.template.fontweight ? scene.template.fontweight : 'bold';
+		scene.text = scene.template.text ? scene.template.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+		switch(scene.flags.textmode){
+			case 'literal':
+			scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
+			break;
+			case 'exact':
+			if(!scene.flags.exactDimensions) break;
+			scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
+			break;
+		}
+		
+		var sceneGraph = new SceneGraph({
+			width: scene.width,
+			height: scene.height
+		});
+
+		var Shape = sceneGraph.Shape;
+
+		var sceneBackground = new Shape.Rectangle('sceneBg', {
+			width: scene.width,
+			height: scene.height,
+			fill: scene.template.background
+		});
+
+		sceneGraph.root.add(sceneBackground);
+		/*
+		var sceneText = new Shape.Group('sceneText', {
+			text: text,
+			align: 'center',
+			font: font,
+			size: textHeight,
+			//size: template.size,
+			weight: fontWeight,
+			fill: template.foreground
+		});
+
+		sceneGraph.root.add(sceneText);
+
+		var textInfo = stagingRenderer(sceneGraph);
+		*/
+		//todo: split and align the scene text according to textInfo parameters
+	}
+
 	/**
 	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
 	 *
@@ -238,9 +288,9 @@ Holder.js - client side image placeholders
 	 * @param mode Placeholder mode, either background or image
 	 * @param params Placeholder-specific parameters
 	 * @param el Image DOM element
-	 * @param instanceConfig Instance configuration
+	 * @param localConfig Instance configuration
 	 */
-	function modifyElement(mode, params, el, instanceConfig) {
+	function render(mode, params, el, localConfig) {
 		var image = null;
 
 		var dimensions = params.dimensions;
@@ -258,44 +308,20 @@ Holder.js - client side image placeholders
 		var text = template.text ? template.text : dimensionsCaption;
 
 		if (flags.textmode == 'literal') {
-			dimensions = flags.dimensions;
-			text = dimensions.width + 'x' + dimensions.height;
+			text = flags.dimensions.width + 'x' + flags.dimensions.height;
 		} else if (flags.textmode == 'exact' && flags.exactDimensions) {
-			dimensions = flags.exactDimensions;
-			text = Math.floor(dimensions.width) + 'x' + Math.floor(dimensions.height);
+			text = Math.floor(flags.exactDimensions.width) + 'x' + Math.floor(flags.exactDimensions.height);
 		}
 
-		var sceneGraph = new SceneGraph({
-			width: width,
-			height: height
-		});
+		var scene = {
+			width: params.dimensions.width,
+			height: params.dimensions.height,
+			template: params.theme,
+			flags: flags
+		};
 
-		var Shape = sceneGraph.Shape;
+		var sceneGraph = buildSceneGraph(scene);
 
-		var sceneBackground = new Shape.Rectangle('sceneBg', {
-			width: width,
-			height: height,
-			fill: template.background
-		});
-
-		sceneGraph.root.add(sceneBackground);
-
-		var sceneText = new Shape.Group('sceneText', {
-			text: text,
-			align: 'center',
-			font: font,
-			size: textHeight,
-			//size: template.size,
-			weight: fontWeight,
-			fill: template.foreground
-		});
-
-		sceneGraph.root.add(sceneText);
-
-		var textInfo = stagingRenderer(sceneGraph);
-
-		//todo: split and align the scene text according to textInfo parameters
-			
 		var rendererParams = {
 			text: text,
 			width: width,
@@ -306,9 +332,9 @@ Holder.js - client side image placeholders
 			template: template
 		}
 
-		if (instanceConfig.renderer == 'canvas') {
+		if (localConfig.renderer == 'canvas') {
 			image = canvasRenderer(rendererParams);
-		} else if (instanceConfig.renderer == 'svg') {
+		} else if (localConfig.renderer == 'svg') {
 			image = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgRenderer(rendererParams))));
 		}
 
@@ -333,9 +359,9 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
-	 * @param instanceConfig Instance configuration
+	 * @param localConfig Instance configuration
 	 */
-	function render(mode, el, flags, src, instanceConfig) {
+	function prepareDOMElement(mode, el, flags, src, localConfig) {
 		var dimensions = flags.dimensions,
 			theme = flags.theme,
 			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
@@ -364,7 +390,7 @@ Holder.js - client side image placeholders
 		flags.theme = theme;
 		el.holderData = {
 			flags: flags,
-			instanceConfig: instanceConfig
+			localConfig: localConfig
 		};
 
 		if(mode == 'image' || mode == 'fluid'){
@@ -372,33 +398,33 @@ Holder.js - client side image placeholders
 		}
 
 		if (mode == 'image') {
-			if (instanceConfig.renderer == 'html' || !flags.auto) {
+			if (localConfig.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
 				el.style.height = dimensions.height + 'px';
 			}
-			if (instanceConfig.renderer == 'html') {
+			if (localConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
-				modifyElement(mode, {
+				render(mode, {
 					dimensions: dimensions,
 					theme: theme,
 					ratio: app.config.ratio,
 					flags: flags
-				}, el, instanceConfig);
+				}, el, localConfig);
 
 				if (flags.textmode && flags.textmode == 'exact') {
 					app.runtime.resizableImages.push(el);
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == 'background' && instanceConfig.renderer != 'html') {
-			modifyElement(mode, {
+		} else if (mode == 'background' && localConfig.renderer != 'html') {
+			render(mode, {
 					dimensions: dimensions,
 					theme: theme,
 					ratio: app.config.ratio,
 					flags: flags
 				},
-				el, instanceConfig);
+				el, localConfig);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height;
@@ -416,7 +442,7 @@ Holder.js - client side image placeholders
 
 			setInitialDimensions(el);
 
-			if (instanceConfig.renderer == 'html') {
+			if (localConfig.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				app.runtime.resizableImages.push(el);
@@ -471,7 +497,7 @@ Holder.js - client side image placeholders
 						drawParams.dimensions = flags.dimensions;
 					}
 
-					modifyElement('image', drawParams, el, el.holderData.instanceConfig);
+					render('image', drawParams, el, el.holderData.localConfig);
 				}
 			}
 		}
