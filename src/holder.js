@@ -447,8 +447,6 @@ Holder.js - client side image placeholders
 			text: scene.text,
 			align: 'center',
 			font: scene.font,
-			fontSize: scene.font.size,
-			fontWeight: scene.font.weight,
 			fill: scene.theme.foreground
 		});
 
@@ -669,31 +667,33 @@ Holder.js - client side image placeholders
 					document.body.appendChild(svg);
 					svg.style.visibility = 'hidden';
 					svg.style.position = 'absolute';
-					svg.style.top = '0px';
-					svg.style.left = '0px';
-					svg.setAttribute('width', 0);
-					svg.setAttribute('height', 0);
+					svg.style.top = '-100%';
+					svg.style.left = '-100%';
+					//todo: workaround for zero-dimension <svg> tag in Opera 12
+					//svg.setAttribute('width', 0);
+					//svg.setAttribute('height', 0);
 				}
 				
 				var holderTextGroup = rootNode.children.holderTextGroup;
-				stagingText.setAttribute('y', holderTextGroup.properties.fontSize);
+				var htgProps = holderTextGroup.properties;
+				stagingText.setAttribute('y', htgProps.font.size);
 				stagingText.setAttribute('style', cssProps({
-					'font-weight': holderTextGroup.properties.fontWeight,
-					'font-size': holderTextGroup.properties.fontSize + 'px',
-					'font-family': holderTextGroup.properties.font,
+					'font-weight': htgProps.font.weight,
+					'font-size': htgProps.font.size + 'px',
+					'font-family': htgProps.font.family,
 					'dominant-baseline': 'middle'
 				}));
 
 				//Get bounding box for the whole string (total width and height)
-				stagingTextNode.nodeValue = holderTextGroup.properties.text;
+				stagingTextNode.nodeValue = htgProps.text;
 				var stagingTextBBox = stagingText.getBBox();
 
 				//Get line count and split the string into words
 				var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
-				var words = holderTextGroup.properties.text.split(' ');
+				var words = htgProps.text.split(' ');
 
 				//Get bounding box for the string with spaces removed
-				stagingTextNode.nodeValue = holderTextGroup.properties.text.replace(/[ ]+/g, '');
+				stagingTextNode.nodeValue = htgProps.text.replace(/[ ]+/g, '');
 				var computedNoSpaceLength = stagingText.getComputedTextLength();
 
 				//Compute average space width
@@ -742,13 +742,18 @@ Holder.js - client side image placeholders
 
 			ctx.fillStyle = root.children.holderBg.properties.fill;
 			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
-			
+
 			var textGroup = root.children.holderTextGroup;
-			ctx.font = textGroup.properties.fontWeight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
+			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
 			ctx.fillStyle = textGroup.properties.fill;
+
 			for(var nodeKey in textGroup.children){
 				var textNode = textGroup.children[nodeKey];
-				ctx.fillText(textNode.properties.text, App.dpr(textGroup.x + textNode.x), App.dpr(textGroup.y + textNode.y));
+				var x = App.dpr(textGroup.x + textNode.x);
+				var y = App.dpr(textGroup.y + textNode.y);
+				if(!isNaN(x) && Infinity != x && !isNaN(y) && Infinity != y){
+					ctx.fillText(textNode.properties.text, x,y);
+				}
 			}
 			
 			return canvas.toDataURL('image/png');
