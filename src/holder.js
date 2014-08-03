@@ -40,29 +40,30 @@ Holder.js - client side image placeholders
 		 *
 		 * @param {Object} preferences Options object, can contain domain, themes, images, and bgnodes properties
 		 */
-		run: function (preferences) {
-			var holderSettings = {};
+		run: function (userOptions) {
+			var renderSettings = {};
 
 			App.vars.preempted = true;
 
-			var options = extend(App.settings, preferences),
+			var options = extend(App.settings, userOptions),
 				images = [],
-				bgnodes = [];
+				bgnodes = [],
+				stylenodes = [];
 
 			//todo: validate renderer
 			//todo: document runtime renderer option
-			holderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
 			
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
-				holderSettings.renderer = 'canvas';
+				renderSettings.renderer = 'canvas';
 			} else if (options.use_svg) {
-				holderSettings.renderer = 'svg';
+				renderSettings.renderer = 'svg';
 			}
 
 			images = getNodeArray(options.images);
-			
 			bgnodes = getNodeArray(options.bgnodes);
+			stylenodes = getNodeArray(options.stylenodes);
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
 
@@ -85,7 +86,7 @@ Holder.js - client side image placeholders
 				if(holderURL != null){
 					var holderFlags = parseURL(holderURL, options);
 					if(holderFlags){
-						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, holderSettings);
+						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, renderSettings);
 					}
 				}
 			}
@@ -110,27 +111,27 @@ Holder.js - client side image placeholders
 
 				if (hasSrc) {
 					if (attr_src.indexOf(options.domain) === 0) {
-						processImageElement(options, holderSettings, attr_src, image);
+						prepareImageElement(options, renderSettings, attr_src, image);
 					} else if (hasDataSrcURL) {
 						if (rendered) {
-							processImageElement(options, holderSettings, attr_datasrc, image);
+							prepareImageElement(options, renderSettings, attr_datasrc, image);
 						} else {
 							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
 								src: attr_src,
 								options: options,
-								holderSettings: holderSettings,
+								renderSettings: renderSettings,
 								dataSrc: attr_datasrc,
 								image: image
 							}, function (exists, config) {
 								if (!exists) {
-									processImageElement(config.options, config.holderSettings, config.dataSrc, config.image);
+									prepareImageElement(config.options, config.renderSettings, config.dataSrc, config.image);
 								}
 							});
 						}
 					}
 				} else if (hasDataSrcURL) {
-						processImageElement(options, holderSettings, attr_datasrc, image);
+					prepareImageElement(options, renderSettings, attr_datasrc, image);
 				}
 			}
 			return this;
@@ -189,15 +190,15 @@ Holder.js - client side image placeholders
 	 *
 	 * @private
 	 * @param options Instance options from Holder.run
-	 * @param holderSettings Instance configuration
+	 * @param renderSettings Instance configuration
 	 * @param src Image URL
 	 * @param el Image DOM element
 	 */
-	function processImageElement(options, holderSettings, src, el) {
+	function prepareImageElement(options, renderSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 
 		if (holderFlags) {
-			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, holderSettings);
+			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, renderSettings);
 		}
 	}
 
@@ -260,9 +261,9 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
-	 * @param holderSettings Instance configuration
+	 * @param renderSettings Instance configuration
 	 */
-	function prepareDOMElement(mode, el, flags, src, holderSettings) {
+	function prepareDOMElement(mode, el, flags, src, renderSettings) {
 		var dimensions = flags.dimensions,
 			theme = flags.theme,
 			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
@@ -291,7 +292,7 @@ Holder.js - client side image placeholders
 		flags.theme = theme;
 		el.holderData = {
 			flags: flags,
-			holderSettings: holderSettings
+			renderSettings: renderSettings
 		};
 
 		if(mode == 'image' || mode == 'fluid'){
@@ -299,33 +300,31 @@ Holder.js - client side image placeholders
 		}
 
 		if (mode == 'image') {
-			if (holderSettings.renderer == 'html' || !flags.auto) {
+			if (renderSettings.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
 				el.style.height = dimensions.height + 'px';
 			}
-			if (holderSettings.renderer == 'html') {
+			if (renderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				render(mode, {
 					dimensions: dimensions,
 					theme: theme,
-					ratio: App.setup.ratio,
 					flags: flags
-				}, el, holderSettings);
+				}, el, renderSettings);
 
 				if (flags.textmode && flags.textmode == 'exact') {
 					App.vars.resizableImages.push(el);
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == 'background' && holderSettings.renderer != 'html') {
+		} else if (mode == 'background' && renderSettings.renderer != 'html') {
 			render(mode, {
 					dimensions: dimensions,
 					theme: theme,
-					ratio: App.setup.ratio,
 					flags: flags
 				},
-				el, holderSettings);
+				el, renderSettings);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height;
@@ -343,7 +342,7 @@ Holder.js - client side image placeholders
 
 			setInitialDimensions(el);
 
-			if (holderSettings.renderer == 'html') {
+			if (renderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				App.vars.resizableImages.push(el);
@@ -359,9 +358,10 @@ Holder.js - client side image placeholders
 	 * @param mode Placeholder mode, either background or image
 	 * @param params Placeholder-specific parameters
 	 * @param el Image DOM element
-	 * @param holderSettings Instance configuration
+	 * @param renderSettings Instance configuration
 	 */
-	function render(mode, params, el, holderSettings) {
+
+	function render(mode, params, el, renderSettings) {
 		var image = null;
 
 		//todo: move generation of scene up to flag generation to reduce extra object creation
@@ -384,15 +384,16 @@ Holder.js - client side image placeholders
 			template: scene.theme
 		};
 
-		switch(holderSettings.renderer){
+		switch(renderSettings.renderer){
 			case 'canvas':
-				image = canvasRenderer(rendererParams);
+				image = sgCanvasRenderer(sceneGraph);
+				//image = canvasRenderer(rendererParams);
 			break;
 			case 'svg':
 				image = svgRenderer(rendererParams);
 			break;
 			default:
-				throw 'Holder: invalid renderer: '+holderSettings.renderer;
+				throw 'Holder: invalid renderer: '+renderSettings.renderer;
 		}
 
 		if (image == null) {
@@ -407,25 +408,7 @@ Holder.js - client side image placeholders
 		}
 		el.setAttribute('data-holder-rendered', true);
 	}
-
-	/**
-	 * Adaptive text sizing function
-	 *
-	 * @private
-	 * @param width Parent width
-	 * @param height Parent height
-	 * @param fontSize Requested text size
-	 */
-	function textSize(width, height, fontSize) {
-		height = parseInt(height, 10);
-		width = parseInt(width, 10);
-		var bigSide = Math.max(height, width);
-		var smallSide = Math.min(height, width);
-		var scale = 1 / 12;
-		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-		return Math.round(Math.max(fontSize, newHeight));
-	}
-
+	
 	//todo: jsdoc buildSceneGraph
 	function buildSceneGraph(scene){
 		//todo: mark the placeholder for canvas re-render if font is defined
@@ -453,30 +436,64 @@ Holder.js - client side image placeholders
 
 		var Shape = sceneGraph.Shape;
 
-		var sceneBg = new Shape.Rect('sceneBg', {
+		var holderBg = new Shape.Rect('holderBg', {
 			fill: scene.theme.background
 		});
 
-		sceneBg.width = scene.width;
-		sceneBg.height = scene.height;
+		holderBg.resize(scene.width, scene.height);
+		sceneGraph.root.add(holderBg);
 
-		sceneGraph.root.add(sceneBg);
-
-		var sceneText = new Shape.Group('sceneText', {
+		var holderTextGroup = new Shape.Group('holderTextGroup', {
 			text: scene.text,
 			align: 'center',
 			font: scene.font,
 			fontSize: scene.font.size,
-			//size: template.size,
 			fontWeight: scene.font.weight,
 			fill: scene.theme.foreground
 		});
 
-		sceneGraph.root.add(sceneText);
-
-		var textInfo = stagingRenderer(sceneGraph);
+		holderTextGroup.moveTo(null,null,1);
+		sceneGraph.root.add(holderTextGroup);
 		
-		//todo: split and align the scene text according to textInfo parameters
+		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
+
+		if(tpdata.lineCount > 1){
+			for(var i = 0; i < tpdata.words.length; i++){
+				var word = tpdata.words[i];
+			}
+		}
+		else{
+			if(holderTextGroup.properties.align == 'center'){
+				holderTextGroup.moveTo(
+					(scene.width - tpdata.boundingBox.width) / 2,
+					(scene.height - tpdata.boundingBox.height) / 2,
+					null);
+				var textNode = new Shape.Text(scene.text);
+				holderTextGroup.add(textNode);
+			}
+		}
+
+		//todo: renderlist
+
+		return sceneGraph;
+	}
+
+	/**
+	 * Adaptive text sizing function
+	 *
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
+	function textSize(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width);
+		var smallSide = Math.min(height, width);
+		var scale = 1 / 12;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return Math.round(Math.max(fontSize, newHeight));
 	}
 
 	/**
@@ -516,7 +533,6 @@ Holder.js - client side image placeholders
 					var drawParams = {
 						dimensions: dimensions,
 						theme: flags.theme,
-						ratio: App.setup.ratio,
 						flags: flags
 					};
 
@@ -525,7 +541,7 @@ Holder.js - client side image placeholders
 						drawParams.dimensions = flags.dimensions;
 					}
 
-					render('image', drawParams, el, el.holderData.holderSettings);
+					render('image', drawParams, el, el.holderData.renderSettings);
 				}
 			}
 		}
@@ -659,25 +675,25 @@ Holder.js - client side image placeholders
 					svg.setAttribute('height', 0);
 				}
 				
-				var sceneText = rootNode.children.sceneText;
-				stagingText.setAttribute('y', sceneText.properties.fontSize);
+				var holderTextGroup = rootNode.children.holderTextGroup;
+				stagingText.setAttribute('y', holderTextGroup.properties.fontSize);
 				stagingText.setAttribute('style', cssProps({
-					'font-weight': sceneText.properties.fontWeight,
-					'font-size': sceneText.properties.fontSize + 'px',
-					'font-family': sceneText.properties.font,
+					'font-weight': holderTextGroup.properties.fontWeight,
+					'font-size': holderTextGroup.properties.fontSize + 'px',
+					'font-family': holderTextGroup.properties.font,
 					'dominant-baseline': 'middle'
 				}));
 
 				//Get bounding box for the whole string (total width and height)
-				stagingTextNode.nodeValue = sceneText.properties.text;
+				stagingTextNode.nodeValue = holderTextGroup.properties.text;
 				var stagingTextBBox = stagingText.getBBox();
 
 				//Get line count and split the string into words
 				var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
-				var words = sceneText.properties.text.split(' ');
+				var words = holderTextGroup.properties.text.split(' ');
 
 				//Get bounding box for the string with spaces removed
-				stagingTextNode.nodeValue = sceneText.properties.text.replace(/[ ]+/g, '');
+				stagingTextNode.nodeValue = holderTextGroup.properties.text.replace(/[ ]+/g, '');
 				var computedNoSpaceLength = stagingText.getComputedTextLength();
 
 				//Compute average space width
@@ -712,22 +728,51 @@ Holder.js - client side image placeholders
 		};
 	})();
 
+	//todo: fix svg rendering on zoomed-in documents if possible
+
+	var sgCanvasRenderer = (function () {
+		var canvas = document.createElement('canvas');
+		var ctx = canvas.getContext('2d');
+
+		return function (sceneGraph) {
+			var root = sceneGraph.root;
+			canvas.width = App.dpr(root.properties.width);
+			canvas.height = App.dpr(root.properties.height);
+			ctx.textBaseline = 'top';
+
+			ctx.fillStyle = root.children.holderBg.properties.fill;
+			ctx.fillRect(0, 0, root.children.holderBg.width, root.children.holderBg.height);
+			
+			var textGroup = root.children.holderTextGroup;
+			ctx.font = textGroup.properties.fontWeight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
+			ctx.fillStyle = textGroup.properties.fill;
+			for(var textNode in textGroup.children){
+				ctx.fillText(textGroup.properties.text, textGroup.x, textGroup.y);
+			}
+			
+			return canvas.toDataURL('image/png');
+		};
+	})();
+
 	var canvasRenderer = (function () {
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
 
 		return function (props) {
-			canvas.width = props.width;
-			canvas.height = props.height;
+			var finalWidth = props.width * App.setup.ratio;
+			var finalHeight = props.height * App.setup.ratio;
+			
+			canvas.width = finalWidth;
+			canvas.height = finalHeight;
 
 			ctx.fillStyle = props.template.background;
-			ctx.fillRect(0, 0, props.width, props.height);
+			ctx.fillRect(0, 0, finalWidth, finalHeight);
 
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
 			ctx.font = props.fontWeight + ' ' + (props.textHeight * App.setup.ratio) + 'px ' + props.font;
 			ctx.fillStyle = props.template.foreground;
-			ctx.fillText(props.text, (props.width / 2), (props.height / 2));
+			ctx.fillText(props.text, (finalWidth / 2), (finalHeight / 2));
 
 			return canvas.toDataURL('image/png');
 		};
@@ -745,7 +790,7 @@ Holder.js - client side image placeholders
 		text_el.appendChild(textnode_el);
 		svg.appendChild(bg_el);
 		svg.appendChild(text_el);
-
+		
 		return function (props) {
 			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
 				throw 'Holder: incorrect properties passed to SVG constructor';
@@ -877,12 +922,32 @@ Holder.js - client side image placeholders
 			}
 			return parent;
 		}
+
+		var changedNodes = {};
+
+		//todo: move all change code out
+
+		function addChangedNode(node){
+			changedNodes[node.id] = node;
+		}
+
+		function flushChangedNodes(){
+			var nodes = [];
+			for(var i in changedNodes){
+				if(changedNodes.hasOwnProperty(i)){
+					nodes.push(changedNodes[i]);
+				}
+			}
+			changedNodes = {};
+			return nodes;
+		}
 		
 		var SceneNode = augment.defclass({
 			constructor: function(name){
 				nodeCount++;
 				this.parent = null;
 				this.children = {};
+				this.id = nodeCount;
 				this.name = 'n' + nodeCount;
 				if(name != null){
 					this.name = name;
@@ -892,7 +957,6 @@ Holder.js - client side image placeholders
 				this.z = 0;
 				this.width = 0;
 				this.height = 0;
-				this.changed = false;
 			},
 			resize: function(width, height){
 				if(width != null){
@@ -901,7 +965,19 @@ Holder.js - client side image placeholders
 				if(height != null){
 					this.height = height;
 				}
-				this.changed = true;
+				//addChangedNode(this);
+			},
+			move: function(dx, dy, dz){
+				this.x += dx;
+				this.y += dy;
+				this.z += dz;
+				//addChangedNode(this);
+			},
+			moveTo: function(x, y, z){
+				this.x = x != null ? x : this.x;
+				this.y = y != null ? y : this.y;
+				this.z = z != null ? z : this.z;
+				//addChangedNode(this);
 			},
 			add: function(child){
 				var name = child.name;
@@ -912,6 +988,7 @@ Holder.js - client side image placeholders
 				else{
 					throw 'SceneGraph: child with that name already exists: '+name;
 				}
+				//addChangedNode(this);
 			},
 			remove: function(name){
 				if(this.children[name] == null){
@@ -921,11 +998,11 @@ Holder.js - client side image placeholders
 					child.parent = null;
 					delete this.children[name];
 				}
+				//addChangedNode(this);
 			},
 			removeAll: function(){
 				for(var child in this.children){
-					this.children[child].parent = null;
-					delete this.children[child];
+					this.remove(child);
 				}
 			}
 		});
@@ -944,7 +1021,7 @@ Holder.js - client side image placeholders
 				if(props != null){
 					merge(this.properties, props);
 				}
-				else if(typeof name !== 'string'){
+				else if(name != null && typeof name !== 'string'){
 					throw 'SceneGraph: invalid node name';
 				}
 			}
@@ -970,10 +1047,11 @@ Holder.js - client side image placeholders
 
 		var root = new RootNode();
 
-		return {
-			Shape: Shape,
-			root: root
-		};
+		this.Shape = Shape;
+		this.root = root;
+		this.flushChangedNodes = flushChangedNodes;
+
+		return this;
 	};
 
 	//< v2.4 API compatibility
@@ -1059,6 +1137,10 @@ Holder.js - client side image placeholders
 		supportsSVG: false
 	};
 
+	App.dpr = function(val){
+		return val * App.setup.ratio;
+	}
+
 	//Properties modified during runtime
 
 	App.vars = {
@@ -1085,7 +1167,7 @@ Holder.js - client side image placeholders
 			}
 		}
 
-		if (App.setup.renderer == 'canvas') {
+		if (App.setup.supportsCanvas) {
 			devicePixelRatio = global.devicePixelRatio || 1;
 			backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 		}
