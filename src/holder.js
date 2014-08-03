@@ -741,7 +741,7 @@ Holder.js - client side image placeholders
 			ctx.textBaseline = 'top';
 
 			ctx.fillStyle = root.children.holderBg.properties.fill;
-			ctx.fillRect(0, 0, root.children.holderBg.width, root.children.holderBg.height);
+			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
 			
 			var textGroup = root.children.holderTextGroup;
 			ctx.font = textGroup.properties.fontWeight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
