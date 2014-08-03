@@ -47,7 +47,6 @@ Holder.js - client side image placeholders
 
 			var options = extend(App.settings, preferences),
 				images = [],
-				imageNodes = [],
 				bgnodes = [];
 
 			//todo: validate renderer
@@ -61,27 +60,9 @@ Holder.js - client side image placeholders
 				holderSettings.renderer = 'svg';
 			}
 
-			if (typeof (options.images) == 'string') {
-				imageNodes = document.querySelectorAll(options.images);
-			} else if (global.NodeList && options.images instanceof global.NodeList) {
-				imageNodes = options.images;
-			} else if (global.Node && options.images instanceof global.Node) {
-				imageNodes = [options.images];
-			} else if (global.HTMLCollection && options.images instanceof global.HTMLCollection) {
-				imageNodes = options.images;
-			}
-
-			for (i = 0; i < imageNodes.length; i++){
-				images.push(imageNodes[i]);
-			}
-
-			if (typeof (options.bgnodes) == 'string') {
-				bgnodes = document.querySelectorAll(options.bgnodes);
-			} else if (global.NodeList && options.elements instanceof global.NodeList) {
-				bgnodes = options.bgnodes;
-			} else if (global.Node && options.bgnodes instanceof global.Node) {
-				bgnodes = [options.bgnodes];
-			}
+			images = getNodeArray(options.images);
+			
+			bgnodes = getNodeArray(options.bgnodes);
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
 
@@ -850,6 +831,21 @@ Holder.js - client side image placeholders
 		debounce(function () {
 			updateResizableElements(null);
 		});
+	}
+
+	//todo: jsdoc getNodeArray
+	function getNodeArray(val){
+		var retval = null;
+		if (typeof (val) == 'string') {
+			retval = document.querySelectorAll(val);
+		} else if (global.NodeList && val instanceof global.NodeList) {
+			retval = val;
+		} else if (global.Node && val instanceof global.Node) {
+			retval = [val];
+		} else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+			retval = val;
+		}
+		return retval;
 	}
 
 	/**
