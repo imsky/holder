@@ -935,25 +935,6 @@ Holder.js - client side image placeholders
 			return parent;
 		}
 
-		var changedNodes = {};
-
-		//todo: move all change code out
-
-		function addChangedNode(node){
-			changedNodes[node.id] = node;
-		}
-
-		function flushChangedNodes(){
-			var nodes = [];
-			for(var i in changedNodes){
-				if(changedNodes.hasOwnProperty(i)){
-					nodes.push(changedNodes[i]);
-				}
-			}
-			changedNodes = {};
-			return nodes;
-		}
-		
 		var SceneNode = augment.defclass({
 			constructor: function(name){
 				nodeCount++;
@@ -977,19 +958,16 @@ Holder.js - client side image placeholders
 				if(height != null){
 					this.height = height;
 				}
-				//addChangedNode(this);
 			},
 			move: function(dx, dy, dz){
 				this.x += dx;
 				this.y += dy;
 				this.z += dz;
-				//addChangedNode(this);
 			},
 			moveTo: function(x, y, z){
 				this.x = x != null ? x : this.x;
 				this.y = y != null ? y : this.y;
 				this.z = z != null ? z : this.z;
-				//addChangedNode(this);
 			},
 			add: function(child){
 				var name = child.name;
@@ -1000,7 +978,6 @@ Holder.js - client side image placeholders
 				else{
 					throw 'SceneGraph: child with that name already exists: '+name;
 				}
-				//addChangedNode(this);
 			},
 			remove: function(name){
 				if(this.children[name] == null){
@@ -1010,7 +987,6 @@ Holder.js - client side image placeholders
 					child.parent = null;
 					delete this.children[name];
 				}
-				//addChangedNode(this);
 			},
 			removeAll: function(){
 				for(var child in this.children){
