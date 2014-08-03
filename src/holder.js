@@ -4,10 +4,7 @@ Holder.js - client side image placeholders
 */
 (function (register, global, undefined) {
 
-	var app = {};
-
 	var Holder = {
-
 		/**
 		 * Adds a theme to default settings
 		 *
@@ -15,8 +12,8 @@ Holder.js - client side image placeholders
 		 * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
 		 */
 		addTheme: function (name, theme) {
-			name != null && theme != null && (app.settings.themes[name] = theme);
-			delete app.runtime.cache.themeKeys;
+			name != null && theme != null && (App.settings.themes[name] = theme);
+			delete App.vars.cache.themeKeys;
 			return this;
 		},
 
@@ -24,7 +21,7 @@ Holder.js - client side image placeholders
 		 * Appends a placeholder to an element
 		 *
 		 * @param {string} src Placeholder URL string
-		 * @param {string} el Selector of target element
+		 * @param {string} el Selector of target element(s)
 		 */
 		addImage: function (src, el) {
 			var node = document.querySelectorAll(el);
@@ -41,23 +38,27 @@ Holder.js - client side image placeholders
 		/**
 		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
 		 *
-		 * @param {Object} instanceOptions Options object, can contain domain, themes, images, and bgnodes properties
+		 * @param {Object} preferences Options object, can contain domain, themes, images, and bgnodes properties
 		 */
-		run: function (instanceOptions) {
-			var localConfig = extend({}, app.config);
+		run: function (preferences) {
+			var holderSettings = {};
 
-			app.runtime.preempted = true;
+			App.vars.preempted = true;
 
-			var options = extend(app.settings, instanceOptions),
+			var options = extend(App.settings, preferences),
 				images = [],
 				imageNodes = [],
 				bgnodes = [];
 
+			//todo: validate renderer
+			//todo: document runtime renderer option
+			holderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+			
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
-				localConfig.renderer = 'canvas';
+				holderSettings.renderer = 'canvas';
 			} else if (options.use_svg) {
-				localConfig.renderer = 'svg';
+				holderSettings.renderer = 'svg';
 			}
 
 			if (typeof (options.images) == 'string') {
@@ -70,6 +71,10 @@ Holder.js - client side image placeholders
 				imageNodes = options.images;
 			}
 
+			for (i = 0; i < imageNodes.length; i++){
+				images.push(imageNodes[i]);
+			}
+
 			if (typeof (options.bgnodes) == 'string') {
 				bgnodes = document.querySelectorAll(options.bgnodes);
 			} else if (global.NodeList && options.elements instanceof global.NodeList) {
@@ -77,14 +82,11 @@ Holder.js - client side image placeholders
 			} else if (global.Node && options.bgnodes instanceof global.Node) {
 				bgnodes = [options.bgnodes];
 			}
-			
-			for (i = 0; i < imageNodes.length; i++){
-				images.push(imageNodes[i]);
-			}
 
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
 
 			for (var i = 0; i < bgnodes.length; i++) {
+				if(bgnodes[i].tagName.toLowerCase() == 'link') continue;
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
 				var holderURL = null;
@@ -102,7 +104,7 @@ Holder.js - client side image placeholders
 				if(holderURL != null){
 					var holderFlags = parseURL(holderURL, options);
 					if(holderFlags){
-						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, localConfig);
+						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, holderSettings);
 					}
 				}
 			}
@@ -127,27 +129,27 @@ Holder.js - client side image placeholders
 
 				if (hasSrc) {
 					if (attr_src.indexOf(options.domain) === 0) {
-						processImageElement(options, localConfig, attr_src, image);
+						processImageElement(options, holderSettings, attr_src, image);
 					} else if (hasDataSrcURL) {
 						if (rendered) {
-							processImageElement(options, localConfig, attr_datasrc, image);
+							processImageElement(options, holderSettings, attr_datasrc, image);
 						} else {
 							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
 								src: attr_src,
 								options: options,
-								localConfig: localConfig,
+								holderSettings: holderSettings,
 								dataSrc: attr_datasrc,
 								image: image
 							}, function (exists, config) {
 								if (!exists) {
-									processImageElement(config.options, config.localConfig, config.dataSrc, config.image);
+									processImageElement(config.options, config.holderSettings, config.dataSrc, config.image);
 								}
 							});
 						}
 					}
 				} else if (hasDataSrcURL) {
-						processImageElement(options, localConfig, attr_datasrc, image);
+						processImageElement(options, holderSettings, attr_datasrc, image);
 				}
 			}
 			return this;
@@ -164,20 +166,57 @@ Holder.js - client side image placeholders
 		}
 	};
 
+	var App = {
+		settings: {
+			domain: 'holder.js',
+			images: 'img',
+			bgnodes: '.holderjs',
+			stylenodes: 'link.holderjs',
+			stylesheets: [],
+			themes: {
+				'gray': {
+					background: '#EEEEEE',
+					foreground: '#AAAAAA'
+				},
+				'social': {
+					background: '#3a5a97',
+					foreground: '#FFFFFF'
+				},
+				'industrial': {
+					background: '#434A52',
+					foreground: '#C2F200'
+				},
+				'sky': {
+					background: '#0D8FDB',
+					foreground: '#FFFFFF'
+				},
+				'vine': {
+					background: '#39DBAC',
+					foreground: '#1E292C',
+				},
+				'lava': {
+					background: '#F8591A',
+					foreground: '#1C2846',
+					size: 12
+				}
+			}
+		}
+	};
+
 	/**
 	 * Processes provided source attribute and sets up the appropriate rendering workflow
 	 *
 	 * @private
 	 * @param options Instance options from Holder.run
-	 * @param localConfig Instance configuration
+	 * @param holderSettings Instance configuration
 	 * @param src Image URL
 	 * @param el Image DOM element
 	 */
-	function processImageElement(options, localConfig, src, el) {
+	function processImageElement(options, holderSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 
 		if (holderFlags) {
-			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, localConfig);
+			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, holderSettings);
 		}
 	}
 
@@ -190,23 +229,24 @@ Holder.js - client side image placeholders
 	 */
 	function parseURL(url, options) {
 		var ret = {
-			theme: extend(app.settings.themes.gray, null)
+			theme: extend(App.settings.themes.gray, null),
+			stylesheets: options.stylesheets
 		};
 		var render = false;
 		var flags = url.split('/');
 		for (var fl = flags.length, j = 0; j < fl; j++) {
 			var flag = flags[j];
-			if (app.flags.dimensions.match(flag)) {
+			if (App.flags.dimensions.match(flag)) {
 				render = true;
-				ret.dimensions = app.flags.dimensions.output(flag);
-			} else if (app.flags.fluid.match(flag)) {
+				ret.dimensions = App.flags.dimensions.output(flag);
+			} else if (App.flags.fluid.match(flag)) {
 				render = true;
-				ret.dimensions = app.flags.fluid.output(flag);
+				ret.dimensions = App.flags.fluid.output(flag);
 				ret.fluid = true;
-			} else if (app.flags.textmode.match(flag)) {
-				ret.textmode = app.flags.textmode.output(flag);
-			} else if (app.flags.colors.match(flag)) {
-				var colors = app.flags.colors.output(flag);
+			} else if (App.flags.textmode.match(flag)) {
+				ret.textmode = App.flags.textmode.output(flag);
+			} else if (App.flags.colors.match(flag)) {
+				var colors = App.flags.colors.output(flag);
 				ret.theme = extend(ret.theme, colors);
 			//todo: convert implicit theme use to a theme: flag
 			} else if (options.themes[flag]) {
@@ -214,39 +254,21 @@ Holder.js - client side image placeholders
 				if (options.themes.hasOwnProperty(flag)) {
 					ret.theme = extend(options.themes[flag], null);
 				}
-			} else if (app.flags.font.match(flag)) {
-				ret.font = app.flags.font.output(flag);
-			} else if (app.flags.auto.match(flag)) {
+			} else if (App.flags.font.match(flag)) {
+				ret.font = App.flags.font.output(flag);
+			} else if (App.flags.auto.match(flag)) {
 				ret.auto = true;
-			} else if (app.flags.text.match(flag)) {
-				ret.text = app.flags.text.output(flag);
-			} else if (app.flags.random.match(flag)) {
-				if(app.runtime.cache.themeKeys == null){
-					app.runtime.cache.themeKeys = Object.keys(options.themes);
+			} else if (App.flags.text.match(flag)) {
+				ret.text = App.flags.text.output(flag);
+			} else if (App.flags.random.match(flag)) {
+				if(App.vars.cache.themeKeys == null){
+					App.vars.cache.themeKeys = Object.keys(options.themes);
 				}
-				var theme = app.runtime.cache.themeKeys[0|Math.random()*app.runtime.cache.themeKeys.length];
+				var theme = App.vars.cache.themeKeys[0|Math.random()*App.vars.cache.themeKeys.length];
 				ret.theme = extend(options.themes[theme], null);
 			}
 		}
 		return render ? ret : false;
-	}
-
-	/**
-	 * Adaptive text sizing function
-	 *
-	 * @private
-	 * @param width Parent width
-	 * @param height Parent height
-	 * @param fontSize Requested text size
-	 */
-	function textSize(width, height, fontSize) {
-		height = parseInt(height, 10);
-		width = parseInt(width, 10);
-		var bigSide = Math.max(height, width);
-		var smallSide = Math.min(height, width);
-		var scale = 1 / 12;
-		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-		return Math.round(Math.max(fontSize, newHeight));
 	}
 
 	/**
@@ -257,9 +279,9 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
-	 * @param localConfig Instance configuration
+	 * @param holderSettings Instance configuration
 	 */
-	function prepareDOMElement(mode, el, flags, src, localConfig) {
+	function prepareDOMElement(mode, el, flags, src, holderSettings) {
 		var dimensions = flags.dimensions,
 			theme = flags.theme,
 			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
@@ -288,7 +310,7 @@ Holder.js - client side image placeholders
 		flags.theme = theme;
 		el.holderData = {
 			flags: flags,
-			localConfig: localConfig
+			holderSettings: holderSettings
 		};
 
 		if(mode == 'image' || mode == 'fluid'){
@@ -296,33 +318,33 @@ Holder.js - client side image placeholders
 		}
 
 		if (mode == 'image') {
-			if (localConfig.renderer == 'html' || !flags.auto) {
+			if (holderSettings.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
 				el.style.height = dimensions.height + 'px';
 			}
-			if (localConfig.renderer == 'html') {
+			if (holderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				render(mode, {
 					dimensions: dimensions,
 					theme: theme,
-					ratio: app.config.ratio,
+					ratio: App.setup.ratio,
 					flags: flags
-				}, el, localConfig);
+				}, el, holderSettings);
 
 				if (flags.textmode && flags.textmode == 'exact') {
-					app.runtime.resizableImages.push(el);
+					App.vars.resizableImages.push(el);
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == 'background' && localConfig.renderer != 'html') {
+		} else if (mode == 'background' && holderSettings.renderer != 'html') {
 			render(mode, {
 					dimensions: dimensions,
 					theme: theme,
-					ratio: app.config.ratio,
+					ratio: App.setup.ratio,
 					flags: flags
 				},
-				el, localConfig);
+				el, holderSettings);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height;
@@ -340,10 +362,10 @@ Holder.js - client side image placeholders
 
 			setInitialDimensions(el);
 
-			if (localConfig.renderer == 'html') {
+			if (holderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
-				app.runtime.resizableImages.push(el);
+				App.vars.resizableImages.push(el);
 				updateResizableElements(el);
 			}
 		}
@@ -356,9 +378,9 @@ Holder.js - client side image placeholders
 	 * @param mode Placeholder mode, either background or image
 	 * @param params Placeholder-specific parameters
 	 * @param el Image DOM element
-	 * @param localConfig Instance configuration
+	 * @param holderSettings Instance configuration
 	 */
-	function render(mode, params, el, localConfig) {
+	function render(mode, params, el, holderSettings) {
 		var image = null;
 
 		//todo: move generation of scene up to flag generation to reduce extra object creation
@@ -381,13 +403,15 @@ Holder.js - client side image placeholders
 			template: scene.theme
 		};
 
-		switch(localConfig.renderer){
+		switch(holderSettings.renderer){
 			case 'canvas':
 				image = canvasRenderer(rendererParams);
 			break;
 			case 'svg':
 				image = svgRenderer(rendererParams);
 			break;
+			default:
+				throw 'Holder: invalid renderer: '+holderSettings.renderer;
 		}
 
 		if (image == null) {
@@ -403,12 +427,30 @@ Holder.js - client side image placeholders
 		el.setAttribute('data-holder-rendered', true);
 	}
 
+	/**
+	 * Adaptive text sizing function
+	 *
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
+	function textSize(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width);
+		var smallSide = Math.min(height, width);
+		var scale = 1 / 12;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return Math.round(Math.max(fontSize, newHeight));
+	}
+
 	//todo: jsdoc buildSceneGraph
 	function buildSceneGraph(scene){
 		//todo: mark the placeholder for canvas re-render if font is defined
 		scene.font = {
 			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-			size: textSize(scene.width, scene.height, scene.theme.size),
+			size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : 12),
 			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 		};
 		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
@@ -465,7 +507,7 @@ Holder.js - client side image placeholders
 	function updateResizableElements(element) {
 		var images;
 		if (element == null || element.nodeType == null) {
-			images = app.runtime.resizableImages;
+			images = App.vars.resizableImages;
 		} else {
 			images = [element];
 		}
@@ -493,7 +535,7 @@ Holder.js - client side image placeholders
 					var drawParams = {
 						dimensions: dimensions,
 						theme: flags.theme,
-						ratio: app.config.ratio,
+						ratio: App.setup.ratio,
 						flags: flags
 					};
 
@@ -502,7 +544,7 @@ Holder.js - client side image placeholders
 						drawParams.dimensions = flags.dimensions;
 					}
 
-					render('image', drawParams, el, el.holderData.localConfig);
+					render('image', drawParams, el, el.holderData.holderSettings);
 				}
 			}
 		}
@@ -612,7 +654,7 @@ Holder.js - client side image placeholders
 		var svg = null, stagingText = null, stagingTextNode = null;
 		return function (graph){
 			var rootNode = graph.root;
-			if(app.config.supportsSVG){
+			if(App.setup.supportsSVG){
 				var firstTimeSetup = false;
 				var tnode = function(text){
 						return document.createTextNode(text);
@@ -702,7 +744,7 @@ Holder.js - client side image placeholders
 
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle';
-			ctx.font = props.fontWeight + ' ' + (props.textHeight * app.config.ratio) + 'px ' + props.font;
+			ctx.font = props.fontWeight + ' ' + (props.textHeight * App.setup.ratio) + 'px ' + props.font;
 			ctx.fillStyle = props.template.foreground;
 			ctx.fillText(props.text, (props.width / 2), (props.height / 2));
 
@@ -745,111 +787,6 @@ Holder.js - client side image placeholders
 			return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
 		};
 	})();
-
-	//Configuration
-
-	app.flags = {
-		dimensions: {
-			regex: /^(\d+)x(\d+)$/,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					width: +exec[1],
-					height: +exec[2]
-				};
-			}
-		},
-		fluid: {
-			regex: /^([0-9%]+)x([0-9%]+)$/,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					width: exec[1],
-					height: exec[2]
-				};
-			}
-		},
-		colors: {
-			regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					foreground: '#' + exec[2],
-					background: '#' + exec[1]
-				};
-			}
-		},
-		text: {
-			regex: /text\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		font: {
-			regex: /font\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		auto: {
-			regex: /^auto$/
-		},
-		textmode: {
-			regex: /textmode\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		//todo: document random flag
-		random: {
-			regex: /^random$/
-		}
-	};
-
-	for (var flag in app.flags) {
-		if (!app.flags.hasOwnProperty(flag)) continue;
-		app.flags[flag].match = function (val) {
-			return val.match(this.regex);
-		};
-	}
-
-	app.settings = {
-		domain: 'holder.js',
-		images: 'img',
-		bgnodes: '.holderjs',
-		themes: {
-			'gray': {
-				background: '#eee',
-				foreground: '#aaa',
-				size: 12
-			},
-			'social': {
-				background: '#3a5a97',
-				foreground: '#fff',
-				size: 12
-			},
-			'industrial': {
-				background: '#434A52',
-				foreground: '#C2F200',
-				size: 12
-			},
-			'sky': {
-				background: '#0D8FDB',
-				foreground: '#fff',
-				size: 12
-			},
-			'vine': {
-				background: '#39DBAC',
-				foreground: '#1E292C',
-				size: 12
-			},
-			'lava': {
-				background: '#F8591A',
-				foreground: '#1C2846',
-				size: 12
-			}
-		}
-	};
 
 	//Helpers
 
@@ -898,12 +835,12 @@ Holder.js - client side image placeholders
 	 * @param fn Function to call
 	 */
 	function debounce(fn) {
-		if (!app.runtime.debounceTimer) fn.call(this);
-		if (app.runtime.debounceTimer) clearTimeout(app.runtime.debounceTimer);
-		app.runtime.debounceTimer = setTimeout(function () {
-			app.runtime.debounceTimer = null;
+		if (!App.vars.debounceTimer) fn.call(this);
+		if (App.vars.debounceTimer) clearTimeout(App.vars.debounceTimer);
+		App.vars.debounceTimer = setTimeout(function () {
+			App.vars.debounceTimer = null;
 			fn.call(this);
-		}, app.config.debounce);
+		}, App.setup.debounce);
 	}
 
 	/**
@@ -1049,9 +986,76 @@ Holder.js - client side image placeholders
 	Holder.add_image = Holder.addImage;
 	Holder.invisible_error_fn = Holder.invisibleErrorFn;
 
+	//Configuration
+
+	App.flags = {
+		dimensions: {
+			regex: /^(\d+)x(\d+)$/,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					width: +exec[1],
+					height: +exec[2]
+				};
+			}
+		},
+		fluid: {
+			regex: /^([0-9%]+)x([0-9%]+)$/,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					width: exec[1],
+					height: exec[2]
+				};
+			}
+		},
+		colors: {
+			regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
+			output: function (val) {
+				var exec = this.regex.exec(val);
+				return {
+					foreground: '#' + exec[2],
+					background: '#' + exec[1]
+				};
+			}
+		},
+		text: {
+			regex: /text\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		},
+		font: {
+			regex: /font\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		},
+		auto: {
+			regex: /^auto$/
+		},
+		textmode: {
+			regex: /textmode\:(.*)/,
+			output: function (val) {
+				return this.regex.exec(val)[1];
+			}
+		},
+		//todo: document random flag
+		random: {
+			regex: /^random$/
+		}
+	};
+
+	for (var flag in App.flags) {
+		if (!App.flags.hasOwnProperty(flag)) continue;
+		App.flags[flag].match = function (val) {
+			return val.match(this.regex);
+		};
+	}
+
 	//Properties set once on setup
 
-	app.config = {
+	App.setup = {
 		renderer: 'html',
 		debounce: 100,
 		ratio: 1,
@@ -1061,7 +1065,7 @@ Holder.js - client side image placeholders
 
 	//Properties modified during runtime
 
-	app.runtime = {
+	App.vars = {
 		preempted: false,
 		resizableImages: [],
 		debounceTimer: null,
@@ -1079,22 +1083,22 @@ Holder.js - client side image placeholders
 
 		if (canvas.getContext) {
 			if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
-				app.config.renderer = 'canvas';
+				App.setup.renderer = 'canvas';
 				ctx = canvas.getContext('2d');
-				app.config.supportsCanvas = true;
+				App.setup.supportsCanvas = true;
 			}
 		}
 
-		if (app.config.renderer == 'canvas') {
+		if (App.setup.renderer == 'canvas') {
 			devicePixelRatio = global.devicePixelRatio || 1;
 			backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
 		}
 
-		app.config.ratio = devicePixelRatio / backingStoreRatio;
+		App.setup.ratio = devicePixelRatio / backingStoreRatio;
 
 		if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
-			app.config.renderer = 'svg';
-			app.config.supportsSVG = true;
+			App.setup.renderer = 'svg';
+			App.setup.supportsSVG = true;
 		}
 	})();
 
@@ -1104,7 +1108,7 @@ Holder.js - client side image placeholders
 
 	if (global.onDomReady) {
 		global.onDomReady(function () {
-			if (!app.runtime.preempted) {
+			if (!App.vars.preempted) {
 				Holder.run({});
 			}
 			if (global.addEventListener) {
