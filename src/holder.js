@@ -248,131 +248,6 @@ Holder.js - client side image placeholders
 		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
 		return Math.round(Math.max(fontSize, newHeight));
 	}
-	
-	//todo: jsdoc buildSceneGraph
-	function buildSceneGraph(scene){
-		scene.font = {
-			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-			size: textSize(scene.width, scene.height, scene.theme.size),
-			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
-		};
-		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
-
-		switch(scene.flags.textmode){
-			case 'literal':
-			scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
-			break;
-			case 'exact':
-			if(!scene.flags.exactDimensions) break;
-			scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
-			break;
-		}
-		
-		var sceneGraph = new SceneGraph({
-			width: scene.width,
-			height: scene.height
-		});
-
-		var Shape = sceneGraph.Shape;
-
-		var sceneBackground = new Shape.Rect('sceneBg', {
-			width: scene.width,
-			height: scene.height,
-			fill: scene.theme.background
-		});
-
-		sceneGraph.root.add(sceneBackground);
-
-		var sceneText = new Shape.Group('sceneText', {
-			text: scene.text,
-			align: 'center',
-			font: scene.font,
-			size: scene.font.size,
-			//size: template.size,
-			weight: scene.font.weight,
-			fill: scene.theme.foreground
-		});
-
-		sceneGraph.root.add(sceneText);
-
-		var textInfo = stagingRenderer(sceneGraph);
-		
-		//todo: split and align the scene text according to textInfo parameters
-	}
-
-	/**
-	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
-	 *
-	 * @private
-	 * @param mode Placeholder mode, either background or image
-	 * @param params Placeholder-specific parameters
-	 * @param el Image DOM element
-	 * @param localConfig Instance configuration
-	 */
-	function render(mode, params, el, localConfig) {
-		var image = null;
-
-		var dimensions = params.dimensions;
-		var template = params.theme;
-		var flags = params.flags;
-
-		var width = dimensions.width;
-		var height = dimensions.height;
-		var textHeight = textSize(width, height, template.size);
-
-		//todo: mark the placeholder for canvas re-render if font is defined
-		var font = template.font ? template.font : 'Arial, Helvetica, sans-serif';
-		var fontWeight = template.fontweight ? template.fontweight : 'bold';
-		var dimensionsCaption = Math.floor(width) + 'x' + Math.floor(height);
-		var text = template.text ? template.text : dimensionsCaption;
-
-		if (flags.textmode == 'literal') {
-			text = flags.dimensions.width + 'x' + flags.dimensions.height;
-		} else if (flags.textmode == 'exact' && flags.exactDimensions) {
-			text = Math.floor(flags.exactDimensions.width) + 'x' + Math.floor(flags.exactDimensions.height);
-		}
-
-		//todo: move generation of scene up to flag generation to reduce extra object creation
-		var scene = {
-			width: params.dimensions.width,
-			height: params.dimensions.height,
-			theme: params.theme,
-			flags: params.flags
-		};
-
-		var sceneGraph = buildSceneGraph(scene);
-
-		var rendererParams = {
-			text: text,
-			width: width,
-			height: height,
-			textHeight: textHeight,
-			font: font,
-			fontWeight: fontWeight,
-			template: template
-		};
-
-		switch(localConfig.renderer){
-			case 'canvas':
-				image = canvasRenderer(rendererParams);
-			break;
-			case 'svg':
-				image = svgRenderer(rendererParams);
-			break;
-		}
-
-		if (image == null) {
-			throw 'Holder: couldn\'t render placeholder';
-		}
-
-		if (mode == 'background') {
-			el.style.backgroundImage = 'url(' + image + ')';
-			el.style.backgroundSize = params.dimensions.width + 'px ' + params.dimensions.height + 'px';
-		} else {
-			el.setAttribute('src', image);
-		}
-		el.setAttribute('data-holder-rendered', true);
-	}
 
 	/**
 	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
@@ -472,6 +347,113 @@ Holder.js - client side image placeholders
 				updateResizableElements(el);
 			}
 		}
+	}
+
+	/**
+	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
+	 *
+	 * @private
+	 * @param mode Placeholder mode, either background or image
+	 * @param params Placeholder-specific parameters
+	 * @param el Image DOM element
+	 * @param localConfig Instance configuration
+	 */
+	function render(mode, params, el, localConfig) {
+		var image = null;
+
+		//todo: move generation of scene up to flag generation to reduce extra object creation
+		var scene = {
+			width: params.dimensions.width,
+			height: params.dimensions.height,
+			theme: params.theme,
+			flags: params.flags
+		};
+
+		var sceneGraph = buildSceneGraph(scene);
+
+		var rendererParams = {
+			text: scene.text,
+			width: scene.width,
+			height: scene.height,
+			textHeight: scene.font.size,
+			font: scene.font.family,
+			fontWeight: scene.font.weight,
+			template: scene.theme
+		};
+
+		switch(localConfig.renderer){
+			case 'canvas':
+				image = canvasRenderer(rendererParams);
+			break;
+			case 'svg':
+				image = svgRenderer(rendererParams);
+			break;
+		}
+
+		if (image == null) {
+			throw 'Holder: couldn\'t render placeholder';
+		}
+
+		if (mode == 'background') {
+			el.style.backgroundImage = 'url(' + image + ')';
+			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+		} else {
+			el.setAttribute('src', image);
+		}
+		el.setAttribute('data-holder-rendered', true);
+	}
+
+	//todo: jsdoc buildSceneGraph
+	function buildSceneGraph(scene){
+		//todo: mark the placeholder for canvas re-render if font is defined
+		scene.font = {
+			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
+			size: textSize(scene.width, scene.height, scene.theme.size),
+			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
+		};
+		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+		switch(scene.flags.textmode){
+			case 'literal':
+			scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
+			break;
+			case 'exact':
+			if(!scene.flags.exactDimensions) break;
+			scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
+			break;
+		}
+		
+		var sceneGraph = new SceneGraph({
+			width: scene.width,
+			height: scene.height
+		});
+
+		var Shape = sceneGraph.Shape;
+
+		var sceneBg = new Shape.Rect('sceneBg', {
+			fill: scene.theme.background
+		});
+
+		sceneBg.width = scene.width;
+		sceneBg.height = scene.height;
+
+		sceneGraph.root.add(sceneBg);
+
+		var sceneText = new Shape.Group('sceneText', {
+			text: scene.text,
+			align: 'center',
+			font: scene.font,
+			fontSize: scene.font.size,
+			//size: template.size,
+			fontWeight: scene.font.weight,
+			fill: scene.theme.foreground
+		});
+
+		sceneGraph.root.add(sceneText);
+
+		var textInfo = stagingRenderer(sceneGraph);
+		
+		//todo: split and align the scene text according to textInfo parameters
 	}
 
 	/**
@@ -655,10 +637,10 @@ Holder.js - client side image placeholders
 				}
 				
 				var sceneText = rootNode.children.sceneText;
-				stagingText.setAttribute('y', sceneText.properties.size);
+				stagingText.setAttribute('y', sceneText.properties.fontSize);
 				stagingText.setAttribute('style', cssProps({
-					'font-weight': sceneText.properties.weight,
-					'font-size': sceneText.properties.size + 'px',
+					'font-weight': sceneText.properties.fontWeight,
+					'font-size': sceneText.properties.fontSize + 'px',
 					'font-family': sceneText.properties.font,
 					'dominant-baseline': 'middle'
 				}));
@@ -975,6 +957,18 @@ Holder.js - client side image placeholders
 				this.x = 0;
 				this.y = 0;
 				this.z = 0;
+				this.width = 0;
+				this.height = 0;
+				this.changed = false;
+			},
+			resize: function(width, height){
+				if(width != null){
+					this.width = width;
+				}
+				if(height != null){
+					this.height = height;
+				}
+				this.changed = true;
 			},
 			add: function(child){
 				var name = child.name;
@@ -1013,7 +1007,7 @@ Holder.js - client side image placeholders
 		var Shape = augment(SceneNode, function(uber){
 			function constructor(name, props){
 				uber.constructor.call(this, name);
-				this.properties = {width:0, height:0, fill:'#000'};
+				this.properties = {fill:'#000'};
 				if(props != null){
 					merge(this.properties, props);
 				}
@@ -1043,13 +1037,8 @@ Holder.js - client side image placeholders
 
 		var root = new RootNode();
 
-		function serialize(){
-			return JSON.stringify(root);
-		}
-
 		return {
 			Shape: Shape,
-			serialize: serialize,
 			root: root
 		};
 	};
