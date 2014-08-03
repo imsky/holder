@@ -455,6 +455,8 @@ Holder.js - client side image placeholders
 		
 		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
 
+		holderTextGroup.properties.lineHeight = tpdata.boundingBox.height;
+
 		if(tpdata.lineCount > 1){
 			for(var i = 0; i < tpdata.words.length; i++){
 				var word = tpdata.words[i];
@@ -738,19 +740,23 @@ Holder.js - client side image placeholders
 			var root = sceneGraph.root;
 			canvas.width = App.dpr(root.properties.width);
 			canvas.height = App.dpr(root.properties.height);
-			ctx.textBaseline = 'top';
+			ctx.textBaseline = 'middle';
 
 			ctx.fillStyle = root.children.holderBg.properties.fill;
 			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
 
 			var textGroup = root.children.holderTextGroup;
 			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
+
+			//ctx.fillStyle = '#ff0000';
+			//ctx.fillRect(App.dpr(textGroup.x), App.dpr(textGroup.y), App.dpr(textGroup.textPositionData.boundingBox.width), App.dpr(textGroup.textPositionData.boundingBox.height));
+
 			ctx.fillStyle = textGroup.properties.fill;
 
 			for(var nodeKey in textGroup.children){
 				var textNode = textGroup.children[nodeKey];
 				var x = App.dpr(textGroup.x + textNode.x);
-				var y = App.dpr(textGroup.y + textNode.y);
+				var y = App.dpr(textGroup.y + textNode.y + textGroup.properties.lineHeight / 2);
 				if(!isNaN(x) && Infinity != x && !isNaN(y) && Infinity != y){
 					ctx.fillText(textNode.properties.text, x,y);
 				}
