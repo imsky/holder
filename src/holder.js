@@ -747,7 +747,7 @@ Holder.js - client side image placeholders
 			ctx.font = textGroup.properties.fontWeight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
 			ctx.fillStyle = textGroup.properties.fill;
 			for(var textNode in textGroup.children){
-				ctx.fillText(textGroup.properties.text, App.dpr(textGroup.x), App.dpr(textGroup.y));
+				ctx.fillText(textGroup.children[textNode].properties.text, App.dpr(textGroup.x), App.dpr(textGroup.y));
 			}
 			
 			return canvas.toDataURL('image/png');
