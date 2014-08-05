@@ -97,7 +97,7 @@ app.flags = {
 	fluid: {
 		regex: /^([0-9%]+)x([0-9%]+)$/,
 		output: function (val) {
-			var exec = this.regex.exec(val);
+			var exec = this.regex.exec(val.replace(/%25/g, '%'));
 			return {
 				width: exec[1],
 				height: exec[2]
