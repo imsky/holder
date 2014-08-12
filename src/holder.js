@@ -447,7 +447,8 @@ Holder.js - client side image placeholders
 				//image = canvasRenderer(rendererParams);
 			break;
 			case 'svg':
-				image = svgRenderer(rendererParams);
+				image = sgSVGRenderer(sceneGraph);
+				//image = svgRenderer(rendererParams);
 			break;
 			default:
 				throw 'Holder: invalid renderer: '+renderSettings.renderer;
@@ -509,9 +510,9 @@ Holder.js - client side image placeholders
 
 		holderTextGroup.moveTo(null,null,1);
 		sceneGraph.root.add(holderTextGroup);
-		
-		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
 
+		//todo: see if possible to avoid bounding box calcs for short text and preserve line height
+		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
 		holderTextGroup.properties.lineHeight = tpdata.boundingBox.height;
 
 		if(tpdata.lineCount > 1){
@@ -704,6 +705,7 @@ Holder.js - client side image placeholders
 		return svg_css + serializer.serializeToString(svg);
 	}
 
+	//todo: see if possible to convert stagingRenderer to use HTML only
 	var stagingRenderer = (function(){
 		var svg = null, stagingText = null, stagingTextNode = null;
 		return function (graph){
@@ -805,24 +807,76 @@ Holder.js - client side image placeholders
 			var textGroup = root.children.holderTextGroup;
 			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
 
-			//ctx.fillStyle = '#ff0000';
-			//ctx.fillRect(App.dpr(textGroup.x), App.dpr(textGroup.y), App.dpr(textGroup.textPositionData.boundingBox.width), App.dpr(textGroup.textPositionData.boundingBox.height));
-
 			ctx.fillStyle = textGroup.properties.fill;
 
 			for(var nodeKey in textGroup.children){
 				var textNode = textGroup.children[nodeKey];
 				var x = App.dpr(textGroup.x + textNode.x);
 				var y = App.dpr(textGroup.y + textNode.y + textGroup.properties.lineHeight / 2);
-				if(!isNaN(x) && Infinity != x && !isNaN(y) && Infinity != y){
-					ctx.fillText(textNode.properties.text, x,y);
-				}
+
+				ctx.fillText(textNode.properties.text, x,y);
 			}
 			
 			return canvas.toDataURL('image/png');
 		};
 	})();
 
+	var sgSVGRenderer = (function(){
+		//Prevent IE <9 from initializing SVG renderer
+		if (!global.XMLSerializer) return;
+		var svg = initSVG(null, 0,0);
+		var bgEl = document.createElementNS(SVG_NS, 'rect');
+		//todo: create a generic setAttribute and createElement function
+		//todo: create a reusable pool for textNodes, resize if more words present
+		
+		return function (sceneGraph){
+			var root = sceneGraph.root;
+			initSVG(svg, root.properties.width, root.properties.height);
+			
+			while(svg.firstChild){
+				svg.removeChild(svg.firstChild);
+			}
+			
+			bgEl.setAttribute('width', root.children.holderBg.width);
+			bgEl.setAttribute('height', root.children.holderBg.height);
+			bgEl.setAttribute('fill', root.children.holderBg.properties.fill);
+			svg.appendChild(bgEl);
+
+			var textGroup = root.children.holderTextGroup;
+			var textGroupEl = document.createElementNS(SVG_NS, 'g');
+			svg.appendChild(textGroupEl);
+
+			for(var nodeKey in textGroup.children){
+				var textNode = textGroup.children[nodeKey];
+				var x = textGroup.x + textNode.x;
+				var y = textGroup.y + textNode.y + textGroup.properties.lineHeight / 2;
+
+				var textNodeEl = document.createElementNS(SVG_NS, 'text');
+				var textValue = document.createTextNode(null);
+				
+				textNodeEl.setAttribute('x', x);
+				textNodeEl.setAttribute('y', y);
+				textNodeEl.setAttribute('style', cssProps({
+					'fill': textGroup.properties.fill,
+					'font-weight': textGroup.properties.font.weight,
+					'font-family': textGroup.properties.font.family,
+					'font-size': textGroup.properties.font.size + 'px',
+					'dominant-baseline': 'central'
+				}));
+				textValue.nodeValue = textNode.properties.text;
+
+				textNodeEl.appendChild(textValue);
+				textGroupEl.appendChild(textNodeEl);
+			}
+
+			return 'data:image/svg+xml;base64,' +
+			btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
+		};
+	})();
+
+/*
+ * These renderers are now deprecated and should be removed ASAP
+ * 
 	var canvasRenderer = (function () {
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
@@ -879,10 +933,11 @@ Holder.js - client side image placeholders
 				'dominant-baseline': 'central'
 			}));
 			
-			return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
+			return 'data:image/svg+xml;base64,' +
+			btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
 		};
 	})();
-
+*/
 	//Helpers
 
 	/**
@@ -1128,7 +1183,7 @@ Holder.js - client side image placeholders
 
 	App.dpr = function(val){
 		return val * App.setup.ratio;
-	}
+	};
 
 	//Properties modified during runtime
 

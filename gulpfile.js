@@ -4,6 +4,7 @@ var uglify = require('gulp-uglify');
 var header = require('gulp-header');
 var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
+var gulputil = require('gulp-util');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -50,4 +51,10 @@ gulp.task('scripts', ['jshint'], function () {
 		.pipe(gulp.dest("./"))
 });
 
-gulp.task('default', ['todo', 'jshint', 'scripts']);
+gulp.task('watch', function(){
+	gulp.watch(paths.scripts, ['default']);
+});
+
+gulp.task('default', ['todo', 'jshint', 'scripts'], function(){
+	gulputil.log("Finished build "+build);
+});
