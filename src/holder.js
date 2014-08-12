@@ -65,10 +65,24 @@ Holder.js - client side image placeholders
 			bgnodes = getNodeArray(options.bgnodes);
 			stylenodes = getNodeArray(options.stylenodes);
 
+			renderSettings.stylesheets = [];
+
+			for(var i = 0; i < stylenodes.length; i++){
+				var styleNode = stylenodes[i];
+				if(styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == "stylesheet"){
+					var href = styleNode.attributes.href.value;
+					//todo: write isomorphic relative-to-absolute URL function
+					//todo: document that when testing locally, external fonts should have a full protocol
+					var proxyLink = document.createElement("a");
+					proxyLink.href = href;
+					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
+					renderSettings.stylesheets.push(stylesheetURL);
+				}
+			}
+
 			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
 
-			for (var i = 0; i < bgnodes.length; i++) {
-				if(bgnodes[i].tagName.toLowerCase() == 'link') continue;
+			for (i = 0; i < bgnodes.length; i++) {
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
 				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
 				var holderURL = null;
@@ -152,7 +166,7 @@ Holder.js - client side image placeholders
 		settings: {
 			domain: 'holder.js',
 			images: 'img',
-			bgnodes: '.holderjs',
+			bgnodes: 'body .holderjs',
 			stylenodes: 'link.holderjs',
 			stylesheets: [],
 			themes: {
@@ -447,7 +461,7 @@ Holder.js - client side image placeholders
 				//image = canvasRenderer(rendererParams);
 			break;
 			case 'svg':
-				image = sgSVGRenderer(sceneGraph);
+				image = sgSVGRenderer(sceneGraph, renderSettings);
 				//image = svgRenderer(rendererParams);
 			break;
 			default:
@@ -671,6 +685,8 @@ Holder.js - client side image placeholders
 	function initSVG(svg, width, height){
 		if(svg == null){
 			svg = document.createElementNS(SVG_NS, 'svg');
+			var defs = document.createElementNS(SVG_NS, 'defs');
+			svg.appendChild(defs);
 		}
 		//IE throws an exception if this is set and Chrome requires it to be set
 		if (svg.webkitMatchesSelector) {
@@ -693,15 +709,44 @@ Holder.js - client side image placeholders
 	function serializeSVG(svg, stylesheets){
 		if (!global.XMLSerializer) return;
 		var serializer = new XMLSerializer();
-		/* todo: process stylesheets variable
-		var xml = new DOMParser().parseFromString('<xml />', "application/xml")
-		var css = xml.createProcessingInstruction('xml-stylesheet', 'href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet"');
-		xml.insertBefore(css, xml.firstChild);
-		xml.removeChild(xml.documentElement)
-		var svg_css = serializer.serializeToString(xml);
-		*/
+		var xml = new DOMParser().parseFromString('<xml />', "application/xml");
 
-		var svg_css = '';
+		//Add <?xml-stylesheet ?> directives
+		for(var i = stylesheets.length - 1; i >= 0; i--){
+			var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="'+stylesheets[i]+'" rel="stylesheet"');
+			xml.insertBefore(csspi, xml.firstChild);
+		}
+
+		//Remove <xml />
+		xml.removeChild(xml.documentElement)
+
+		var defs = svg.querySelector("defs");
+
+		while(defs.firstChild != null){
+			defs.removeChild(defs.firstChild);
+		}
+		
+		for(i = 0; i < stylesheets.length; i++){
+			var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
+			link.setAttribute('href', stylesheets[i]);
+			link.setAttribute('rel', 'stylesheet');
+			link.setAttribute('type', 'text/css');
+
+			defs.appendChild(link);
+		}
+
+		var style = document.createElementNS(SVG_NS, 'style');
+		var styleText = [];
+
+		for(i = 0; i < stylesheets.length; i++){
+			styleText.push('@import url('+stylesheets[i]+');');
+		}
+
+		var styleTextNode = document.createTextNode(styleText.join("\n"));
+		style.appendChild(styleTextNode);
+		defs.appendChild(style);
+		
+		var svg_css = ''; serializer.serializeToString(xml);
 		return svg_css + serializer.serializeToString(svg);
 	}
 
@@ -826,21 +871,24 @@ Holder.js - client side image placeholders
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0,0);
 		var bgEl = document.createElementNS(SVG_NS, 'rect');
+		svg.appendChild(bgEl);
+		
 		//todo: create a generic setAttribute and createElement function
 		//todo: create a reusable pool for textNodes, resize if more words present
 		
-		return function (sceneGraph){
+		return function (sceneGraph, renderSettings){
 			var root = sceneGraph.root;
-			initSVG(svg, root.properties.width, root.properties.height);
 			
-			while(svg.firstChild){
-				svg.removeChild(svg.firstChild);
+			initSVG(svg, root.properties.width, root.properties.height);
+			var groups = svg.querySelectorAll("g");
+
+			for(var i = 0; i < groups.length; i++){
+				groups[i].parentNode.removeChild(groups[i]);
 			}
 			
 			bgEl.setAttribute('width', root.children.holderBg.width);
 			bgEl.setAttribute('height', root.children.holderBg.height);
 			bgEl.setAttribute('fill', root.children.holderBg.properties.fill);
-			svg.appendChild(bgEl);
 
 			var textGroup = root.children.holderTextGroup;
 			var textGroupEl = document.createElementNS(SVG_NS, 'g');
@@ -870,7 +918,7 @@ Holder.js - client side image placeholders
 			}
 
 			return 'data:image/svg+xml;base64,' +
-			btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
+			btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.stylesheets))));
 		};
 	})();
 

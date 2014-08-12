@@ -18,10 +18,12 @@ var banner =
 	'License:\t<%= pkg.license.url %>\n\n' +
 	'*/\n';
 
-var build = (function(){
+function generateBuild(){
 	var date = new Date;
 	return Math.floor((date - (new Date(date.getFullYear(),0,0)))/1000).toString(36)
-})()
+}
+
+var build = generateBuild();
 
 var paths = {
 	scripts: ["src/ondomready.js", "src/polyfills.js", "src/augment.js", "src/holder.js"]
@@ -56,5 +58,6 @@ gulp.task('watch', function(){
 });
 
 gulp.task('default', ['todo', 'jshint', 'scripts'], function(){
+	build = generateBuild();
 	gulputil.log("Finished build "+build);
 });
