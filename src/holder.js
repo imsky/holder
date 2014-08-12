@@ -182,6 +182,63 @@ Holder.js - client side image placeholders
 					size: 12
 				}
 			}
+		},
+		flags: {
+			dimensions: {
+				regex: /^(\d+)x(\d+)$/,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						width: +exec[1],
+						height: +exec[2]
+					};
+				}
+			},
+			fluid: {
+				regex: /^([0-9]+%)x([0-9]+%)$/,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						width: exec[1],
+						height: exec[2]
+					};
+				}
+			},
+			colors: {
+				regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						foreground: '#' + exec[2],
+						background: '#' + exec[1]
+					};
+				}
+			},
+			text: {
+				regex: /text\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1];
+				}
+			},
+			font: {
+				regex: /font\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1];
+				}
+			},
+			auto: {
+				regex: /^auto$/
+			},
+			textmode: {
+				regex: /textmode\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1];
+				}
+			},
+			//todo: document random flag
+			random: {
+				regex: /^random$/
+			}
 		}
 	};
 
@@ -902,6 +959,9 @@ Holder.js - client side image placeholders
 		} else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
 			retval = val;
 		}
+		else if(val === null){
+			retval = [];
+		}
 		return retval;
 	}
 
@@ -1037,7 +1097,6 @@ Holder.js - client side image placeholders
 
 		this.Shape = Shape;
 		this.root = root;
-		this.flushChangedNodes = flushChangedNodes;
 
 		return this;
 	};
@@ -1048,65 +1107,7 @@ Holder.js - client side image placeholders
 	Holder.add_image = Holder.addImage;
 	Holder.invisible_error_fn = Holder.invisibleErrorFn;
 
-	//Configuration
-
-	App.flags = {
-		dimensions: {
-			regex: /^(\d+)x(\d+)$/,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					width: +exec[1],
-					height: +exec[2]
-				};
-			}
-		},
-		fluid: {
-			regex: /^([0-9%]+)x([0-9%]+)$/,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					width: exec[1],
-					height: exec[2]
-				};
-			}
-		},
-		colors: {
-			regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
-			output: function (val) {
-				var exec = this.regex.exec(val);
-				return {
-					foreground: '#' + exec[2],
-					background: '#' + exec[1]
-				};
-			}
-		},
-		text: {
-			regex: /text\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		font: {
-			regex: /font\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		auto: {
-			regex: /^auto$/
-		},
-		textmode: {
-			regex: /textmode\:(.*)/,
-			output: function (val) {
-				return this.regex.exec(val)[1];
-			}
-		},
-		//todo: document random flag
-		random: {
-			regex: /^random$/
-		}
-	};
+	//Set up flags
 
 	for (var flag in App.flags) {
 		if (!App.flags.hasOwnProperty(flag)) continue;

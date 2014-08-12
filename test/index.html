@@ -152,12 +152,18 @@
 		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
 </div>
+<div class="thumb">
+<img data-src="holder.js/100%x100/sky">
+<img data-src="holder.js/100%x100/lava">
+<div class="caption">Two placeholders in one parent</div>
+</div>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../holder.js"></script>
 <!--
 <script src="require.js" data-main="test.js"></script>
 -->
 <script>
+DOCUMENTQSA = function(arg){return document.querySelectorAll(arg)};
 Holder.run({use_canvas:true});
 /*
 Holder.add_image("holder.js/250x120/sky", "#thumb1").run();
