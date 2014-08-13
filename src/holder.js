@@ -38,7 +38,7 @@ Holder.js - client side image placeholders
 		/**
 		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
 		 *
-		 * @param {Object} preferences Options object, can contain domain, themes, images, and bgnodes properties
+		 * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
 		 */
 		run: function (userOptions) {
 			var renderSettings = {};
@@ -53,6 +53,9 @@ Holder.js - client side image placeholders
 			//todo: validate renderer
 			//todo: document runtime renderer option
 			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+
+			//todo: document noFontFallback option
+			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 			
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
@@ -66,6 +69,8 @@ Holder.js - client side image placeholders
 			stylenodes = getNodeArray(options.stylenodes);
 
 			renderSettings.stylesheets = [];
+			//todo: document svg stylesheet settings
+			renderSettings.svgXMLStylesheet = true;
 
 			for(var i = 0; i < stylenodes.length; i++){
 				var styleNode = stylenodes[i];
@@ -267,9 +272,8 @@ Holder.js - client side image placeholders
 	 */
 	function prepareImageElement(options, renderSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
-
 		if (holderFlags) {
-			prepareDOMElement(holderFlags.fluid ? 'fluid' : 'image', el, holderFlags, src, renderSettings);
+			prepareDOMElement(null, el, holderFlags, src, renderSettings);
 		}
 	}
 
@@ -328,7 +332,6 @@ Holder.js - client side image placeholders
 	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
 	 *
 	 * @private
-	 * @param mode Placeholder mode, either background or image
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
@@ -339,17 +342,19 @@ Holder.js - client side image placeholders
 			theme = flags.theme,
 			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
-
-		var extensions = {};
+		mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
 
 		if(text){
-			extensions.text = text;
+			theme.text = text;
 		}
+		
 		if(flags.font){
-			extensions.font = flags.font;
+			theme.font = flags.font;
+			if(!renderSettings.noFontFallback && App.setup.supportsCanvas){
+				//If the client does not support canvas, the fallback fails and external fonts are dropped
+				renderSettings.renderer = 'canvas';
+			}
 		}
-
-		theme = extend(theme, extensions);
 
 		if(mode == 'background'){
 			if(el.getAttribute('data-background-src') == null){
@@ -361,6 +366,7 @@ Holder.js - client side image placeholders
 		}
 
 		flags.theme = theme;
+		
 		el.holderData = {
 			flags: flags,
 			renderSettings: renderSettings
@@ -706,47 +712,55 @@ Holder.js - client side image placeholders
 	 * @param svg SVG context
 	 * @param stylesheets CSS stylesheets to include
 	 */
-	function serializeSVG(svg, stylesheets){
+	function serializeSVG(svg, renderSettings) {
 		if (!global.XMLSerializer) return;
+		var serializer = new XMLSerializer();
+		var svg_css = '';
+		var stylesheets = renderSettings.stylesheets;
+		var defs = svg.querySelector('defs');
 
 		//External stylesheets: Processing Instruction method
-		var serializer = new XMLSerializer();
-		var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
-		//Add <?xml-stylesheet ?> directives
-		for(var i = stylesheets.length - 1; i >= 0; i--){
-			var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="'+stylesheets[i]+'" rel="stylesheet"');
-			xml.insertBefore(csspi, xml.firstChild);
+		if (renderSettings.svgXMLStylesheet) {
+			var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
+			//Add <?xml-stylesheet ?> directives
+			for (var i = stylesheets.length - 1; i >= 0; i--) {
+				var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
+				xml.insertBefore(csspi, xml.firstChild);
+			}
+
+			xml.removeChild(xml.documentElement);
+			svg_css = serializer.serializeToString(xml);
 		}
-		
-		xml.removeChild(xml.documentElement);
 
 		//External stylesheets: <link> method
-		var defs = svg.querySelector('defs');
-		while(defs.firstChild != null){
-			defs.removeChild(defs.firstChild);
-		}
-		
-		for(i = 0; i < stylesheets.length; i++){
-			var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
-			link.setAttribute('href', stylesheets[i]);
-			link.setAttribute('rel', 'stylesheet');
-			link.setAttribute('type', 'text/css');
-			defs.appendChild(link);
+		if (renderSettings.svgLinkStylesheet) {
+			while (defs.firstChild != null) {
+				defs.removeChild(defs.firstChild);
+			}
+
+			for (i = 0; i < stylesheets.length; i++) {
+				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
+				link.setAttribute('href', stylesheets[i]);
+				link.setAttribute('rel', 'stylesheet');
+				link.setAttribute('type', 'text/css');
+				defs.appendChild(link);
+			}
 		}
 
 		//External stylesheets: <style> and @import method
-		var style = document.createElementNS(SVG_NS, 'style');
-		var styleText = [];
+		if (renderSettings.svgImportStylesheet) {
+			var style = document.createElementNS(SVG_NS, 'style');
+			var styleText = [];
 
-		for(i = 0; i < stylesheets.length; i++){
-			styleText.push('@import url('+stylesheets[i]+');');
+			for (i = 0; i < stylesheets.length; i++) {
+				styleText.push('@import url(' + stylesheets[i] + ');');
+			}
+
+			var styleTextNode = document.createTextNode(styleText.join('\n'));
+			style.appendChild(styleTextNode);
+			defs.appendChild(style);
 		}
 
-		var styleTextNode = document.createTextNode(styleText.join('\n'));
-		style.appendChild(styleTextNode);
-		defs.appendChild(style);
-		
-		var svg_css = serializer.serializeToString(xml);
 		return svg_css + serializer.serializeToString(svg);
 	}
 
@@ -918,7 +932,7 @@ Holder.js - client side image placeholders
 			}
 
 			var svgString = 'data:image/svg+xml;base64,' +
-			btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.stylesheets))));
+			btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings))));
 			return svgString;
 		};
 	})();
