@@ -214,7 +214,7 @@ Holder.js - client side image placeholders
 				}
 			},
 			fluid: {
-				regex: /^([0-9]+%)x([0-9]+%)$/,
+				regex: /^([0-9]+%?)x([0-9]+%?)$/,
 				output: function(val) {
 					var exec = this.regex.exec(val);
 					return {
@@ -883,7 +883,7 @@ Holder.js - client side image placeholders
 			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
 
 			var textGroup = root.children.holderTextGroup;
-			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
+			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family +', monospace';
 			
 			ctx.fillStyle = textGroup.properties.fill;
 
@@ -941,7 +941,7 @@ Holder.js - client side image placeholders
 				textNodeEl.setAttribute('style', cssProps({
 					'fill': textGroup.properties.fill,
 					'font-weight': textGroup.properties.font.weight,
-					'font-family': textGroup.properties.font.family + ', Arial, Helvetica, sans-serif',
+					'font-family': textGroup.properties.font.family + ', monospace',
 					'font-size': textGroup.properties.font.size + 'px',
 					'dominant-baseline': 'central'
 				}));
