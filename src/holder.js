@@ -69,11 +69,11 @@ Holder.js - client side image placeholders
 
 			for(var i = 0; i < stylenodes.length; i++){
 				var styleNode = stylenodes[i];
-				if(styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == "stylesheet"){
+				if(styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet'){
 					var href = styleNode.attributes.href.value;
 					//todo: write isomorphic relative-to-absolute URL function
 					//todo: document that when testing locally, external fonts should have a full protocol
-					var proxyLink = document.createElement("a");
+					var proxyLink = document.createElement('a');
 					proxyLink.href = href;
 					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
 					renderSettings.stylesheets.push(stylesheetURL);
@@ -708,20 +708,20 @@ Holder.js - client side image placeholders
 	 */
 	function serializeSVG(svg, stylesheets){
 		if (!global.XMLSerializer) return;
-		var serializer = new XMLSerializer();
-		var xml = new DOMParser().parseFromString('<xml />', "application/xml");
 
+		//External stylesheets: Processing Instruction method
+		var serializer = new XMLSerializer();
+		var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
 		//Add <?xml-stylesheet ?> directives
 		for(var i = stylesheets.length - 1; i >= 0; i--){
 			var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="'+stylesheets[i]+'" rel="stylesheet"');
 			xml.insertBefore(csspi, xml.firstChild);
 		}
+		
+		xml.removeChild(xml.documentElement);
 
-		//Remove <xml />
-		xml.removeChild(xml.documentElement)
-
-		var defs = svg.querySelector("defs");
-
+		//External stylesheets: <link> method
+		var defs = svg.querySelector('defs');
 		while(defs.firstChild != null){
 			defs.removeChild(defs.firstChild);
 		}
@@ -731,10 +731,10 @@ Holder.js - client side image placeholders
 			link.setAttribute('href', stylesheets[i]);
 			link.setAttribute('rel', 'stylesheet');
 			link.setAttribute('type', 'text/css');
-
 			defs.appendChild(link);
 		}
 
+		//External stylesheets: <style> and @import method
 		var style = document.createElementNS(SVG_NS, 'style');
 		var styleText = [];
 
@@ -742,11 +742,11 @@ Holder.js - client side image placeholders
 			styleText.push('@import url('+stylesheets[i]+');');
 		}
 
-		var styleTextNode = document.createTextNode(styleText.join("\n"));
+		var styleTextNode = document.createTextNode(styleText.join('\n'));
 		style.appendChild(styleTextNode);
 		defs.appendChild(style);
 		
-		var svg_css = ''; serializer.serializeToString(xml);
+		var svg_css = serializer.serializeToString(xml);
 		return svg_css + serializer.serializeToString(svg);
 	}
 
@@ -880,7 +880,7 @@ Holder.js - client side image placeholders
 			var root = sceneGraph.root;
 			
 			initSVG(svg, root.properties.width, root.properties.height);
-			var groups = svg.querySelectorAll("g");
+			var groups = svg.querySelectorAll('g');
 
 			for(var i = 0; i < groups.length; i++){
 				groups[i].parentNode.removeChild(groups[i]);
@@ -907,7 +907,7 @@ Holder.js - client side image placeholders
 				textNodeEl.setAttribute('style', cssProps({
 					'fill': textGroup.properties.fill,
 					'font-weight': textGroup.properties.font.weight,
-					'font-family': textGroup.properties.font.family,
+					'font-family': textGroup.properties.font.family + ', Arial, Helvetica, sans-serif',
 					'font-size': textGroup.properties.font.size + 'px',
 					'dominant-baseline': 'central'
 				}));
@@ -917,8 +917,9 @@ Holder.js - client side image placeholders
 				textGroupEl.appendChild(textNodeEl);
 			}
 
-			return 'data:image/svg+xml;base64,' +
+			var svgString = 'data:image/svg+xml;base64,' +
 			btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.stylesheets))));
+			return svgString;
 		};
 	})();
 
