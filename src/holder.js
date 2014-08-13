@@ -335,9 +335,9 @@ Holder.js - client side image placeholders
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
 	 * @param src Image URL string
-	 * @param renderSettings Instance configuration
+	 * @param _renderSettings Instance configuration
 	 */
-	function prepareDOMElement(mode, el, flags, src, renderSettings) {
+	function prepareDOMElement(mode, el, flags, src, _renderSettings) {
 		var dimensions = flags.dimensions,
 			theme = flags.theme,
 			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
@@ -347,13 +347,21 @@ Holder.js - client side image placeholders
 		if(text){
 			theme.text = text;
 		}
+
+		var renderSettings = extend(_renderSettings, null);
 		
 		if(flags.font){
 			theme.font = flags.font;
 			if(!renderSettings.noFontFallback && App.setup.supportsCanvas){
 				//If the client does not support canvas, the fallback fails and external fonts are dropped
-				renderSettings.renderer = 'canvas';
+				renderSettings = extend(renderSettings, {renderer: 'canvas'});
 			}
+		}
+
+		//Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
+		if(flags.font && renderSettings.renderer == 'canvas'){
+			//todo: document reRender
+			renderSettings.reRender = true;
 		}
 
 		if(mode == 'background'){
@@ -461,18 +469,22 @@ Holder.js - client side image placeholders
 			template: scene.theme
 		};
 
-		switch(renderSettings.renderer){
-			case 'canvas':
-				image = sgCanvasRenderer(sceneGraph);
-				//image = canvasRenderer(rendererParams);
-			break;
-			case 'svg':
-				image = sgSVGRenderer(sceneGraph, renderSettings);
-				//image = svgRenderer(rendererParams);
-			break;
-			default:
-				throw 'Holder: invalid renderer: '+renderSettings.renderer;
+		function getRenderedImage(){
+			var image = null;
+			switch(renderSettings.renderer){
+				case 'canvas':
+					image = sgCanvasRenderer(sceneGraph);
+				break;
+				case 'svg':
+					image = sgSVGRenderer(sceneGraph, renderSettings);
+				break;
+				default:
+					throw 'Holder: invalid renderer: '+renderSettings.renderer;
+			}
+			return image;
 		}
+
+		image = getRenderedImage();
 
 		if (image == null) {
 			throw 'Holder: couldn\'t render placeholder';
@@ -483,6 +495,15 @@ Holder.js - client side image placeholders
 			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
 		} else {
 			el.setAttribute('src', image);
+			if(renderSettings.reRender){
+				setTimeout(function(){
+					var image = getRenderedImage();
+					if (image == null) {
+						throw 'Holder: couldn\'t render placeholder';
+					}
+					el.setAttribute('src', image);
+				}, 10);
+			}
 		}
 		el.setAttribute('data-holder-rendered', true);
 	}
@@ -848,8 +869,6 @@ Holder.js - client side image placeholders
 		};
 	})();
 
-	//todo: fix svg rendering on zoomed-in documents if possible
-
 	var sgCanvasRenderer = (function () {
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
@@ -865,7 +884,7 @@ Holder.js - client side image placeholders
 
 			var textGroup = root.children.holderTextGroup;
 			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family;
-
+			
 			ctx.fillStyle = textGroup.properties.fill;
 
 			for(var nodeKey in textGroup.children){
@@ -880,6 +899,7 @@ Holder.js - client side image placeholders
 		};
 	})();
 
+	//todo: fix svg rendering on zoomed-in documents if possible
 	var sgSVGRenderer = (function(){
 		//Prevent IE <9 from initializing SVG renderer
 		if (!global.XMLSerializer) return;
@@ -937,70 +957,6 @@ Holder.js - client side image placeholders
 		};
 	})();
 
-/*
- * These renderers are now deprecated and should be removed ASAP
- * 
-	var canvasRenderer = (function () {
-		var canvas = document.createElement('canvas');
-		var ctx = canvas.getContext('2d');
-
-		return function (props) {
-			var finalWidth = props.width * App.setup.ratio;
-			var finalHeight = props.height * App.setup.ratio;
-			
-			canvas.width = finalWidth;
-			canvas.height = finalHeight;
-
-			ctx.fillStyle = props.template.background;
-			ctx.fillRect(0, 0, finalWidth, finalHeight);
-
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.font = props.fontWeight + ' ' + (props.textHeight * App.setup.ratio) + 'px ' + props.font;
-			ctx.fillStyle = props.template.foreground;
-			ctx.fillText(props.text, (finalWidth / 2), (finalHeight / 2));
-
-			return canvas.toDataURL('image/png');
-		};
-	})();
-
-	var svgRenderer = (function () {
-		//Prevent IE <9 from initializing SVG renderer
-		if (!global.XMLSerializer) return;
-		var svg = initSVG(null, 0,0);
-
-		var bg_el = document.createElementNS(SVG_NS, 'rect');
-		var text_el = document.createElementNS(SVG_NS, 'text');
-		var textnode_el = document.createTextNode(null);
-		text_el.setAttribute('text-anchor', 'middle');
-		text_el.appendChild(textnode_el);
-		svg.appendChild(bg_el);
-		svg.appendChild(text_el);
-		
-		return function (props) {
-			if (isNaN(props.width) || isNaN(props.height) || isNaN(props.textHeight)) {
-				throw 'Holder: incorrect properties passed to SVG constructor';
-			}
-			initSVG(svg, props.width, props.height);
-			bg_el.setAttribute('width', props.width);
-			bg_el.setAttribute('height', props.height);
-			bg_el.setAttribute('fill', props.template.background);
-			text_el.setAttribute('x', props.width / 2);
-			text_el.setAttribute('y', props.height / 2);
-			textnode_el.nodeValue = props.text;
-			text_el.setAttribute('style', cssProps({
-				'fill': props.template.foreground,
-				'font-weight': props.fontWeight,
-				'font-size': props.textHeight + 'px',
-				'font-family': props.font,
-				'dominant-baseline': 'central'
-			}));
-			
-			return 'data:image/svg+xml;base64,' +
-			btoa(unescape(encodeURIComponent(serializeSVG(svg, null))));
-		};
-	})();
-*/
 	//Helpers
 
 	/**
