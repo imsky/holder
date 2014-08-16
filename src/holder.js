@@ -85,23 +85,35 @@ Holder.js - client side image placeholders
 				}
 			}
 
-			var backgroundImageRegex = new RegExp(options.domain + '\/(.*?)"?\\)');
-
+			//var backgroundImageRegex = new RegExp(options.domain.replace('.', '\.') + '\/(.*?)"?\\)');
+			
 			for (i = 0; i < bgnodes.length; i++) {
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
-				var backgroundImageMatch = backgroundImage.match(backgroundImageRegex);
-				var holderURL = null;
-				if(backgroundImageMatch == null){
-					//todo: document data-background-src
-					var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
-					if(dataBackgroundImage != null){
-						holderURL = dataBackgroundImage;
-					}
+				var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
+				var rawURL = null;
+
+				if(dataBackgroundImage == null){
+					rawURL = backgroundImage;
 				}
 				else{
-					holderURL = options.domain + '/' + backgroundImageMatch[1];
+					rawURL = dataBackgroundImage;
 				}
 
+				var holderURL = null;
+				var holderString = '?' + options.domain + '/';
+				
+				if(rawURL.indexOf(holderString) === 0){
+					holderURL = rawURL.slice(1);
+				}
+				else if(rawURL.indexOf(holderString) != -1){
+					var fragment = rawURL.substr(rawURL.indexOf(holderString)).slice(1);
+					var fragmentMatch = fragment.match(/([^\"]*)"?\)/);
+
+					if(fragmentMatch != null){
+						holderURL = fragmentMatch[1];
+					}
+				}
+				
 				if(holderURL != null){
 					var holderFlags = parseURL(holderURL, options);
 					if(holderFlags){
@@ -132,9 +144,12 @@ Holder.js - client side image placeholders
 					if (attr_src.indexOf(options.domain) === 0) {
 						prepareImageElement(options, renderSettings, attr_src, image);
 					} else if (hasDataSrcURL) {
+						//Image has a valid data-src and an invalid src
 						if (rendered) {
+							//If the placeholder has already been render, re-render it
 							prepareImageElement(options, renderSettings, attr_datasrc, image);
 						} else {
+							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
 							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
 								src: attr_src,
@@ -167,12 +182,18 @@ Holder.js - client side image placeholders
 		}
 	};
 
+	//< v2.4 API compatibility
+
+	Holder.add_theme = Holder.addTheme;
+	Holder.add_image = Holder.addImage;
+	Holder.invisible_error_fn = Holder.invisibleErrorFn;
+
 	var App = {
 		settings: {
 			domain: 'holder.js',
 			images: 'img',
 			bgnodes: 'body .holderjs',
-			stylenodes: 'link.holderjs',
+			stylenodes: 'head link.holderjs',
 			stylesheets: [],
 			themes: {
 				'gray': {
@@ -224,7 +245,7 @@ Holder.js - client side image placeholders
 				}
 			},
 			colors: {
-				regex: /#([0-9a-f]{3,})\:#([0-9a-f]{3,})/i,
+				regex: /(?:#|\^)([0-9a-f]{3,})\:(?:#|\^)([0-9a-f]{3,})/i,
 				output: function(val) {
 					var exec = this.regex.exec(val);
 					return {
@@ -502,7 +523,7 @@ Holder.js - client side image placeholders
 						throw 'Holder: couldn\'t render placeholder';
 					}
 					el.setAttribute('src', image);
-				}, 10);
+				}, 100);
 			}
 		}
 		el.setAttribute('data-holder-rendered', true);
@@ -558,6 +579,7 @@ Holder.js - client side image placeholders
 
 		//todo: alignment
 		//todo: split holder text group into lines, for single-line and multi-line text
+		var textNode = null;
 		if(tpdata.lineCount > 1){
 			var offsetX = 0;
 			var offsetY = 0;
@@ -565,7 +587,7 @@ Holder.js - client side image placeholders
 			
 			for(var i = 0; i < tpdata.words.length; i++){
 				var word = tpdata.words[i];
-				var textNode = new Shape.Text(word.text);
+				textNode = new Shape.Text(word.text);
 				if(offsetX + word.width >= lineWidth){
 					offsetX = 0;
 					offsetY += holderTextGroup.properties.leading;
@@ -580,8 +602,10 @@ Holder.js - client side image placeholders
 				(scene.width - tpdata.boundingBox.width) / 2,
 				(scene.height - tpdata.boundingBox.height) / 2,
 				null);
-			var textNode = new Shape.Text(scene.text);
-			holderTextGroup.add(textNode);
+			textNode = new Shape.Text(scene.text);
+			var line = new Shape.Group('line0');
+			line.add(textNode);
+			holderTextGroup.add(line);
 		}
 
 		//todo: renderlist
@@ -792,7 +816,7 @@ Holder.js - client side image placeholders
 			defs.appendChild(style);
 		}
 
-		return '<?xml version="1.0" encoding="UTF-8"?>' + svg_css + serializer.serializeToString(svg);
+		return svg_css + serializer.serializeToString(svg);
 	}
 
 	//todo: see if possible to convert stagingRenderer to use HTML only
@@ -893,18 +917,21 @@ Holder.js - client side image placeholders
 			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
 
 			var textGroup = root.children.holderTextGroup;
+			var tgProps = textGroup.properties;
 			ctx.font = textGroup.properties.font.weight + ' '+App.dpr(textGroup.properties.font.size)+'px ' + textGroup.properties.font.family +', monospace';
-			
 			ctx.fillStyle = textGroup.properties.fill;
 
-			for(var nodeKey in textGroup.children){
-				var textNode = textGroup.children[nodeKey];
-				var x = App.dpr(textGroup.x + textNode.x);
-				var y = App.dpr(textGroup.y + textNode.y + textGroup.properties.leading / 2);
+			for(var lineKey in textGroup.children){
+				var line = textGroup.children[lineKey];
+				for(var wordKey in line.children){
+					var word = line.children[wordKey];
+					var x = App.dpr(textGroup.x + line.x + word.x);
+					var y = App.dpr(textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
 
-				ctx.fillText(textNode.properties.text, x,y);
+					ctx.fillText(word.properties.text, x, y);
+				}
 			}
-			
+						
 			return canvas.toDataURL('image/png');
 		};
 	})();
@@ -935,30 +962,34 @@ Holder.js - client side image placeholders
 			bgEl.setAttribute('fill', root.children.holderBg.properties.fill);
 
 			var textGroup = root.children.holderTextGroup;
+			var tgProps = textGroup.properties;
 			var textGroupEl = document.createElementNS(SVG_NS, 'g');
 			svg.appendChild(textGroupEl);
 
-			for(var nodeKey in textGroup.children){
-				var textNode = textGroup.children[nodeKey];
-				var x = textGroup.x + textNode.x;
-				var y = textGroup.y + textNode.y + textGroup.properties.leading / 2;
+			for(var lineKey in textGroup.children){
+				var line = textGroup.children[lineKey];
+				for(var wordKey in line.children){
+					var word = line.children[wordKey];
+					var x = textGroup.x + line.x + word.x;
+					var y = textGroup.y + line.y + word.y + (textGroup.properties.leading / 2);
 
-				var textNodeEl = document.createElementNS(SVG_NS, 'text');
-				var textValue = document.createTextNode(null);
-				
-				textNodeEl.setAttribute('x', x);
-				textNodeEl.setAttribute('y', y);
-				textNodeEl.setAttribute('style', cssProps({
-					'fill': textGroup.properties.fill,
-					'font-weight': textGroup.properties.font.weight,
-					'font-family': textGroup.properties.font.family + ', monospace',
-					'font-size': textGroup.properties.font.size + 'px',
-					'dominant-baseline': 'central'
-				}));
-				textValue.nodeValue = textNode.properties.text;
+					var textEl = document.createElementNS(SVG_NS, 'text');
+					var textNode = document.createTextNode(null);
 
-				textNodeEl.appendChild(textValue);
-				textGroupEl.appendChild(textNodeEl);
+					textEl.setAttribute('x', x);
+					textEl.setAttribute('y', y);
+					textEl.setAttribute('style', cssProps({
+						'fill': tgProps.fill,
+						'font-weight': tgProps.font.weight,
+						'font-family': tgProps.font.family + ', monospace',
+						'font-size': tgProps.font.size + 'px',
+						'dominant-baseline': 'central'
+					}));
+
+					textNode.nodeValue = word.properties.text;
+					textEl.appendChild(textNode);
+					textGroupEl.appendChild(textEl);
+				}
 			}
 
 			var svgString = 'data:image/svg+xml;base64,' +
@@ -1103,11 +1134,6 @@ Holder.js - client side image placeholders
 					this.height = height;
 				}
 			},
-			move: function(dx, dy, dz){
-				this.x += dx;
-				this.y += dy;
-				this.z += dz;
-			},
 			moveTo: function(x, y, z){
 				this.x = x != null ? x : this.x;
 				this.y = y != null ? y : this.y;
@@ -1122,7 +1148,8 @@ Holder.js - client side image placeholders
 				else{
 					throw 'SceneGraph: child with that name already exists: '+name;
 				}
-			},
+			}
+			/*,	// probably unnecessary in Holder
 			remove: function(name){
 				if(this.children[name] == null){
 					throw 'SceneGraph: child with that name doesn\'t exist: '+name;
@@ -1136,7 +1163,7 @@ Holder.js - client side image placeholders
 				for(var child in this.children){
 					this.remove(child);
 				}
-			}
+			}*/
 		});
 
 		var RootNode = augment(SceneNode, function(uber){
@@ -1184,12 +1211,6 @@ Holder.js - client side image placeholders
 
 		return this;
 	};
-
-	//< v2.4 API compatibility
-
-	Holder.add_theme = Holder.addTheme;
-	Holder.add_image = Holder.addImage;
-	Holder.invisible_error_fn = Holder.invisibleErrorFn;
 
 	//Set up flags
 

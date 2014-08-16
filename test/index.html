@@ -9,10 +9,11 @@
 <style>
 	body {font-family:sans-serif}
 	.thumb {width:300px;height:250px;margin:25px;float:left}
-	.thumb img, .thumb .holderjs {display:block;margin:0 auto}
+	.thumb img, .thumb .holderjs, .thumb object {display:block;margin:0 auto}
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
 	.thumb.fullpage {float:none;clear:both;width:auto}
 	.autosize img {width:100%}
+	#holder1 {background:url('?holder.js/200x150/text:Background%20placeholder/^eee:^222');width:200px;height:150px}
 </style>
 </head>
 <body>
@@ -89,14 +90,13 @@
 	</div>
 </div>
 <div class="thumb">
-	<div class="holderjs" style="background:url(?holder.js/200x150/#111155:#aabbcc/text:Background%20placeholder);width:200px;height:150px">
-	</div>
+	<div class="holderjs" id="holder1"></div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with background placeholder
 	</div>
 </div>
 <div class="thumb">
-	<div class="holderjs" style="width:100px;height:100px" data-background-src="holder.js/100x100/#f0f0f0:#ff0000"></div>
+	<div class="holderjs" style="width:100px;height:100px" data-background-src="?holder.js/100x100/#ff8362:#5e422e"></div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with <code>data-background-src</code> placeholder
 	</div>
@@ -116,21 +116,37 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/font:Pacifico/text:Pacifico">
+	<img data-src="holder.js/300x200/font:Pacifico/#4466ff:#fff/text:Pacifico">
 	<div class="caption">
 		 Placeholder using <span style="font-family:Pacifico">Pacifico</span> font</span>
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/font:FontAwesome/text:&#xf0c0;">
+	<object data="holder.js/300x200/font:Pacifico/text:Pacifico"></object>
+	<div class="caption">
+		<code>object</code> placeholder using <span style="font-family:Pacifico">Pacifico</span> font</span>
+	</div>
+</div>
+<div class="thumb">
+	<img data-src="holder.js/300x200/font:FontAwesome/lava/text:&#xf0c0;">
 	<div class="caption">
 		 Placeholder using FontAwesome font, rendering <span style="font-family:FontAwesome">&#xf0c0;</span>
 	</div>
 </div>
 <div class="thumb">
-<img data-src="holder.js/100x20">
-<img data-src="holder.js/200x50">
-<img data-src="holder.js/300x100">
+	<div style="overflow:hidden">
+	<img data-src="holder.js/50x30/sky" style="float:left">
+	<img data-src="holder.js/100x30/vine" style="float:left">
+	<img data-src="holder.js/150x30/lava" style="float:left">
+	</div>
+	<div style="overflow:hidden">
+	<img data-src="holder.js/50x50/social" style="float:left">
+	<img data-src="holder.js/250x50" style="float:left">
+	</div>
+	<div style="overflow:hidden">
+	<img data-src="holder.js/50x120" style="float:left">
+	<img data-src="holder.js/250x120/industrial" style="float:left">
+	</div>
 <div class="caption">
 		 Placeholders demonstrating adaptive text size
 	</div>
@@ -178,8 +194,6 @@ Holder.run({
 	domain: "holder.canvas",
 	use_canvas: true
 });
-
-//Holder.run({use_canvas:true})
 </script>
 </body>
 </html>
