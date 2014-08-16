@@ -4,6 +4,11 @@ Holder.js - client side image placeholders
 */
 (function (register, global, undefined) {
 
+	//Constants and definitions
+	
+	var SVG_NS = 'http://www.w3.org/2000/svg';
+	var document = global.document;
+
 	var Holder = {
 		/**
 		 * Adds a theme to default settings
@@ -27,8 +32,8 @@ Holder.js - client side image placeholders
 			var node = document.querySelectorAll(el);
 			if (node.length) {
 				for (var i = 0, l = node.length; i < l; i++) {
-					var img = document.createElement('img');
-					img.setAttribute('data-src', src);
+					var img = newEl('img');
+					setAttr(img, {'data-src': src});
 					node[i].appendChild(img);
 				}
 			}
@@ -78,7 +83,7 @@ Holder.js - client side image placeholders
 					var href = styleNode.attributes.href.value;
 					//todo: write isomorphic relative-to-absolute URL function
 					//todo: document that when testing locally, external fonts should have a full protocol
-					var proxyLink = document.createElement('a');
+					var proxyLink = newEl('a');
 					proxyLink.href = href;
 					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
 					renderSettings.stylesheets.push(stylesheetURL);
@@ -403,11 +408,11 @@ Holder.js - client side image placeholders
 
 		if(mode == 'background'){
 			if(el.getAttribute('data-background-src') == null){
-				el.setAttribute('data-background-src', src);
+				setAttr(el, {'data-background-src': src});
 			}
 		}
 		else{
-			el.setAttribute('data-src', src);
+			setAttr(el, {'data-src': src});
 		}
 
 		flags.theme = theme;
@@ -418,7 +423,7 @@ Holder.js - client side image placeholders
 		};
 
 		if(mode == 'image' || mode == 'fluid'){
-			el.setAttribute('alt', text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption);
+			setAttr(el, {'alt': text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption});
 		}
 
 		if (mode == 'image') {
@@ -532,11 +537,11 @@ Holder.js - client side image placeholders
 			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
 		} else {
 			if(el.nodeName.toLowerCase() === 'img'){
-				el.setAttribute('src', image);
+				setAttr(el, {'src':image});
 			}
 			else if(el.nodeName.toLowerCase() === 'object'){
-				el.setAttribute('data', image);
-				el.setAttribute('type', 'image/svg+xml');
+				setAttr(el, {'data':image});
+				setAttr(el, {'type': 'image/svg+xml'});
 			}
 			if(renderSettings.reRender){
 				setTimeout(function(){
@@ -545,16 +550,16 @@ Holder.js - client side image placeholders
 						throw 'Holder: couldn\'t render placeholder';
 					}
 					if(el.nodeName.toLowerCase() === 'img'){
-						el.setAttribute('src', image);
+						setAttr(el, {'src':image});
 					}
 					else if(el.nodeName.toLowerCase() === 'object'){
-						el.setAttribute('data', image);
-						el.setAttribute('type', 'image/svg+xml');
+						setAttr(el, {'data':image});
+						setAttr(el, {'type': 'image/svg+xml'});
 					}
 				}, 100);
 			}
 		}
-		el.setAttribute('data-holder-rendered', true);
+		setAttr(el, {'data-holder-rendered': true});
 	}
 	
 	/**
@@ -769,7 +774,7 @@ Holder.js - client side image placeholders
 			width: el.clientWidth
 		};
 		if (!dimensions.height && !dimensions.width) {
-			el.setAttribute('data-holder-invisible', true);
+			setAttr(el, {'data-holder-invisible': true});
 			callback.call(this, el);
 		} else {
 			el.removeAttribute('data-holder-invisible');
@@ -809,90 +814,6 @@ Holder.js - client side image placeholders
 		}
 	}
 
-	var SVG_NS = 'http://www.w3.org/2000/svg';
-
-	/**
-	 * Generic SVG element creation function
-	 *
-	 * @private
-	 * @param svg SVG context, set to null if new
-	 * @param width Document width
-	 * @param height Document height
-	 */
-	function initSVG(svg, width, height){
-		if(svg == null){
-			svg = document.createElementNS(SVG_NS, 'svg');
-			var defs = document.createElementNS(SVG_NS, 'defs');
-			svg.appendChild(defs);
-		}
-		//IE throws an exception if this is set and Chrome requires it to be set
-		if (svg.webkitMatchesSelector) {
-			svg.setAttribute('xmlns', SVG_NS);
-		}
-		svg.setAttribute('width', width);
-		svg.setAttribute('height', height);
-		svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-		svg.setAttribute('preserveAspectRatio', 'none');
-		return svg;
-	}
-
-	/**
-	 * Generic SVG serialization function
-	 *
-	 * @private
-	 * @param svg SVG context
-	 * @param stylesheets CSS stylesheets to include
-	 */
-	function serializeSVG(svg, renderSettings) {
-		if (!global.XMLSerializer) return;
-		var serializer = new XMLSerializer();
-		var svg_css = '';
-		var stylesheets = renderSettings.stylesheets;
-		var defs = svg.querySelector('defs');
-
-		//External stylesheets: Processing Instruction method
-		if (renderSettings.svgXMLStylesheet) {
-			var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
-			//Add <?xml-stylesheet ?> directives
-			for (var i = stylesheets.length - 1; i >= 0; i--) {
-				var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
-				xml.insertBefore(csspi, xml.firstChild);
-			}
-
-			xml.removeChild(xml.documentElement);
-			svg_css = serializer.serializeToString(xml);
-		}
-
-		//External stylesheets: <link> method
-		if (renderSettings.svgLinkStylesheet) {
-
-			defs.removeChild(defs.firstChild);
-			for (i = 0; i < stylesheets.length; i++) {
-				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
-				link.setAttribute('href', stylesheets[i]);
-				link.setAttribute('rel', 'stylesheet');
-				link.setAttribute('type', 'text/css');
-				defs.appendChild(link);
-			}
-		}
-
-		//External stylesheets: <style> and @import method
-		if (renderSettings.svgImportStylesheet) {
-			var style = document.createElementNS(SVG_NS, 'style');
-			var styleText = [];
-
-			for (i = 0; i < stylesheets.length; i++) {
-				styleText.push('@import url(' + stylesheets[i] + ');');
-			}
-
-			var styleTextNode = document.createTextNode(styleText.join('\n'));
-			style.appendChild(styleTextNode);
-			defs.appendChild(style);
-		}
-
-		return svg_css + serializer.serializeToString(svg);
-	}
-
 	//todo: see if possible to convert stagingRenderer to use HTML only
 	var stagingRenderer = (function(){
 		var svg = null, stagingText = null, stagingTextNode = null;
@@ -908,9 +829,9 @@ Holder.js - client side image placeholders
 				}
 				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
 				if(firstTimeSetup){
-					stagingText = document.createElementNS(SVG_NS, 'text');
+					stagingText = newEl('text', SVG_NS);
 					stagingTextNode = tnode(null);
-					stagingText.setAttribute('x', 0);
+					setAttr(stagingText, {x:0});
 					stagingText.appendChild(stagingTextNode);
 					svg.appendChild(stagingText);
 					document.body.appendChild(svg);
@@ -925,13 +846,15 @@ Holder.js - client side image placeholders
 				
 				var holderTextGroup = rootNode.children.holderTextGroup;
 				var htgProps = holderTextGroup.properties;
-				stagingText.setAttribute('y', htgProps.font.size);
-				stagingText.setAttribute('style', cssProps({
+				setAttr(stagingText, {
+					'y': htgProps.font.size,
+					'style': cssProps({
 					'font-weight': htgProps.font.weight,
 					'font-size': htgProps.font.size + 'px',
 					'font-family': htgProps.font.family,
 					'dominant-baseline': 'middle'
-				}));
+				})
+				});
 
 				//Get bounding box for the whole string (total width and height)
 				stagingTextNode.nodeValue = htgProps.text;
@@ -981,7 +904,7 @@ Holder.js - client side image placeholders
 	})();
 
 	var sgCanvasRenderer = (function () {
-		var canvas = document.createElement('canvas');
+		var canvas = newEl('canvas');
 		var ctx = canvas.getContext('2d');
 
 		return function (sceneGraph) {
@@ -1018,10 +941,9 @@ Holder.js - client side image placeholders
 		//Prevent IE <9 from initializing SVG renderer
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0,0);
-		var bgEl = document.createElementNS(SVG_NS, 'rect');
+		var bgEl = newEl('rect', SVG_NS);
 		svg.appendChild(bgEl);
 		
-		//todo: create a generic setAttribute and createElement function
 		//todo: create a reusable pool for textNodes, resize if more words present
 		
 		return function (sceneGraph, renderSettings){
@@ -1033,14 +955,16 @@ Holder.js - client side image placeholders
 			for(var i = 0; i < groups.length; i++){
 				groups[i].parentNode.removeChild(groups[i]);
 			}
-			
-			bgEl.setAttribute('width', root.children.holderBg.width);
-			bgEl.setAttribute('height', root.children.holderBg.height);
-			bgEl.setAttribute('fill', root.children.holderBg.properties.fill);
+
+			setAttr(bgEl, {
+				'width': root.children.holderBg.width,
+				'height': root.children.holderBg.height,
+				'fill': root.children.holderBg.properties.fill
+			});
 
 			var textGroup = root.children.holderTextGroup;
 			var tgProps = textGroup.properties;
-			var textGroupEl = document.createElementNS(SVG_NS, 'g');
+			var textGroupEl = newEl('g', SVG_NS);
 			svg.appendChild(textGroupEl);
 
 			for(var lineKey in textGroup.children){
@@ -1050,18 +974,20 @@ Holder.js - client side image placeholders
 					var x = textGroup.x + line.x + word.x;
 					var y = textGroup.y + line.y + word.y + (textGroup.properties.leading / 2);
 
-					var textEl = document.createElementNS(SVG_NS, 'text');
+					var textEl = newEl('text', SVG_NS);
 					var textNode = document.createTextNode(null);
 
-					textEl.setAttribute('x', x);
-					textEl.setAttribute('y', y);
-					textEl.setAttribute('style', cssProps({
-						'fill': tgProps.fill,
-						'font-weight': tgProps.font.weight,
-						'font-family': tgProps.font.family + ', monospace',
-						'font-size': tgProps.font.size + 'px',
-						'dominant-baseline': 'central'
-					}));
+					setAttr(textEl, {
+							'x': x,
+							'y': y,
+							'style': cssProps({
+							'fill': tgProps.fill,
+							'font-weight': tgProps.font.weight,
+							'font-family': tgProps.font.family + ', monospace',
+							'font-size': tgProps.font.size + 'px',
+							'dominant-baseline': 'central'
+						})
+					});
 
 					textNode.nodeValue = word.properties.text;
 					textEl.appendChild(textNode);
@@ -1076,6 +1002,124 @@ Holder.js - client side image placeholders
 	})();
 
 	//Helpers
+
+	/**
+	 * Generic new DOM element function
+	 *
+	 * @private
+	 * @param tag Tag to create
+	 * @param namespace Optional namespace value
+	 */
+	function newEl(tag, namespace){
+		if(namespace == null){
+			return document.createElement(tag);
+		}
+		else{
+			return document.createElementNS(namespace, tag);
+		}
+	}
+
+	/**
+	 * Generic setAttribute function
+	 *
+	 * @private
+	 * @param el Reference to DOM element
+	 * @param attrs Object with attribute keys and values
+	 */
+	function setAttr(el, attrs){
+		for(var a in attrs){
+			el.setAttribute(a, attrs[a]);
+		}
+	}
+
+	/**
+	 * Generic SVG element creation function
+	 *
+	 * @private
+	 * @param svg SVG context, set to null if new
+	 * @param width Document width
+	 * @param height Document height
+	 */
+	function initSVG(svg, width, height){
+		if(svg == null){
+			svg = newEl('svg', SVG_NS);
+			var defs = newEl('defs', SVG_NS);
+			svg.appendChild(defs);
+		}
+		//IE throws an exception if this is set and Chrome requires it to be set
+		if (svg.webkitMatchesSelector) {
+			svg.setAttribute('xmlns', SVG_NS);
+		}
+
+		setAttr(svg, {
+			'width': width,
+			'height': height,
+			'viewBox': '0 0 ' + width + ' ' + height,
+			'preserveAspectRatio': 'none'
+		});
+		return svg;
+	}
+
+	/**
+	 * Generic SVG serialization function
+	 *
+	 * @private
+	 * @param svg SVG context
+	 * @param stylesheets CSS stylesheets to include
+	 */
+	function serializeSVG(svg, renderSettings) {
+		if (!global.XMLSerializer) return;
+		var serializer = new XMLSerializer();
+		var svg_css = '';
+		var stylesheets = renderSettings.stylesheets;
+		var defs = svg.querySelector('defs');
+
+		//External stylesheets: Processing Instruction method
+		if (renderSettings.svgXMLStylesheet) {
+			var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
+			//Add <?xml-stylesheet ?> directives
+			for (var i = stylesheets.length - 1; i >= 0; i--) {
+				var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
+				xml.insertBefore(csspi, xml.firstChild);
+			}
+
+			xml.removeChild(xml.documentElement);
+			svg_css = serializer.serializeToString(xml);
+		}
+
+		/*
+
+		//External stylesheets: <link> method
+		if (renderSettings.svgLinkStylesheet) {
+
+			defs.removeChild(defs.firstChild);
+			for (i = 0; i < stylesheets.length; i++) {
+				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
+				link.setAttribute('href', stylesheets[i]);
+				link.setAttribute('rel', 'stylesheet');
+				link.setAttribute('type', 'text/css');
+				defs.appendChild(link);
+			}
+		}
+
+		//External stylesheets: <style> and @import method
+		if (renderSettings.svgImportStylesheet) {
+			var style = document.createElementNS(SVG_NS, 'style');
+			var styleText = [];
+
+			for (i = 0; i < stylesheets.length; i++) {
+				styleText.push('@import url(' + stylesheets[i] + ');');
+			}
+
+			var styleTextNode = document.createTextNode(styleText.join('\n'));
+			style.appendChild(styleTextNode);
+			defs.appendChild(style);
+		}
+
+		*/
+
+		return svg_css + serializer.serializeToString(svg);
+	}
 
 	/**
 	 * Shallow object clone and merge
@@ -1333,7 +1377,7 @@ Holder.js - client side image placeholders
 		var devicePixelRatio = 1,
 			backingStoreRatio = 1;
 
-		var canvas = document.createElement('canvas');
+		var canvas = newEl('canvas');
 		var ctx = null;
 
 		if (canvas.getContext) {
