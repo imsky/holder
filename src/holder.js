@@ -554,9 +554,10 @@ Holder.js - client side image placeholders
 
 		//todo: see if possible to avoid bounding box calcs for short text and preserve line height
 		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
-		holderTextGroup.properties.lineHeight = tpdata.boundingBox.height;
+		holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
 		//todo: alignment
+		//todo: split holder text group into lines, for single-line and multi-line text
 		if(tpdata.lineCount > 1){
 			var offsetX = 0;
 			var offsetY = 0;
@@ -567,7 +568,7 @@ Holder.js - client side image placeholders
 				var textNode = new Shape.Text(word.text);
 				if(offsetX + word.width >= lineWidth){
 					offsetX = 0;
-					offsetY += holderTextGroup.properties.lineHeight;
+					offsetY += holderTextGroup.properties.leading;
 				}
 				textNode.moveTo(offsetX, offsetY);
 				offsetX += tpdata.spaceWidth + word.width;
@@ -899,7 +900,7 @@ Holder.js - client side image placeholders
 			for(var nodeKey in textGroup.children){
 				var textNode = textGroup.children[nodeKey];
 				var x = App.dpr(textGroup.x + textNode.x);
-				var y = App.dpr(textGroup.y + textNode.y + textGroup.properties.lineHeight / 2);
+				var y = App.dpr(textGroup.y + textNode.y + textGroup.properties.leading / 2);
 
 				ctx.fillText(textNode.properties.text, x,y);
 			}
@@ -940,7 +941,7 @@ Holder.js - client side image placeholders
 			for(var nodeKey in textGroup.children){
 				var textNode = textGroup.children[nodeKey];
 				var x = textGroup.x + textNode.x;
-				var y = textGroup.y + textNode.y + textGroup.properties.lineHeight / 2;
+				var y = textGroup.y + textNode.y + textGroup.properties.leading / 2;
 
 				var textNodeEl = document.createElementNS(SVG_NS, 'text');
 				var textValue = document.createTextNode(null);
