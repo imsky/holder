@@ -84,8 +84,6 @@ Holder.js - client side image placeholders
 					renderSettings.stylesheets.push(stylesheetURL);
 				}
 			}
-
-			//var backgroundImageRegex = new RegExp(options.domain.replace('.', '\.') + '\/(.*?)"?\\)');
 			
 			for (i = 0; i < bgnodes.length; i++) {
 				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
@@ -529,7 +527,12 @@ Holder.js - client side image placeholders
 		el.setAttribute('data-holder-rendered', true);
 	}
 	
-	//todo: jsdoc buildSceneGraph
+	/**
+	 * Core function that takes a Holder scene description and builds a scene graph
+	 *
+	 * @private
+	 * @param scene Holder scene object
+	 */
 	function buildSceneGraph(scene){
 		//todo: mark the placeholder for canvas re-render if font is defined
 		scene.font = {
@@ -573,39 +576,78 @@ Holder.js - client side image placeholders
 		holderTextGroup.moveTo(null,null,1);
 		sceneGraph.root.add(holderTextGroup);
 
-		//todo: see if possible to avoid bounding box calcs for short text and preserve line height
 		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
 		holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
-		//todo: alignment
-		//todo: split holder text group into lines, for single-line and multi-line text
+		//todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
 		var textNode = null;
+		var line = null;
+
+		function finalizeLine(parent, line, width, height){
+				line.width = width;
+				line.height = height;
+				parent.width = Math.max(parent.width, line.width);
+				parent.height += line.height;
+				parent.add(line);
+			}
+
 		if(tpdata.lineCount > 1){
 			var offsetX = 0;
 			var offsetY = 0;
-			var lineWidth = scene.width * App.setup.lineWrapRatio;
-			
+			var maxLineWidth = scene.width * App.setup.lineWrapRatio;
+			var lineIndex = 0;
+			line = new Shape.Group('line' + lineIndex);
+
 			for(var i = 0; i < tpdata.words.length; i++){
 				var word = tpdata.words[i];
 				textNode = new Shape.Text(word.text);
-				if(offsetX + word.width >= lineWidth){
+				var newline = word.text == '\\n';
+				if(offsetX + word.width >= maxLineWidth || newline === true){
+					finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
 					offsetX = 0;
 					offsetY += holderTextGroup.properties.leading;
+					lineIndex += 1;
+					line = new Shape.Group('line' + lineIndex);
+					line.y = offsetY;
 				}
-				textNode.moveTo(offsetX, offsetY);
+				if(newline === true){
+					continue;
+				}
+				textNode.moveTo(offsetX, 0);
 				offsetX += tpdata.spaceWidth + word.width;
-				holderTextGroup.add(textNode);
+				line.add(textNode);
+			}
+
+			finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+
+			for(var lineKey in holderTextGroup.children){
+				line = holderTextGroup.children[lineKey];
+				line.moveTo(
+					(holderTextGroup.width - line.width) / 2,
+					null,
+					null);
+			}
+
+			holderTextGroup.moveTo(
+			(scene.width - holderTextGroup.width) / 2,
+			(scene.height - holderTextGroup.height) / 2,
+			null);
+
+			//If the text exceeds vertical space, move it down so the first line is visible
+			if((scene.height - holderTextGroup.height) / 2 < 0){
+				holderTextGroup.moveTo(null, 0, null);
 			}
 		}
 		else{
+			textNode = new Shape.Text(scene.text);
+			line = new Shape.Group('line0');
+			line.add(textNode);
+			holderTextGroup.add(line);
+
 			holderTextGroup.moveTo(
 				(scene.width - tpdata.boundingBox.width) / 2,
 				(scene.height - tpdata.boundingBox.height) / 2,
 				null);
-			textNode = new Shape.Text(scene.text);
-			var line = new Shape.Group('line0');
-			line.add(textNode);
-			holderTextGroup.add(line);
 		}
 
 		//todo: renderlist
@@ -866,6 +908,8 @@ Holder.js - client side image placeholders
 				//Get line count and split the string into words
 				var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.setup.lineWrapRatio));
 				var words = htgProps.text.split(' ');
+				var newlines = htgProps.text.match(/\\n/g);
+				lineCount += newlines == null ? 0 : newlines.length;
 
 				//Get bounding box for the string with spaces removed
 				stagingTextNode.nodeValue = htgProps.text.replace(/[ ]+/g, '');
@@ -880,6 +924,7 @@ Holder.js - client side image placeholders
 				if(lineCount > 1){
 					stagingTextNode.nodeValue = '';
 					for(var i = 0; i < words.length; i++){
+						if(words[i].length === 0) continue;
 						stagingTextNode.nodeValue = words[i];
 						var bbox = stagingText.getBBox();
 						wordWidths.push({
