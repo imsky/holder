@@ -1060,7 +1060,7 @@ Holder.js - client side image placeholders
 						'font-weight': tgProps.font.weight,
 						'font-family': tgProps.font.family + ', monospace',
 						'font-size': tgProps.font.size + 'px',
-						'dominant-baseline': 'middle'
+						'dominant-baseline': 'central'
 					}));
 
 					textNode.nodeValue = word.properties.text;
