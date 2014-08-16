@@ -7,11 +7,11 @@
 <link href='http://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css' class="holderjs">
 
 <style>
-	body {font-family:Arial,sans-serif}
+	body {font-family:Arial,sans-serif;width:1050px;margin:0 auto}
 	.thumb {width:300px;height:250px;margin:25px;float:left}
 	.thumb img, .thumb .holderjs, .thumb object {display:block;margin:0 auto}
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
-	.thumb.fullpage {float:none;clear:both;width:auto}
+	.thumb.fullpage {float:none;clear:both;width:auto;height:100px;margin:25px}
 	.autosize img {width:100%}
 	#holder1 {background:url('?holder.js/200x150/text:Background%20placeholder/^eee:^222');width:200px;height:150px}
 </style>
@@ -163,20 +163,25 @@
 		 Placeholders demonstrating adaptive text size
 	</div>
 </div>
+<div class="thumb">
+<img data-src="holder.js/100%x100/sky">
+<img data-src="holder.js/100%x100/lava">
+<div class="caption">Two placeholders in one parent</div>
+</div>
 <div class="fullpage thumb">
-	<img data-src="holder.js/80%x50%/industrial">
+	<img data-src="holder.js/90%x80%/industrial">
 	<div class="caption">
 		 Full-page fluid placeholder
 	</div>
 </div>
 <div class="fullpage thumb">
-	<object data-src="holder.js/80%x50%/industrial"></object>
+	<object data-src="holder.js/90%x80%/industrial"></object>
 	<div class="caption">
 		 Full-page fluid <code>object</code> placeholder
 	</div>
 </div>
 <div class="fullpage thumb">
-	<img data-src="holder.js/80%x50%/vine/textmode:literal">
+	<img data-src="holder.js/90%x80%/vine/textmode:literal">
 	<div class="caption">
 		 Full-page fluid placeholder in literal mode
 	</div>
@@ -186,11 +191,6 @@
 	<div class="caption">
 		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
-</div>
-<div class="thumb">
-<img data-src="holder.js/100%x100/sky">
-<img data-src="holder.js/100%x100/lava">
-<div class="caption">Two placeholders in one parent</div>
 </div>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../holder.js"></script>
