@@ -53,9 +53,6 @@ Holder.js - client side image placeholders
 			//todo: validate renderer
 			//todo: document runtime renderer option
 			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
-
-			//todo: document noFontFallback option
-			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 			
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
@@ -71,6 +68,9 @@ Holder.js - client side image placeholders
 			renderSettings.stylesheets = [];
 			//todo: document svg stylesheet settings
 			renderSettings.svgXMLStylesheet = true;
+
+			//todo: document noFontFallback option
+			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 
 			for(var i = 0; i < stylenodes.length; i++){
 				var styleNode = stylenodes[i];
@@ -556,20 +556,31 @@ Holder.js - client side image placeholders
 		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
 		holderTextGroup.properties.lineHeight = tpdata.boundingBox.height;
 
+		//todo: alignment
 		if(tpdata.lineCount > 1){
+			var offsetX = 0;
+			var offsetY = 0;
+			var lineWidth = scene.width * App.setup.lineWrapRatio;
+			
 			for(var i = 0; i < tpdata.words.length; i++){
 				var word = tpdata.words[i];
+				var textNode = new Shape.Text(word.text);
+				if(offsetX + word.width >= lineWidth){
+					offsetX = 0;
+					offsetY += holderTextGroup.properties.lineHeight;
+				}
+				textNode.moveTo(offsetX, offsetY);
+				offsetX += tpdata.spaceWidth + word.width;
+				holderTextGroup.add(textNode);
 			}
 		}
 		else{
-			if(holderTextGroup.properties.align == 'center'){
-				holderTextGroup.moveTo(
-					(scene.width - tpdata.boundingBox.width) / 2,
-					(scene.height - tpdata.boundingBox.height) / 2,
-					null);
-				var textNode = new Shape.Text(scene.text);
-				holderTextGroup.add(textNode);
-			}
+			holderTextGroup.moveTo(
+				(scene.width - tpdata.boundingBox.width) / 2,
+				(scene.height - tpdata.boundingBox.height) / 2,
+				null);
+			var textNode = new Shape.Text(scene.text);
+			holderTextGroup.add(textNode);
 		}
 
 		//todo: renderlist
@@ -755,10 +766,8 @@ Holder.js - client side image placeholders
 
 		//External stylesheets: <link> method
 		if (renderSettings.svgLinkStylesheet) {
-			while (defs.firstChild != null) {
-				defs.removeChild(defs.firstChild);
-			}
 
+			defs.removeChild(defs.firstChild);
 			for (i = 0; i < stylesheets.length; i++) {
 				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
 				link.setAttribute('href', stylesheets[i]);
@@ -782,7 +791,7 @@ Holder.js - client side image placeholders
 			defs.appendChild(style);
 		}
 
-		return svg_css + serializer.serializeToString(svg);
+		return '<?xml version="1.0" encoding="UTF-8"?>' + svg_css + serializer.serializeToString(svg);
 	}
 
 	//todo: see if possible to convert stagingRenderer to use HTML only
@@ -830,7 +839,7 @@ Holder.js - client side image placeholders
 				var stagingTextBBox = stagingText.getBBox();
 
 				//Get line count and split the string into words
-				var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
+				var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.setup.lineWrapRatio));
 				var words = htgProps.text.split(' ');
 
 				//Get bounding box for the string with spaces removed
@@ -1197,7 +1206,8 @@ Holder.js - client side image placeholders
 		debounce: 100,
 		ratio: 1,
 		supportsCanvas: false,
-		supportsSVG: false
+		supportsSVG: false,
+		lineWrapRatio: 0.9
 	};
 
 	App.dpr = function(val){
