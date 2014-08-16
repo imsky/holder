@@ -222,7 +222,8 @@ Browser support
 * Chrome
 * Firefox 3+
 * Safari 4+
-* Internet Explorer 6+ (with fallback for older IE)
+* Internet Explorer 9+ (with partial support for 6-8)
+* Opera 15+ (with partial support for 12)
 * Android (with fallback)
 
 License

@@ -45,14 +45,13 @@ Holder.js - client side image placeholders
 
 			App.vars.preempted = true;
 
-			var options = extend(App.settings, userOptions),
-				images = [],
-				bgnodes = [],
-				stylenodes = [];
+			var options = extend(App.settings, userOptions);
 
-			//todo: validate renderer
 			//todo: document runtime renderer option
 			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+			if(App.setup.renderers.join(',').indexOf(renderSettings.renderer) === -1){
+				renderSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
+			}
 			
 			//< v2.4 API compatibility
 			if (options.use_canvas) {
@@ -61,9 +60,10 @@ Holder.js - client side image placeholders
 				renderSettings.renderer = 'svg';
 			}
 
-			images = getNodeArray(options.images);
-			bgnodes = getNodeArray(options.bgnodes);
-			stylenodes = getNodeArray(options.stylenodes);
+			var images = getNodeArray(options.images);
+			var bgnodes = getNodeArray(options.bgnodes);
+			var stylenodes = getNodeArray(options.stylenodes);
+			var objects = getNodeArray(options.objects);
 
 			renderSettings.stylesheets = [];
 			//todo: document svg stylesheet settings
@@ -120,40 +120,56 @@ Holder.js - client side image placeholders
 				}
 			}
 
-			for (i = 0; i < images.length; i++) {
-				var attr_datasrc, attr_src, src;
-				attr_src = attr_datasrc = src = null;
-				var attr_rendered = null;
+			for(i = 0; i < objects.length; i++){
+				var object = objects[i];
+				var objectAttr = {};
 
+				try{
+					objectAttr.data = object.getAttribute('data');
+					objectAttr.dataSrc = object.getAttribute('data-src');
+				} catch(e){}
+
+				var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
+				var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
+
+				if(objectHasSrcURL){
+					prepareImageElement(options, renderSettings, objectAttr.data, object);
+				}
+				else if(objectHasDataSrcURL){
+					prepareImageElement(options, renderSettings, objectAttr.dataSrc, object);
+				}
+			}
+
+			for (i = 0; i < images.length; i++) {
 				var image = images[i];
+				var imageAttr = {};
 
 				try {
-					attr_src = image.getAttribute('src');
-					attr_datasrc = image.getAttribute('data-src');
-					attr_rendered = image.getAttribute('data-holder-rendered');
+					imageAttr.src = image.getAttribute('src');
+					imageAttr.dataSrc = image.getAttribute('data-src');
+					imageAttr.rendered = image.getAttribute('data-holder-rendered');
 				} catch (e) {}
 
-				var hasSrc = attr_src != null;
-				var hasDataSrc = attr_datasrc != null;
-				var hasDataSrcURL = hasDataSrc && attr_datasrc.indexOf(options.domain) === 0;
-				var rendered = attr_rendered != null && attr_rendered == 'true';
+				var imageHasSrc = imageAttr.src != null;
+				var imageHasDataSrcURL = imageAttr.dataSrc != null && imageAttr.dataSrc.indexOf(options.domain) === 0;
+				var imageRendered = imageAttr.rendered != null && imageAttr.rendered == 'true';
 
-				if (hasSrc) {
-					if (attr_src.indexOf(options.domain) === 0) {
-						prepareImageElement(options, renderSettings, attr_src, image);
-					} else if (hasDataSrcURL) {
+				if (imageHasSrc) {
+					if (imageAttr.src.indexOf(options.domain) === 0) {
+						prepareImageElement(options, renderSettings, imageAttr.src, image);
+					} else if (imageHasDataSrcURL) {
 						//Image has a valid data-src and an invalid src
-						if (rendered) {
+						if (imageRendered) {
 							//If the placeholder has already been render, re-render it
-							prepareImageElement(options, renderSettings, attr_datasrc, image);
+							prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
 						} else {
 							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
 							//todo: simplify imageExists param marshalling so an object doesn't need to be created
 							imageExists({
-								src: attr_src,
+								src: imageAttr.src,
 								options: options,
 								renderSettings: renderSettings,
-								dataSrc: attr_datasrc,
+								dataSrc: imageAttr.dataSrc,
 								image: image
 							}, function (exists, config) {
 								if (!exists) {
@@ -162,10 +178,11 @@ Holder.js - client side image placeholders
 							});
 						}
 					}
-				} else if (hasDataSrcURL) {
-					prepareImageElement(options, renderSettings, attr_datasrc, image);
+				} else if (imageHasDataSrcURL) {
+					prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
 				}
 			}
+
 			return this;
 		},
 		
@@ -190,6 +207,7 @@ Holder.js - client side image placeholders
 		settings: {
 			domain: 'holder.js',
 			images: 'img',
+			objects: 'object',
 			bgnodes: 'body .holderjs',
 			stylenodes: 'head link.holderjs',
 			stylesheets: [],
@@ -371,8 +389,8 @@ Holder.js - client side image placeholders
 		
 		if(flags.font){
 			theme.font = flags.font;
-			if(!renderSettings.noFontFallback && App.setup.supportsCanvas){
-				//If the client does not support canvas, the fallback fails and external fonts are dropped
+			//Only run the <canvas> webfont fallback if noFontFallback is false, if the node is not an image, and if canvas is supported
+			if(!renderSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas){
 				renderSettings = extend(renderSettings, {renderer: 'canvas'});
 			}
 		}
@@ -513,14 +531,26 @@ Holder.js - client side image placeholders
 			el.style.backgroundImage = 'url(' + image + ')';
 			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
 		} else {
-			el.setAttribute('src', image);
+			if(el.nodeName.toLowerCase() === 'img'){
+				el.setAttribute('src', image);
+			}
+			else if(el.nodeName.toLowerCase() === 'object'){
+				el.setAttribute('data', image);
+				el.setAttribute('type', 'image/svg+xml');
+			}
 			if(renderSettings.reRender){
 				setTimeout(function(){
 					var image = getRenderedImage();
 					if (image == null) {
 						throw 'Holder: couldn\'t render placeholder';
 					}
-					el.setAttribute('src', image);
+					if(el.nodeName.toLowerCase() === 'img'){
+						el.setAttribute('src', image);
+					}
+					else if(el.nodeName.toLowerCase() === 'object'){
+						el.setAttribute('data', image);
+						el.setAttribute('type', 'image/svg+xml');
+					}
 				}, 100);
 			}
 		}
@@ -534,7 +564,6 @@ Holder.js - client side image placeholders
 	 * @param scene Holder scene object
 	 */
 	function buildSceneGraph(scene){
-		//todo: mark the placeholder for canvas re-render if font is defined
 		scene.font = {
 			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
 			size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : 12),
@@ -577,6 +606,9 @@ Holder.js - client side image placeholders
 		sceneGraph.root.add(holderTextGroup);
 
 		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
+		if(!tpdata){
+			throw 'Holder: staging fallback not supported yet.';
+		}
 		holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
 		//todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
@@ -1028,7 +1060,7 @@ Holder.js - client side image placeholders
 						'font-weight': tgProps.font.weight,
 						'font-family': tgProps.font.family + ', monospace',
 						'font-size': tgProps.font.size + 'px',
-						'dominant-baseline': 'central'
+						'dominant-baseline': 'middle'
 					}));
 
 					textNode.nodeValue = word.properties.text;
@@ -1107,7 +1139,11 @@ Holder.js - client side image placeholders
 		});
 	}
 
-	//todo: jsdoc getNodeArray
+	/**
+	 * Converts a value into an array of DOM nodes
+	 *
+	 * @param val A string, a NodeList, a Node, or an HTMLCollection
+	 */
 	function getNodeArray(val){
 		var retval = null;
 		if (typeof (val) == 'string') {
@@ -1274,7 +1310,8 @@ Holder.js - client side image placeholders
 		ratio: 1,
 		supportsCanvas: false,
 		supportsSVG: false,
-		lineWrapRatio: 0.9
+		lineWrapRatio: 0.9,
+		renderers: ['html', 'canvas', 'svg']
 	};
 
 	App.dpr = function(val){
