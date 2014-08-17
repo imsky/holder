@@ -120,7 +120,7 @@ Holder.js - client side image placeholders
 				if (holderURL != null) {
 					var holderFlags = parseURL(holderURL, options);
 					if (holderFlags) {
-						prepareDOMElement('background', bgnodes[i], holderFlags, holderURL, renderSettings);
+						prepareDOMElement('background', bgnodes[i], holderFlags, renderSettings);
 					}
 				}
 			}
@@ -314,7 +314,7 @@ Holder.js - client side image placeholders
 	function prepareImageElement(options, renderSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 		if (holderFlags) {
-			prepareDOMElement(null, el, holderFlags, src, renderSettings);
+			prepareDOMElement(null, el, holderFlags, renderSettings);
 		}
 	}
 
@@ -329,7 +329,7 @@ Holder.js - client side image placeholders
 		var ret = {
 			theme: extend(App.settings.themes.gray, null),
 			stylesheets: options.stylesheets,
-			cleanURL: []
+			holderURL: []
 		};
 		var render = false;
 		var flags = url.split('/');
@@ -344,40 +344,56 @@ Holder.js - client side image placeholders
 					flag = flags[j];
 				}
 			}
-			ret.cleanURL.push(flag);
+
+			var push = false;
+			
 			if (App.flags.dimensions.match(flag)) {
 				render = true;
 				ret.dimensions = App.flags.dimensions.output(flag);
+				push = true;
 			} else if (App.flags.fluid.match(flag)) {
 				render = true;
 				ret.dimensions = App.flags.fluid.output(flag);
 				ret.fluid = true;
+				push = true;
 			} else if (App.flags.textmode.match(flag)) {
 				ret.textmode = App.flags.textmode.output(flag);
+				push = true;
 			} else if (App.flags.colors.match(flag)) {
 				var colors = App.flags.colors.output(flag);
 				ret.theme = extend(ret.theme, colors);
 				//todo: convert implicit theme use to a theme: flag
+				push = true;
 			} else if (options.themes[flag]) {
 				//If a theme is specified, it will override custom colors
 				if (options.themes.hasOwnProperty(flag)) {
 					ret.theme = extend(options.themes[flag], null);
 				}
+				push = true;
 			} else if (App.flags.font.match(flag)) {
 				ret.font = App.flags.font.output(flag);
+				push = true;
 			} else if (App.flags.auto.match(flag)) {
 				ret.auto = true;
+				push = true;
 			} else if (App.flags.text.match(flag)) {
 				ret.text = App.flags.text.output(flag);
+				push = true;
 			} else if (App.flags.random.match(flag)) {
 				if (App.vars.cache.themeKeys == null) {
 					App.vars.cache.themeKeys = Object.keys(options.themes);
 				}
 				var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
 				ret.theme = extend(options.themes[theme], null);
+				push = true;
+			}
+
+			if(push){
+				ret.holderURL.push(flag);
 			}
 		}
-		ret.cleanURL = ret.cleanURL.join('/');
+		ret.holderURL.unshift(options.domain);
+		ret.holderURL = ret.holderURL.join('/');
 		return render ? ret : false;
 	}
 
@@ -387,10 +403,9 @@ Holder.js - client side image placeholders
 	 * @private
 	 * @param el Image DOM element
 	 * @param flags Placeholder-specific configuration
-	 * @param src Image URL string
 	 * @param _renderSettings Instance configuration
 	 */
-	function prepareDOMElement(mode, el, flags, src, _renderSettings) {
+	function prepareDOMElement(mode, el, flags, _renderSettings) {
 		var dimensions = flags.dimensions,
 			theme = flags.theme;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
@@ -400,12 +415,7 @@ Holder.js - client side image placeholders
 			theme.text = flags.text;
 		}
 		
-		var holderURL = src;
-		
-		if(flags.cleanURL && flags.cleanURL.length){
-			holderURL = flags.cleanURL;
-		}
-
+		var holderURL = flags.holderURL;
 		var renderSettings = extend(_renderSettings, null);
 
 		if (flags.font) {
