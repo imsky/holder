@@ -37,8 +37,8 @@ The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
-Theming
--------
+Themes
+------
 
 ![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
 
@@ -50,8 +50,8 @@ There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial`
 <img src="holder.js/200x300/sky">
 ```
 
-Using custom colors on specific images
---------------------------------------
+Custom colors
+-------------
 
 Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
 
@@ -260,6 +260,26 @@ Using with ``lazyload.js``
 --------------------------
 
 Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
+
+Using with Angular.js
+---------------------
+
+You can use Holder in Angular projects with the following JS and HTML code (by [Nick Clark](https://github.com/NickClark)):
+
+```js
+angular.module('MyModule').directive('myHolder', function() {
+  return {
+    link: function(scope, element, attrs) {
+      attrs.$set('data-src', attrs.myHolder);
+      Holder.run({images:element.get(0), nocss:true});
+    }
+  };
+});
+```
+
+```html
+<img my-holder="holder.js/200x300">
+```
 
 Browser support
 ---------------
