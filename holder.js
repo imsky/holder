@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.4.0+bt3qy
+Version 2.4.0+bt54h
 © 2014 Ivan Malopinsky - http://imsky.co
 
 Site:		http://imsky.github.io/holder

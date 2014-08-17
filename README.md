@@ -50,6 +50,56 @@ There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial`
 <img src="holder.js/200x300/sky">
 ```
 
+Using custom colors on specific images
+--------------------------------------
+
+Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
+
+```html
+<img data-src="holder.js/100x200/#000:#fff">
+```
+
+The above will render a placeholder with a black background and white text.
+
+Custom text
+-----------
+
+You can specify custom text using the ``text:`` operator:
+
+```html
+<img data-src="holder.js/200x200/text:hello world">
+```
+
+If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
+
+```js
+Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" });
+```
+
+Custom fonts, web fonts and icon fonts
+--------------------------------------
+
+You can set a placeholder's font either through a theme or through the `font` flag:
+
+```html
+<img data-src="holder.js/300x200/font:Helvetica">
+```
+
+Placeholders using a custom font are rendered using canvas by default, due to SVG's constraints on cross-domain resource linking. If you're using only locally available fonts, you can disable this behavior by setting `noFontFallback` to `true`. However, if you need to render an SVG placeholder using an externally loaded font, you have to use the `object` tag instead of the `img` tag and add a `holderjs` class to the appropriate `link` tags. Here's an example:
+
+```html
+<head>
+<link href="http://cdn.jsdelivr.net/fontawesome/4.1.0/css/font-awesome.css" rel="stylesheet" class="holderjs">
+</head>
+<body>
+<object data="holder.js/300x200/font:FontAwesome"></object>
+```
+
+**Important:** When testing locally, font URLs must have a `http` or `https` protocol defined, otherwise they won't load.
+
+`svg` placeholders work just like `img` placeholders, with the added benefit of being able to inspect their contents using developer tools. This means you can access the placeholder DOM after it's rendered.
+
+
 Customizing themes
 ------------------
 
@@ -109,30 +159,12 @@ Holder.run({
 });
 ```
 
-Using custom colors on specific images
---------------------------------------
+Random themes
+-------------
 
-Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
-
+You can render a placeholder with a random theme using the `random` flag:
 ```html
-<img data-src="holder.js/100x200/#000:#fff">
-```
-
-The above will render a placeholder with a black background and white text.
-
-Custom text
------------
-
-You can specify custom text using the ``text:`` operator:
-
-```html
-<img data-src="holder.js/200x200/text:hello world">
-```
-
-If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
-
-```js
-Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" });
+<img data-src="holder.js/300x200/random">
 ```
 
 Fluid placeholders
@@ -145,6 +177,8 @@ Specifying a dimension in percentages creates a fluid placeholder that responds 
 ```
 
 By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, set the ``textmode`` flag to ``literal`` like so: `holder.js/100%x75/textmode:literal`.
+
+Fluid placeholders need to be visible in order to work. In cases when a placeholder is not visible, the `Holder.invisibleErrorFn` function is called, which takes the callee function as an argument and returns a function that takes the placeholder element as an argument. This function by default throws an exception, however its behavior can and should be overridden by the user.
 
 Automatically sized placeholders
 --------------------------------
@@ -174,8 +208,8 @@ Holder can render placeholders as background images for elements with the `holde
 
 The Holder URL in CSS should have a `?` in front. You can change the default class by specifying a selector as the `bgnodes` property when calling `Holder.run`.
 
-Customizing only the settings you need
---------------------------------------
+Custom settings
+---------------
 
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
@@ -203,13 +237,13 @@ Holder.add_theme("new", {
 
 The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
 
-Changing rendering engine
+Using different renderers
 -------------------------
 
-By default, Holder renders placeholders using SVG, however it has a fallback `canvas` engine that it uses in case the browser lacks SVG support. If you'd like to force `canvas` rendering, you can do it like so:
+Holder has three renderers: canvas, SVG, and HTML. The SVG renderer is used by default, however you can set the renderer using the `renderer` option, with either `svg`, `canvas`, or `html` values.
 
 ```js
-Holder.run({use_canvas:true});
+Holder.run({renderer: 'canvas'});
 ```
 
 Using with ``lazyload.js``

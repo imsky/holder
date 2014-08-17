@@ -54,7 +54,6 @@ Holder.js - client side image placeholders
 
 			var options = extend(App.settings, userOptions);
 
-			//todo: document runtime renderer option
 			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
 			if (App.setup.renderers.join(',').indexOf(renderSettings.renderer) === -1) {
 				renderSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
@@ -73,10 +72,7 @@ Holder.js - client side image placeholders
 			var objects = getNodeArray(options.objects);
 
 			renderSettings.stylesheets = [];
-			//todo: document svg stylesheet settings
 			renderSettings.svgXMLStylesheet = true;
-
-			//todo: document noFontFallback option
 			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 
 			for (var i = 0; i < stylenodes.length; i++) {
@@ -84,7 +80,6 @@ Holder.js - client side image placeholders
 				if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
 					var href = styleNode.attributes.href.value;
 					//todo: write isomorphic relative-to-absolute URL function
-					//todo: document that when testing locally, external fonts should have a full protocol
 					var proxyLink = newEl('a');
 					proxyLink.href = href;
 					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
@@ -189,8 +184,6 @@ Holder.js - client side image placeholders
 
 			return this;
 		},
-
-		//todo: document invisibleErrorFn for 2.4
 		//todo: remove invisibleErrorFn for 2.5
 		invisibleErrorFn: function(fn) {
 			return function(el) {
@@ -295,7 +288,6 @@ Holder.js - client side image placeholders
 					return this.regex.exec(val)[1];
 				}
 			},
-			//todo: document random flag
 			random: {
 				regex: /^random$/
 			}
@@ -430,7 +422,6 @@ Holder.js - client side image placeholders
 
 		//Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
 		if (flags.font && renderSettings.renderer == 'canvas') {
-			//todo: document reRender
 			renderSettings.reRender = true;
 		}
 
