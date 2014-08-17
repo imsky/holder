@@ -556,6 +556,7 @@ Holder.js - client side image placeholders
 			throw 'Holder: couldn\'t render placeholder';
 		}
 
+		//todo: add <object> canvas rendering
 		if (mode == 'background') {
 			el.style.backgroundImage = 'url(' + image + ')';
 			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';

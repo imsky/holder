@@ -216,7 +216,9 @@ The Holder URL in CSS should have a `?` in front. Like in image placeholders, yo
 <div data-background-src="holder.js/300x200"></div>
 ```
 
-**Important**: Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
+**Important:** Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
+
+**Important:** Some browsers can't parse URLs like `?holder.js/300x200/#fff:#000` due to the `#` characters. You can use `^` in place of `#` like this: `?holder.js/300x200/^fff:^000`.
 
 Custom settings
 ---------------
