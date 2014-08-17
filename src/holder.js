@@ -48,6 +48,7 @@ Holder.js - client side image placeholders
 		 * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
 		 */
 		run: function(userOptions) {
+			userOptions = userOptions || {};
 			var renderSettings = {};
 
 			App.vars.preempted = true;
@@ -1445,7 +1446,7 @@ Holder.js - client side image placeholders
 	if (global.onDomReady) {
 		global.onDomReady(function() {
 			if (!App.vars.preempted) {
-				Holder.run({});
+				Holder.run();
 			}
 			if (global.addEventListener) {
 				global.addEventListener('resize', resizeEvent, false);
@@ -1456,7 +1457,7 @@ Holder.js - client side image placeholders
 
 			if (typeof global.Turbolinks == 'object') {
 				global.document.addEventListener('page:change', function() {
-					Holder.run({});
+					Holder.run();
 				});
 			}
 		});
