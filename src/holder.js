@@ -328,12 +328,23 @@ Holder.js - client side image placeholders
 	function parseURL(url, options) {
 		var ret = {
 			theme: extend(App.settings.themes.gray, null),
-			stylesheets: options.stylesheets
+			stylesheets: options.stylesheets,
+			cleanURL: []
 		};
 		var render = false;
 		var flags = url.split('/');
+		var uriRegex = /%[0-9a-f]{2}/gi;
 		for (var fl = flags.length, j = 0; j < fl; j++) {
 			var flag = flags[j];
+			if(flag.match(uriRegex)){
+				try {
+					flag = decodeURIComponent(flag);
+				}
+				catch(e){
+					flag = flags[j];
+				}
+			}
+			ret.cleanURL.push(flag);
 			if (App.flags.dimensions.match(flag)) {
 				render = true;
 				ret.dimensions = App.flags.dimensions.output(flag);
@@ -366,6 +377,7 @@ Holder.js - client side image placeholders
 				ret.theme = extend(options.themes[theme], null);
 			}
 		}
+		ret.cleanURL = ret.cleanURL.join('/');
 		return render ? ret : false;
 	}
 
@@ -380,13 +392,18 @@ Holder.js - client side image placeholders
 	 */
 	function prepareDOMElement(mode, el, flags, src, _renderSettings) {
 		var dimensions = flags.dimensions,
-			theme = flags.theme,
-			text = flags.text ? decodeURIComponent(flags.text) : flags.text;
+			theme = flags.theme;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 		mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
 
-		if (text) {
-			theme.text = text;
+		if(flags.text != null){
+			theme.text = flags.text;
+		}
+		
+		var holderURL = src;
+		
+		if(flags.cleanURL && flags.cleanURL.length){
+			holderURL = flags.cleanURL;
 		}
 
 		var renderSettings = extend(_renderSettings, null);
@@ -410,12 +427,12 @@ Holder.js - client side image placeholders
 		if (mode == 'background') {
 			if (el.getAttribute('data-background-src') == null) {
 				setAttr(el, {
-					'data-background-src': src
+					'data-background-src': holderURL
 				});
 			}
 		} else {
 			setAttr(el, {
-				'data-src': src
+				'data-src': holderURL
 			});
 		}
 
@@ -428,7 +445,7 @@ Holder.js - client side image placeholders
 
 		if (mode == 'image' || mode == 'fluid') {
 			setAttr(el, {
-				'alt': text ? text : theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption
+				'alt': (theme.text ? theme.text + ' ['+dimensionsCaption+']': dimensionsCaption)
 			});
 		}
 
