@@ -421,7 +421,7 @@ Holder.js - client side image placeholders
 		if (flags.font) {
 			theme.font = flags.font;
 			//Only run the <canvas> webfont fallback if noFontFallback is false, if the node is not an image, and if canvas is supported
-			if (!renderSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas) {
+			if (!renderSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && renderSettings.renderer === 'svg') {
 				renderSettings = extend(renderSettings, {
 					renderer: 'canvas'
 				});
@@ -455,7 +455,7 @@ Holder.js - client side image placeholders
 
 		if (mode == 'image' || mode == 'fluid') {
 			setAttr(el, {
-				'alt': (theme.text ? theme.text + ' ['+dimensionsCaption+']': dimensionsCaption)
+				'alt': (theme.text ? (theme.text.length > 16 ? theme.text.substring(0,16) + '…' : theme.text) + ' ['+dimensionsCaption+']': dimensionsCaption)
 			});
 		}
 
