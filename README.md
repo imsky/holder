@@ -97,7 +97,7 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 
 **Important:** When testing locally, font URLs must have a `http` or `https` protocol defined, otherwise they won't load.
 
-`svg` placeholders work just like `img` placeholders, with the added benefit of being able to inspect their contents using developer tools. This means you can access the placeholder DOM after it's rendered.
+`svg` placeholders work like `img` placeholders, with the added benefit of their DOM being able to be inspected and modified.
 
 
 Customizing themes
