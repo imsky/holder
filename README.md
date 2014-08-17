@@ -95,9 +95,9 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 <object data="holder.js/300x200/font:FontAwesome"></object>
 ```
 
-**Important:** When testing locally, font URLs must have a `http` or `https` protocol defined, otherwise they won't load.
+**Important:** When testing locally, font URLs must have a `http` or `https` protocol defined.
 
-`svg` placeholders work like `img` placeholders, with the added benefit of their DOM being able to be inspected and modified.
+`<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified.
 
 
 Customizing themes
