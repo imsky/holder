@@ -85,7 +85,7 @@ You can set a placeholder's font either through a theme or through the `font` fl
 <img data-src="holder.js/300x200/font:Helvetica">
 ```
 
-Placeholders using a custom font are rendered using canvas by default, due to SVG's constraints on cross-domain resource linking. If you're using only locally available fonts, you can disable this behavior by setting `noFontFallback` to `true` in `Holder.run` options. However, if you need to render an SVG placeholder using an externally loaded font, you have to use the `object` tag instead of the `img` tag and add a `holderjs` class to the appropriate `link` tags. Here's an example:
+Placeholders using a custom font are rendered using canvas by default, due to SVG's constraints on cross-domain resource linking. If you're using only locally available fonts, you can disable this behavior by setting `noFontFallback` to `true` in `Holder.run` options. However, if you need to render a SVG placeholder using an externally loaded font, you have to use the `object` tag instead of the `img` tag and add a `holderjs` class to the appropriate `link` tags. Here's an example:
 
 ```html
 <head>
@@ -210,7 +210,13 @@ Holder can render placeholders as background images for elements with the `holde
 <div id="sample" class="holderjs"></div>
 ```
 
-The Holder URL in CSS should have a `?` in front. You can change the default class by specifying a selector as the `bgnodes` property when calling `Holder.run`.
+The Holder URL in CSS should have a `?` in front. Like in image placeholders, you can specify the Holder URL in a `data-background-src` attribute:
+
+```html
+<div data-background-src="holder.js/300x200"></div>
+```
+
+**Important**: Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
 
 Custom settings
 ---------------
