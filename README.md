@@ -256,8 +256,8 @@ Holder has three renderers: canvas, SVG, and HTML. The SVG renderer is used by d
 Holder.run({renderer: 'canvas'});
 ```
 
-Using with ``lazyload.js``
---------------------------
+Using with [lazyload.js](https://github.com/tuupola/jquery_lazyload)
+------------------------
 
 Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
 
