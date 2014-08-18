@@ -1171,7 +1171,7 @@ Holder.js - client side image placeholders
 		*/
 
 		var svgText = serializer.serializeToString(svg);
-		svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, "&$1");
+		svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
 		return svgCSS + svgText;
 	}
 
@@ -1293,7 +1293,7 @@ Holder.js - client side image placeholders
 		}		
 	  }
 	  return buf.join('');
-	};
+	}
 
 	/**
 	 * Decodes HTML entities in a stirng
