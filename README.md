@@ -76,6 +76,12 @@ If you have a group of placeholders where you'd like to use particular text, you
 Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" });
 ```
 
+Holder automatically adds line breaks to text that goes outside of the image boundaries. If the text is so long it goes out of both horizontal and vertical boundaries, the text is moved to the top. If you prefer to control the line breaks, you can add `\n` to the `text` property:
+
+```html
+<img data-src="holder.js/300x200/text:Add \n line breaks \n anywhere.">
+```
+
 Custom fonts, web fonts and icon fonts
 --------------------------------------
 
