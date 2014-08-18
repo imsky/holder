@@ -73,7 +73,7 @@ You can specify custom text using the ``text:`` operator:
 If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
 
 ```js
-Holder.add_theme("thumbnail", { background: "#fff", text: "Thumbnail" });
+Holder.addTheme("thumbnail", { background: "#fff", text: "Thumbnail" });
 ```
 
 Holder automatically adds line breaks to text that goes outside of the image boundaries. If the text is so long it goes out of both horizontal and vertical boundaries, the text is moved to the top. If you prefer to control the line breaks, you can add `\n` to the `text` property:
@@ -112,7 +112,7 @@ Customizing themes
 Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
 
 ```js
-Holder.add_theme("dark", {
+Holder.addTheme("dark", {
   background: "#000",
   foreground: "#aaa",
   size: 11,
@@ -134,7 +134,7 @@ The first approach is the easiest. After you include ``holder.js``, add a ``scri
 ```html
 <script src="holder.js"></script>
 <script>
-Holder.add_theme("bright", {
+Holder.addTheme("bright", {
   background: "white", foreground: "gray", size: 12
 });
 </script>
@@ -143,7 +143,7 @@ Holder.add_theme("bright", {
 The second approach requires that you call ``run`` after you add the theme, like this:
 
 ```js
-Holder.add_theme("bright", {background: "white", foreground: "gray", size: 12}).run();
+Holder.addTheme("bright", {background: "white", foreground: "gray", size: 12}).run();
 ```
 
 Using custom themes and domain on specific images
@@ -246,14 +246,14 @@ Inserting an image with optional custom theme
 You can add a placeholder programmatically by chaining Holder calls:
 
 ```js
-Holder.add_theme("new", {
+Holder.addTheme("new", {
   foreground: "#ccc",
   background: "#000",
   size: 10
-}).add_image("holder.js/200x100/new", "body").run();
+}).addImage("holder.js/200x100/new", "body").run();
 ```
 
-The first argument in ``add_image`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
+The first argument in ``addImage`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
 
 Using different renderers
 -------------------------
