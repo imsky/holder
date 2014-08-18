@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" class="holderjs">
 <link href='http://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css' class="holderjs">
-
+<link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css' class='holderjs'>
 <style>
 	body {font-family:Arial,sans-serif;width:1050px;margin:0 auto}
 	.thumb {width:300px;height:250px;margin:25px;float:left}
@@ -13,10 +13,11 @@
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
 	.thumb.fullpage {float:none;clear:both;width:auto;height:100px;margin:25px}
 	.autosize img {width:100%}
-	#holder1 {background:url('?holder.js/200x150/text:Background%20placeholder/^eee:^222');width:200px;height:150px}
+	#holder1 {background:url('?holder.js/300x200/text:Background%20placeholder/^eee:^222');width:300px;height:200px}
 </style>
 </head>
 <body>
+	
 <div class="thumb">
 	<img data-src="holder.js/300x200">
 	<div class="caption">
@@ -36,25 +37,19 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/lava/text:заполнитель">
+	<img data-src="holder.js/300x200/text:заполнитель">
 	<div class="caption">
 		 Placeholder with text
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/randomrandom/hello:world/$$$$/%25%25%67/lava/text:заполнитель">
-	<div class="caption">
-		 Placeholder with text and bad flags
-	</div>
-</div>
-<div class="thumb">
-	<img data-src="holder.js/300x200/sky/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
+	<img data-src="holder.js/300x200/#EE403D:#FFFFFF/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
 	<div class="caption">
 		 Placeholder with lengthy text
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.canvas/300x200/sky/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
+	<img data-src="holder.canvas/300x200/#EE403D:#FFFFFF/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
 	<div class="caption">
 		Canvas placeholder with lengthy text
 	</div>
@@ -72,6 +67,12 @@
 	</div>
 </div>
 <div class="thumb">
+	<img data-src="holder.js/300x200/randomrandom/hello:world/$$$$/%25%25%67/industrial/text:заполнитель">
+	<div class="caption">
+		 Placeholder with text and bad flags
+	</div>
+</div>
+<div class="thumb">
 	<script>
 	var r = Math.random();
 	if(r > 0.5){
@@ -86,14 +87,8 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/80%x50%/vine">
-	<div class="caption">
-		 Fluid placeholder
-	</div>
-</div>
-<div class="thumb">
 	<div class="autosize">
-		<img data-src="holder.js/200x100/#555:#aaa/auto">
+		<img data-src="holder.js/200x133/#111:#ffff00/auto">
 	</div>
 	<div class="caption">
 		 Auto-sized placeholder
@@ -101,7 +96,7 @@
 </div>
 <div class="thumb">
 	<div class="autosize">
-		<img data-src="holder.js/200x100/auto/textmode:exact">
+		<img data-src="holder.js/200x133/#111:#ffff00/auto/textmode:exact">
 	</div>
 	<div class="caption">
 		 Auto-sized placeholder in exact mode
@@ -114,7 +109,7 @@
 	</div>
 </div>
 <div class="thumb">
-	<div class="holderjs" style="width:100px;height:100px" data-background-src="?holder.js/100x100/#ff8362:#5e422e"></div>
+	<div class="holderjs" style="width:300px;height:200px" data-background-src="?holder.js/300x200/#ff8362:#5e422e"></div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with <code>data-background-src</code> placeholder
 	</div>
@@ -128,7 +123,7 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="custom.holder/50x50/custom/auto" style="width:200px;height:200px">
+	<img data-src="custom.holder/150x100/custom/auto" style="width:300px;height:200px">
 	<div class="caption">
 		Auto-sized <code>canvas</code> placeholder with custom domain and theme
 	</div>
@@ -143,12 +138,6 @@
 	<object data="holder.js/300x200/font:Pacifico/#4466ff:#fff/text:Pacifico"></object>
 	<div class="caption">
 		<code>object</code> placeholder using <span style="font-family:Pacifico">Pacifico</span> font</span>
-	</div>
-</div>
-<div class="thumb">
-	<img data-src="holder.js/300x200/font:FontAwesome/lava/text:&#xf0c0;">
-	<div class="caption">
-		 Placeholder using FontAwesome font, rendering <span style="font-family:FontAwesome">&#xf0c0;</span>
 	</div>
 </div>
 <div class="thumb">
@@ -170,6 +159,12 @@
 <img data-src="holder.js/100%25x50%25/lava">
 </div>
 <div class="caption">Two fluid placeholders in one parent using URI encoding</div>
+</div>
+<div class="thumb">
+	<img data-src="holder.js/80%x50%/vine">
+	<div class="caption">
+		 Fluid placeholder
+	</div>
 </div>
 <div class="fullpage thumb">
 	<img data-src="holder.js/90%x80%/sky">
@@ -195,13 +190,14 @@
 		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
 </div>
+
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../holder.js"></script>
 <!--
 <script src="require.js" data-main="test.js"></script>
 -->
 <script>
-Holder.add_image("holder.js/250x120/sky", "#thumb1").run();
+Holder.add_image("holder.js/300x200/sky", "#thumb1").run();
 Holder.add_theme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
 	use_canvas: true
@@ -213,6 +209,7 @@ Holder.run({
 	domain: "holder.canvas",
 	use_canvas: true
 });
+
 </script>
 </body>
 </html>

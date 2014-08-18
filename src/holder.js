@@ -271,7 +271,7 @@ Holder.js - client side image placeholders
 			text: {
 				regex: /text\:(.*)/,
 				output: function(val) {
-					return this.regex.exec(val)[1];
+					return this.regex.exec(val)[1].replace('\\/', '/');
 				}
 			},
 			font: {
@@ -325,7 +325,8 @@ Holder.js - client side image placeholders
 			holderURL: []
 		};
 		var render = false;
-		var flags = url.split('/');
+		var vtab = String.fromCharCode(11);
+		var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
 		var uriRegex = /%[0-9a-f]{2}/gi;
 		for (var fl = flags.length, j = 0; j < fl; j++) {
 			var flag = flags[j];
@@ -406,6 +407,15 @@ Holder.js - client side image placeholders
 
 		if(flags.text != null){
 			theme.text = flags.text;
+
+			//<object> SVG embedding doesn't parse Unicode properly
+			if(el.nodeName.toLowerCase() === 'object'){
+				var textLines = theme.text.split('\\n');
+				for(var k = 0; k < textLines.length; k++){
+					textLines[k] = encodeHtmlEntity(textLines[k]);
+				}
+				theme.text = textLines.join('\\n');
+			}
 		}
 		
 		var holderURL = flags.holderURL;
@@ -921,7 +931,7 @@ Holder.js - client side image placeholders
 					stagingTextNode.nodeValue = '';
 					for (var i = 0; i < words.length; i++) {
 						if (words[i].length === 0) continue;
-						stagingTextNode.nodeValue = words[i];
+						stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
 						var bbox = stagingText.getBBox();
 						wordWidths.push({
 							text: words[i],
@@ -1109,7 +1119,7 @@ Holder.js - client side image placeholders
 	function serializeSVG(svg, renderSettings) {
 		if (!global.XMLSerializer) return;
 		var serializer = new XMLSerializer();
-		var svg_css = '';
+		var svgCSS = '';
 		var stylesheets = renderSettings.stylesheets;
 		var defs = svg.querySelector('defs');
 
@@ -1122,8 +1132,11 @@ Holder.js - client side image placeholders
 				xml.insertBefore(csspi, xml.firstChild);
 			}
 
+			//Add <?xml ... ?> UTF-8 directive
+			var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+			xml.insertBefore(xmlpi, xml.firstChild);
 			xml.removeChild(xml.documentElement);
-			svg_css = serializer.serializeToString(xml);
+			svgCSS = serializer.serializeToString(xml);
 		}
 
 		/*
@@ -1157,7 +1170,9 @@ Holder.js - client side image placeholders
 
 		*/
 
-		return svg_css + serializer.serializeToString(svg);
+		var svgText = serializer.serializeToString(svg);
+		svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, "&$1");
+		return svgCSS + svgText;
 	}
 
 	/**
@@ -1258,6 +1273,37 @@ Holder.js - client side image placeholders
 			callback.call(this, true, params);
 		};
 		image.src = params.src;
+	}
+
+	/**
+	 * Encodes HTML entities in a string
+	 *
+	 * @param str Input string
+	 */
+	function encodeHtmlEntity(str) {
+	  var buf = [];
+	  var charCode = 0;
+	  for (var i=str.length-1;i>=0;i--) {
+		charCode = str[i].charCodeAt();
+		if(charCode > 128){
+			buf.unshift(['&#', charCode, ';'].join(''));
+		}
+		else{
+			buf.unshift(str[i]);
+		}		
+	  }
+	  return buf.join('');
+	};
+
+	/**
+	 * Decodes HTML entities in a stirng
+	 *
+	 * @param str Input string
+	 */
+	function decodeHtmlEntity(str) {
+	  return str.replace(/&#(\d+);/g, function(match, dec) {
+		return String.fromCharCode(dec);
+	  });
 	}
 
 	// Scene graph
