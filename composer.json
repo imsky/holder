@@ -1,6 +1,6 @@
 {
     "name": "imsky/holder",
-    "description": "Holder uses the canvas element and the data URI scheme to render image placeholders entirely in browser.",
+    "description": "Client-side image placeholders.",
     "homepage": "https://github.com/imsky/holder",
     "keywords": [
         "images",
