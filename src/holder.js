@@ -228,7 +228,7 @@ Holder.js - client side image placeholders
 				},
 				'vine': {
 					background: '#39DBAC',
-					foreground: '#1E292C',
+					foreground: '#1E292C'
 				},
 				'lava': {
 					background: '#F8591A',
@@ -330,17 +330,16 @@ Holder.js - client side image placeholders
 		var uriRegex = /%[0-9a-f]{2}/gi;
 		for (var fl = flags.length, j = 0; j < fl; j++) {
 			var flag = flags[j];
-			if(flag.match(uriRegex)){
+			if (flag.match(uriRegex)) {
 				try {
 					flag = decodeURIComponent(flag);
-				}
-				catch(e){
+				} catch (e) {
 					flag = flags[j];
 				}
 			}
 
 			var push = false;
-			
+
 			if (App.flags.dimensions.match(flag)) {
 				render = true;
 				ret.dimensions = App.flags.dimensions.output(flag);
@@ -382,7 +381,7 @@ Holder.js - client side image placeholders
 				push = true;
 			}
 
-			if(push){
+			if (push) {
 				ret.holderURL.push(flag);
 			}
 		}
@@ -405,19 +404,19 @@ Holder.js - client side image placeholders
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 		mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
 
-		if(flags.text != null){
+		if (flags.text != null) {
 			theme.text = flags.text;
 
 			//<object> SVG embedding doesn't parse Unicode properly
-			if(el.nodeName.toLowerCase() === 'object'){
+			if (el.nodeName.toLowerCase() === 'object') {
 				var textLines = theme.text.split('\\n');
-				for(var k = 0; k < textLines.length; k++){
+				for (var k = 0; k < textLines.length; k++) {
 					textLines[k] = encodeHtmlEntity(textLines[k]);
 				}
 				theme.text = textLines.join('\\n');
 			}
 		}
-		
+
 		var holderURL = flags.holderURL;
 		var renderSettings = extend(_renderSettings, null);
 
@@ -457,7 +456,7 @@ Holder.js - client side image placeholders
 
 		if (mode == 'image' || mode == 'fluid') {
 			setAttr(el, {
-				'alt': (theme.text ? (theme.text.length > 16 ? theme.text.substring(0,16) + '…' : theme.text) + ' ['+dimensionsCaption+']': dimensionsCaption)
+				'alt': (theme.text ? (theme.text.length > 16 ? theme.text.substring(0, 16) + '…' : theme.text) + ' [' + dimensionsCaption + ']' : dimensionsCaption)
 			});
 		}
 
@@ -525,6 +524,17 @@ Holder.js - client side image placeholders
 
 	function render(mode, params, el, renderSettings) {
 		var image = null;
+
+		switch (renderSettings.renderer) {
+			case 'svg':
+				if (!App.setup.supportsSVG) return;
+				break;
+			case 'canvas':
+				if (!App.setup.supportsCanvas) return;
+				break;
+			default:
+				return;
+		}
 
 		//todo: move generation of scene up to flag generation to reduce extra object creation
 		var scene = {
@@ -955,9 +965,12 @@ Holder.js - client side image placeholders
 
 	var sgCanvasRenderer = (function() {
 		var canvas = newEl('canvas');
-		var ctx = canvas.getContext('2d');
+		var ctx = null;
 
 		return function(sceneGraph) {
+			if (ctx == null) {
+				ctx = canvas.getContext('2d');
+			}
 			var root = sceneGraph.root;
 			canvas.width = App.dpr(root.properties.width);
 			canvas.height = App.dpr(root.properties.height);
@@ -1281,18 +1294,17 @@ Holder.js - client side image placeholders
 	 * @param str Input string
 	 */
 	function encodeHtmlEntity(str) {
-	  var buf = [];
-	  var charCode = 0;
-	  for (var i=str.length-1;i>=0;i--) {
-		charCode = str[i].charCodeAt();
-		if(charCode > 128){
-			buf.unshift(['&#', charCode, ';'].join(''));
+		var buf = [];
+		var charCode = 0;
+		for (var i = str.length - 1; i >= 0; i--) {
+			charCode = str[i].charCodeAt();
+			if (charCode > 128) {
+				buf.unshift(['&#', charCode, ';'].join(''));
+			} else {
+				buf.unshift(str[i]);
+			}
 		}
-		else{
-			buf.unshift(str[i]);
-		}		
-	  }
-	  return buf.join('');
+		return buf.join('');
 	}
 
 	/**
@@ -1301,9 +1313,9 @@ Holder.js - client side image placeholders
 	 * @param str Input string
 	 */
 	function decodeHtmlEntity(str) {
-	  return str.replace(/&#(\d+);/g, function(match, dec) {
-		return String.fromCharCode(dec);
-	  });
+		return str.replace(/&#(\d+);/g, function(match, dec) {
+			return String.fromCharCode(dec);
+		});
 	}
 
 	// Scene graph
@@ -1484,7 +1496,6 @@ Holder.js - client side image placeholders
 			App.setup.supportsSVG = true;
 		}
 	})();
-
 	//Exposing to environment and setting up listeners
 
 	register(Holder, 'Holder', global);
