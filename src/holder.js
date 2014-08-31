@@ -164,18 +164,13 @@ Holder.js - client side image placeholders
 							prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
 						} else {
 							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
-							//todo: simplify imageExists param marshalling so an object doesn't need to be created
-							imageExists({
-								src: imageAttr.src,
-								options: options,
-								renderSettings: renderSettings,
-								dataSrc: imageAttr.dataSrc,
-								image: image
-							}, function(exists, config) {
-								if (!exists) {
-									prepareImageElement(config.options, config.renderSettings, config.dataSrc, config.image);
-								}
-							});
+              (function(src, options, renderSettings, dataSrc, image){
+                imageExists(src, function(exists){
+                  if(!exists){
+                    prepareImageElement(options, renderSettings, dataSrc, image);
+                  }
+                });
+              })(imageAttr.src, options, renderSettings, imageAttr.dataSrc, image);
 						}
 					}
 				} else if (imageHasDataSrcURL) {
@@ -1282,15 +1277,15 @@ Holder.js - client side image placeholders
 	 * @param params Configuration object, must specify at least a src key
 	 * @param callback Callback to call once image status has been found
 	 */
-	function imageExists(params, callback) {
+	function imageExists(src, callback) {
 		var image = new Image();
 		image.onerror = function() {
-			callback.call(this, false, params);
+			callback.call(this, false);
 		};
 		image.onload = function() {
-			callback.call(this, true, params);
+			callback.call(this, true);
 		};
-		image.src = params.src;
+		image.src = src;
 	}
 
 	/**
@@ -1501,8 +1496,8 @@ Holder.js - client side image placeholders
 			App.setup.supportsSVG = true;
 		}
 	})();
+  
 	//Exposing to environment and setting up listeners
-
 	register(Holder, 'Holder', global);
 
 	if (global.onDomReady) {
