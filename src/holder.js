@@ -232,11 +232,15 @@ Holder.js - client side image placeholders
 				},
 				'lava': {
 					background: '#F8591A',
-					foreground: '#1C2846',
-					size: 12
+					foreground: '#1C2846'
 				}
 			}
 		},
+    defaults: {
+      size: 10,
+      units: 'pt',
+      scale: 1/16
+    },
 		flags: {
 			dimensions: {
 				regex: /^(\d+)x(\d+)$/,
@@ -629,7 +633,8 @@ Holder.js - client side image placeholders
 	function buildSceneGraph(scene) {
 		scene.font = {
 			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-			size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : 12),
+			size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : App.defaults.size),
+      units: scene.theme.units ? scene.theme.units : App.defaults.units,
 			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 		};
 		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
@@ -760,7 +765,7 @@ Holder.js - client side image placeholders
 		width = parseInt(width, 10);
 		var bigSide = Math.max(height, width);
 		var smallSide = Math.min(height, width);
-		var scale = 1 / 12;
+		var scale = App.defaults.scale;
 		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
 		return Math.round(Math.max(fontSize, newHeight));
 	}
@@ -911,7 +916,7 @@ Holder.js - client side image placeholders
 					'y': htgProps.font.size,
 					'style': cssProps({
 						'font-weight': htgProps.font.weight,
-						'font-size': htgProps.font.size + 'px',
+						'font-size': htgProps.font.size + htgProps.font.units,
 						'font-family': htgProps.font.family,
 						'dominant-baseline': 'middle'
 					})
@@ -981,7 +986,7 @@ Holder.js - client side image placeholders
 
 			var textGroup = root.children.holderTextGroup;
 			var tgProps = textGroup.properties;
-			ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + 'px ' + textGroup.properties.font.family + ', monospace';
+			ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
 			ctx.fillStyle = textGroup.properties.fill;
 
 			for (var lineKey in textGroup.children) {
@@ -1047,7 +1052,7 @@ Holder.js - client side image placeholders
 							'fill': tgProps.fill,
 							'font-weight': tgProps.font.weight,
 							'font-family': tgProps.font.family + ', monospace',
-							'font-size': tgProps.font.size + 'px',
+							'font-size': tgProps.font.size + tgProps.font.units,
 							'dominant-baseline': 'central'
 						})
 					});
