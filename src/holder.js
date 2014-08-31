@@ -999,7 +999,6 @@ Holder.js - client side image placeholders
 		};
 	})();
 
-	//todo: fix svg rendering on zoomed-in documents if possible
 	var sgSVGRenderer = (function() {
 		//Prevent IE <9 from initializing SVG renderer
 		if (!global.XMLSerializer) return;
