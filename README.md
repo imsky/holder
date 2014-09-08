@@ -42,7 +42,7 @@ Themes
 
 ![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
 
-Holder includes support for themes, to help placeholders blend in with your layout. 
+Holder includes support for themes, to help placeholders blend in with your layout.
 
 There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``. Use them like so:
 
