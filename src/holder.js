@@ -1495,7 +1495,7 @@ Holder.js - client side image placeholders
 			App.setup.supportsSVG = true;
 		}
 	})();
-  
+
 	//Exposing to environment and setting up listeners
 	register(Holder, 'Holder', global);
 
