@@ -8,6 +8,7 @@ Holder.js - client side image placeholders
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var document = global.document;
+	var version = '2.4.1';
 
 	var Holder = {
 		/**
@@ -187,7 +188,8 @@ Holder.js - client side image placeholders
 					throw 'Holder: invisible placeholder';
 				}
 			};
-		}
+		},
+		version: version
 	};
 
 	//< v2.4 API compatibility
