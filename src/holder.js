@@ -1296,7 +1296,7 @@ Holder.js - client side image placeholders
 		var buf = [];
 		var charCode = 0;
 		for (var i = str.length - 1; i >= 0; i--) {
-			charCode = str[i].charCodeAt();
+			charCode = str.charCodeAt(i);
 			if (charCode > 128) {
 				buf.unshift(['&#', charCode, ';'].join(''));
 			} else {
