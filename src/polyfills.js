@@ -179,7 +179,6 @@ if (!Object.keys) {
 
 		for (property in currentStyle) {
 			Array.prototype.push.call(style, property == 'styleFloat' ? 'float' : property.replace(/[A-Z]/, unCamelCase));
-
 			if (property == 'width') {
 				style[property] = element.offsetWidth + 'px';
 			} else if (property == 'height') {
@@ -217,10 +216,13 @@ if (!Object.keys) {
 			throw new Error('NotSupportedError: DOM Exception 9');
 		},
 		// <CSSStyleDeclaration>.getPropertyValue
-		getPropertyValue: function (property) {
-			return this[property.replace(/-\w/g, function (match) {
-				return match[1].toUpperCase();
-			})];
+		getPropertyValue: function(property) {
+		    var lookup = property.replace(/-([a-z])/g, function(match) {
+		        match = match.charAt ? match.split('') : match;
+		        return match[1].toUpperCase();
+		    });
+		    var ret = this[lookup];
+		    return ret;
 		},
 		// <CSSStyleDeclaration>.item
 		item: function (index) {
@@ -241,7 +243,7 @@ if (!Object.keys) {
 	};
 
 	// <window>.getComputedStyle
-	window.getComputedStyle = Window.prototype.getComputedStyle = function (element) {
+	window.getComputedStyle = function (element) {
 		return new CSSStyleDeclaration(element);
 	};
 })();
