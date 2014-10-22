@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
+var uglify = require('gulp-uglifyjs');
 var header = require('gulp-header');
 var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
@@ -38,26 +38,36 @@ gulp.task('jshint', function () {
 gulp.task('todo', function(){
 	return gulp.src(paths.scripts)
 		.pipe(todo())
-		.pipe(gulp.dest('./'))
+		.pipe(gulp.dest('./'));
 });
 
 gulp.task('scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts)
 		.pipe(concat("holder.js"))
-		.pipe(uglify())
+		.pipe(gulp.dest("./"));
+});
+
+gulp.task('minify', ['scripts'], function () {
+	return gulp.src("holder.js")
+		.pipe(uglify("holder.min.js", { comments: "all", preamble: banner }))
+		.pipe(gulp.dest("./"));
+});
+
+gulp.task('banner', ['minify'], function () {
+	return gulp.src(["holder*.js"])
 		.pipe(header(banner, {
 			pkg: pkg,
 			year: moment().format("YYYY"),
 			build: build
 		}))
-		.pipe(gulp.dest("./"))
+		.pipe(gulp.dest("./"));
 });
 
 gulp.task('watch', function(){
 	gulp.watch(paths.scripts, ['default']);
 });
 
-gulp.task('default', ['todo', 'jshint', 'scripts'], function(){
+gulp.task('default', ['todo', 'jshint', 'scripts', 'minify', 'banner'], function(){
 	build = generateBuild();
 	gulputil.log("Finished build "+build);
 });
