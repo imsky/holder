@@ -455,7 +455,7 @@ Holder.js - client side image placeholders
 
 		if (mode == 'image' || mode == 'fluid') {
 			setAttr(el, {
-				'alt': (theme.text ? (theme.text.length > 16 ? theme.text.substring(0, 16) + '…' : theme.text) + ' [' + dimensionsCaption + ']' : dimensionsCaption)
+				'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
 			});
 		}
 
