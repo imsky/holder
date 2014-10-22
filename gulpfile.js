@@ -32,7 +32,7 @@ var paths = {
 gulp.task('jshint', function () {
 	return gulp.src(paths.scripts[paths.scripts.length - 1])
 		.pipe(jshint())
-		.pipe(jshint.reporter('default'))
+		.pipe(jshint.reporter('default'));
 });
 
 gulp.task('todo', function(){
@@ -49,7 +49,7 @@ gulp.task('scripts', ['jshint'], function () {
 
 gulp.task('minify', ['scripts'], function () {
 	return gulp.src("holder.js")
-		.pipe(uglify("holder.min.js", { comments: "all", preamble: banner }))
+		.pipe(uglify("holder.min.js"))
 		.pipe(gulp.dest("./"));
 });
 

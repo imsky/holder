@@ -30,13 +30,13 @@
     "url": "https://github.com/imsky/holder/issues"
   },
   "devDependencies": {
-    "moment": "^2.6.0",
     "gulp": "~3",
-    "gulp-uglify": "^0.3.0",
     "gulp-concat": "^2.2.0",
     "gulp-header": "^1.0.2",
     "gulp-jshint": "^1.6.1",
     "gulp-todo": "^0.3.8",
-    "gulp-util": "~3"
+    "gulp-uglifyjs": "^0.4.4",
+    "gulp-util": "~3",
+    "moment": "^2.6.0"
   }
 }
