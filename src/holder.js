@@ -9,6 +9,10 @@ Holder.js - client side image placeholders
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var document = global.document;
 	var version = '2.4.1';
+	var generatorComment =	'\n' +
+				'Created with Holder.js ' + version + '.\n' +
+				'Learn more at http://holderjs.com\n' +
+				'(c) 2012-2014 Ivan Malopinsky - http://imsky.co\n';
 
 	var Holder = {
 		/**
@@ -1006,6 +1010,8 @@ Holder.js - client side image placeholders
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0, 0);
 		var bgEl = newEl('rect', SVG_NS);
+		var commentNode = document.createComment(generatorComment);
+		svg.insertBefore(commentNode, svg.firstChild);
 		svg.appendChild(bgEl);
 
 		//todo: create a reusable pool for textNodes, resize if more words present
