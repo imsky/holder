@@ -169,13 +169,13 @@ Holder.js - client side image placeholders
 							prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
 						} else {
 							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
-              (function(src, options, renderSettings, dataSrc, image){
-                imageExists(src, function(exists){
-                  if(!exists){
-                    prepareImageElement(options, renderSettings, dataSrc, image);
-                  }
-                });
-              })(imageAttr.src, options, renderSettings, imageAttr.dataSrc, image);
+							(function(src, options, renderSettings, dataSrc, image){
+							  imageExists(src, function(exists){
+							    if(!exists){
+							      prepareImageElement(options, renderSettings, dataSrc, image);
+							    }
+							  });
+							})(imageAttr.src, options, renderSettings, imageAttr.dataSrc, image);
 						}
 					}
 				} else if (imageHasDataSrcURL) {
