@@ -237,11 +237,11 @@ Holder.js - client side image placeholders
 				}
 			}
 		},
-    defaults: {
-      size: 10,
-      units: 'pt',
-      scale: 1/16
-    },
+		defaults: {
+			size: 10,
+			units: 'pt',
+			scale: 1 / 16
+		},
 		flags: {
 			dimensions: {
 				regex: /^(\d+)x(\d+)$/,
