@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.4.1+f2l1h
+Version 2.4.1+f63aw
 © 2014 Ivan Malopinsky - http://imsky.co
 
 Site:     http://imsky.github.io/holder
@@ -9,4 +9,1991 @@ Issues:   https://github.com/imsky/holder/issues
 License:  http://opensource.org/licenses/MIT
 
 */
-!function(e,t,r){t[e]=r}("onDomReady",this,function(e){"use strict";function t(e){if(!b){if(!a.body)return i(t);for(b=!0;e=S.shift();)i(e)}}function r(e){(y||e.type===s||a[c]===u)&&(n(),t())}function n(){y?(a[x](m,r,d),e[x](s,r,d)):(a[g](v,r),e[g](h,r))}function i(e,t){setTimeout(e,+t>=0?t:1)}function o(e){b?i(e):S.push(e)}null==document.readyState&&document.addEventListener&&(document.addEventListener("DOMContentLoaded",function E(){document.removeEventListener("DOMContentLoaded",E,!1),document.readyState="complete"},!1),document.readyState="loading");var a=e.document,l=a.documentElement,s="load",d=!1,h="on"+s,u="complete",c="readyState",f="attachEvent",g="detachEvent",p="addEventListener",m="DOMContentLoaded",v="onreadystatechange",x="removeEventListener",y=p in a,w=d,b=d,S=[];if(a[c]===u)i(t);else if(y)a[p](m,r,d),e[p](s,r,d);else{a[f](v,r),e[f](h,r);try{w=null==e.frameElement&&l}catch(C){}w&&w.doScroll&&!function k(){if(!b){try{w.doScroll("left")}catch(e){return i(k,50)}n(),t()}}()}return o.version="1.4.0",o.isReady=function(){return b},o}(this)),document.querySelectorAll||(document.querySelectorAll=function(e){var t,r=document.createElement("style"),n=[];for(document.documentElement.firstChild.appendChild(r),document._qsa=[],r.styleSheet.cssText=e+"{x-qsa:expression(document._qsa && document._qsa.push(this))}",window.scrollBy(0,0),r.parentNode.removeChild(r);document._qsa.length;)t=document._qsa.shift(),t.style.removeAttribute("x-qsa"),n.push(t);return document._qsa=null,n}),document.querySelector||(document.querySelector=function(e){var t=document.querySelectorAll(e);return t.length?t[0]:null}),document.getElementsByClassName||(document.getElementsByClassName=function(e){return e=String(e).replace(/^|\s+/g,"."),document.querySelectorAll(e)}),Object.keys||(Object.keys=function(e){if(e!==Object(e))throw TypeError("Object.keys called on non-object");var t,r=[];for(t in e)Object.prototype.hasOwnProperty.call(e,t)&&r.push(t);return r}),function(e){var t="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";e.atob=e.atob||function(e){e=String(e);var r,n=0,i=[],o=0,a=0;if(e=e.replace(/\s/g,""),e.length%4===0&&(e=e.replace(/=+$/,"")),e.length%4===1)throw Error("InvalidCharacterError");if(/[^+/0-9A-Za-z]/.test(e))throw Error("InvalidCharacterError");for(;n<e.length;)r=t.indexOf(e.charAt(n)),o=o<<6|r,a+=6,24===a&&(i.push(String.fromCharCode(o>>16&255)),i.push(String.fromCharCode(o>>8&255)),i.push(String.fromCharCode(255&o)),a=0,o=0),n+=1;return 12===a?(o>>=4,i.push(String.fromCharCode(255&o))):18===a&&(o>>=2,i.push(String.fromCharCode(o>>8&255)),i.push(String.fromCharCode(255&o))),i.join("")},e.btoa=e.btoa||function(e){e=String(e);var r,n,i,o,a,l,s,d=0,h=[];if(/[^\x00-\xFF]/.test(e))throw Error("InvalidCharacterError");for(;d<e.length;)r=e.charCodeAt(d++),n=e.charCodeAt(d++),i=e.charCodeAt(d++),o=r>>2,a=(3&r)<<4|n>>4,l=(15&n)<<2|i>>6,s=63&i,d===e.length+2?(l=64,s=64):d===e.length+1&&(s=64),h.push(t.charAt(o),t.charAt(a),t.charAt(l),t.charAt(s));return h.join("")}}(this),function(){function e(t,r,n){t.document;var i,o=t.currentStyle[r].match(/([\d\.]+)(%|cm|em|in|mm|pc|pt|)/)||[0,0,""],a=o[1],l=o[2];return n=n?/%|em/.test(l)&&t.parentElement?e(t.parentElement,"fontSize",null):16:n,i="fontSize"==r?n:/width/i.test(r)?t.clientWidth:t.clientHeight,"%"==l?a/100*i:"cm"==l?.3937*a*96:"em"==l?a*n:"in"==l?96*a:"mm"==l?.3937*a*96/10:"pc"==l?12*a*96/72:"pt"==l?96*a/72:a}function t(e,t){var r="border"==t?"Width":"",n=t+"Top"+r,i=t+"Right"+r,o=t+"Bottom"+r,a=t+"Left"+r;e[t]=(e[n]==e[i]&&e[n]==e[o]&&e[n]==e[a]?[e[n]]:e[n]==e[o]&&e[a]==e[i]?[e[n],e[i]]:e[a]==e[i]?[e[n],e[i],e[o]]:[e[n],e[i],e[o],e[a]]).join(" ")}function r(r){var n,i=this,o=r.currentStyle,a=e(r,"fontSize"),l=function(e){return"-"+e.toLowerCase()};for(n in o)if(Array.prototype.push.call(i,"styleFloat"==n?"float":n.replace(/[A-Z]/,l)),"width"==n)i[n]=r.offsetWidth+"px";else if("height"==n)i[n]=r.offsetHeight+"px";else if("styleFloat"==n)i.float=o[n];else if(/margin.|padding.|border.+W/.test(n)&&"auto"!=i[n])i[n]=Math.round(e(r,n,a))+"px";else if(/^outline/.test(n))try{i[n]=o[n]}catch(s){i.outlineColor=o.color,i.outlineStyle=i.outlineStyle||"none",i.outlineWidth=i.outlineWidth||"0px",i.outline=[i.outlineColor,i.outlineWidth,i.outlineStyle].join(" ")}else i[n]=o[n];t(i,"margin"),t(i,"padding"),t(i,"border"),i.fontSize=Math.round(a)+"px"}window.getComputedStyle||(r.prototype={constructor:r,getPropertyPriority:function(){throw new Error("NotSupportedError: DOM Exception 9")},getPropertyValue:function(e){var t=e.replace(/-([a-z])/g,function(e){return e=e.charAt?e.split(""):e,e[1].toUpperCase()}),r=this[t];return r},item:function(e){return this[e]},removeProperty:function(){throw new Error("NoModificationAllowedError: DOM Exception 7")},setProperty:function(){throw new Error("NoModificationAllowedError: DOM Exception 7")},getPropertyCSSValue:function(){throw new Error("NotSupportedError: DOM Exception 9")}},window.getComputedStyle=function(e){return new r(e)})}(),Object.prototype.hasOwnProperty||(Object.prototype.hasOwnProperty=function(e){var t=this.__proto__||this.constructor.prototype;return e in this&&(!(e in t)||t[e]!==this[e])}),function(e,t){e.augment=t()}(this,function(){"use strict";var e=function(){},t=Array.prototype.slice,r=function(r,n){var i=e.prototype="function"==typeof r?r.prototype:r,o=new e,a=n.apply(o,t.call(arguments,2).concat(i));if("object"==typeof a)for(var l in a)o[l]=a[l];if(!o.hasOwnProperty("constructor"))return o;var s=o.constructor;return s.prototype=o,s};return r.defclass=function(e){var t=e.constructor;return t.prototype=e,t},r.extend=function(e,t){return r(e,function(e){return this.uber=e,t})},r}),function(e,t){function r(e,t,r,o){var a=n(r.substr(r.lastIndexOf(e.domain)),e);a&&i(null,o,a,t)}function n(e,t){for(var r={theme:p(A.settings.themes.gray,null),stylesheets:t.stylesheets,holderURL:[]},n=!1,i=String.fromCharCode(11),o=e.replace(/([^\\])\//g,"$1"+i).split(i),a=/%[0-9a-f]{2}/gi,l=o.length,s=0;l>s;s++){var d=o[s];if(d.match(a))try{d=decodeURIComponent(d)}catch(h){d=o[s]}var u=!1;if(A.flags.dimensions.match(d))n=!0,r.dimensions=A.flags.dimensions.output(d),u=!0;else if(A.flags.fluid.match(d))n=!0,r.dimensions=A.flags.fluid.output(d),r.fluid=!0,u=!0;else if(A.flags.textmode.match(d))r.textmode=A.flags.textmode.output(d),u=!0;else if(A.flags.colors.match(d)){var c=A.flags.colors.output(d);r.theme=p(r.theme,c),u=!0}else if(t.themes[d])t.themes.hasOwnProperty(d)&&(r.theme=p(t.themes[d],null)),u=!0;else if(A.flags.font.match(d))r.font=A.flags.font.output(d),u=!0;else if(A.flags.auto.match(d))r.auto=!0,u=!0;else if(A.flags.text.match(d))r.text=A.flags.text.output(d),u=!0;else if(A.flags.random.match(d)){null==A.vars.cache.themeKeys&&(A.vars.cache.themeKeys=Object.keys(t.themes));var f=A.vars.cache.themeKeys[0|Math.random()*A.vars.cache.themeKeys.length];r.theme=p(t.themes[f],null),u=!0}u&&r.holderURL.push(d)}return r.holderURL.unshift(t.domain),r.holderURL=r.holderURL.join("/"),n?r:!1}function i(e,t,r,n){var i=r.dimensions,a=r.theme,l=i.width+"x"+i.height;if(e=null==e?r.fluid?"fluid":"image":e,null!=r.text&&(a.text=r.text,"object"===t.nodeName.toLowerCase())){for(var d=a.text.split("\\n"),u=0;u<d.length;u++)d[u]=b(d[u]);a.text=d.join("\\n")}var f=r.holderURL,g=p(n,null);r.font&&(a.font=r.font,!g.noFontFallback&&"img"===t.nodeName.toLowerCase()&&A.setup.supportsCanvas&&"svg"===g.renderer&&(g=p(g,{renderer:"canvas"}))),r.font&&"canvas"==g.renderer&&(g.reRender=!0),"background"==e?null==t.getAttribute("data-background-src")&&c(t,{"data-background-src":f}):c(t,{"data-src":f}),r.theme=a,t.holderData={flags:r,renderSettings:g},("image"==e||"fluid"==e)&&c(t,{alt:a.text?(a.text.length>16?a.text.substring(0,16)+"…":a.text)+" ["+l+"]":l}),"image"==e?("html"!=g.renderer&&r.auto||(t.style.width=i.width+"px",t.style.height=i.height+"px"),"html"==g.renderer?t.style.backgroundColor=a.background:(o(e,{dimensions:i,theme:a,flags:r},t,g),r.textmode&&"exact"==r.textmode&&(A.vars.resizableImages.push(t),s(t)))):"background"==e&&"html"!=g.renderer?o(e,{dimensions:i,theme:a,flags:r},t,g):"fluid"==e&&("%"==i.height.slice(-1)?t.style.height=i.height:null!=r.auto&&r.auto||(t.style.height=i.height+"px"),"%"==i.width.slice(-1)?t.style.width=i.width:null!=r.auto&&r.auto||(t.style.width=i.width+"px"),("inline"==t.style.display||""===t.style.display||"none"==t.style.display)&&(t.style.display="block"),h(t),"html"==g.renderer?t.style.backgroundColor=a.background:(A.vars.resizableImages.push(t),s(t)))}function o(e,t,r,n){function i(){var e=null;switch(n.renderer){case"canvas":e=L(s);break;case"svg":e=O(s,n);break;default:throw"Holder: invalid renderer: "+n.renderer}return e}var o=null;switch(n.renderer){case"svg":if(!A.setup.supportsSVG)return;break;case"canvas":if(!A.setup.supportsCanvas)return;break;default:return}{var l={width:t.dimensions.width,height:t.dimensions.height,theme:t.theme,flags:t.flags},s=a(l);({text:l.text,width:l.width,height:l.height,textHeight:l.font.size,font:l.font.family,fontWeight:l.font.weight,template:l.theme})}if(o=i(),null==o)throw"Holder: couldn't render placeholder";"background"==e?(r.style.backgroundImage="url("+o+")",r.style.backgroundSize=l.width+"px "+l.height+"px"):("img"===r.nodeName.toLowerCase()?c(r,{src:o}):"object"===r.nodeName.toLowerCase()&&(c(r,{data:o}),c(r,{type:"image/svg+xml"})),n.reRender&&setTimeout(function(){var e=i();if(null==e)throw"Holder: couldn't render placeholder";"img"===r.nodeName.toLowerCase()?c(r,{src:e}):"object"===r.nodeName.toLowerCase()&&(c(r,{data:e}),c(r,{type:"image/svg+xml"}))},100)),c(r,{"data-holder-rendered":!0})}function a(e){function t(e,t,r,n){t.width=r,t.height=n,e.width=Math.max(e.width,t.width),e.height+=t.height,e.add(t)}switch(e.font={family:e.theme.font?e.theme.font:"Arial, Helvetica, Open Sans, sans-serif",size:l(e.width,e.height,e.theme.size?e.theme.size:A.defaults.size),units:e.theme.units?e.theme.units:A.defaults.units,weight:e.theme.fontweight?e.theme.fontweight:"bold"},e.text=e.theme.text?e.theme.text:Math.floor(e.width)+"x"+Math.floor(e.height),e.flags.textmode){case"literal":e.text=e.flags.dimensions.width+"x"+e.flags.dimensions.height;break;case"exact":if(!e.flags.exactDimensions)break;e.text=Math.floor(e.flags.exactDimensions.width)+"x"+Math.floor(e.flags.exactDimensions.height)}var r=new z({width:e.width,height:e.height}),n=r.Shape,i=new n.Rect("holderBg",{fill:e.theme.background});i.resize(e.width,e.height),r.root.add(i);var o=new n.Group("holderTextGroup",{text:e.text,align:"center",font:e.font,fill:e.theme.foreground});o.moveTo(null,null,1),r.root.add(o);var a=o.textPositionData=T(r);if(!a)throw"Holder: staging fallback not supported yet.";o.properties.leading=a.boundingBox.height;var s=null,d=null;if(a.lineCount>1){var h=0,u=0,c=e.width*A.setup.lineWrapRatio,f=0;d=new n.Group("line"+f);for(var g=0;g<a.words.length;g++){var p=a.words[g];s=new n.Text(p.text);var m="\\n"==p.text;(h+p.width>=c||m===!0)&&(t(o,d,h,o.properties.leading),h=0,u+=o.properties.leading,f+=1,d=new n.Group("line"+f),d.y=u),m!==!0&&(s.moveTo(h,0),h+=a.spaceWidth+p.width,d.add(s))}t(o,d,h,o.properties.leading);for(var v in o.children)d=o.children[v],d.moveTo((o.width-d.width)/2,null,null);o.moveTo((e.width-o.width)/2,(e.height-o.height)/2,null),(e.height-o.height)/2<0&&o.moveTo(null,0,null)}else s=new n.Text(e.text),d=new n.Group("line0"),d.add(s),o.add(d),o.moveTo((e.width-a.boundingBox.width)/2,(e.height-a.boundingBox.height)/2,null);return r}function l(e,t,r){t=parseInt(t,10),e=parseInt(e,10);var n=Math.max(t,e),i=Math.min(t,e),o=A.defaults.scale,a=Math.min(.75*i,.75*n*o);return Math.round(Math.max(r,a))}function s(e){var t;t=null==e||null==e.nodeType?A.vars.resizableImages:[e];for(var r in t)if(t.hasOwnProperty(r)){var n=t[r];if(n.holderData){var i=n.holderData.flags,a=d(n,k.invisibleErrorFn(s));if(a){if(i.fluid&&i.auto){var l=n.holderData.fluidConfig;switch(l.mode){case"width":a.height=a.width/l.ratio;break;case"height":a.width=a.height*l.ratio}}var h={dimensions:a,theme:i.theme,flags:i};i.textmode&&"exact"==i.textmode&&(i.exactDimensions=a,h.dimensions=i.dimensions),o("image",h,n,n.holderData.renderSettings)}}}}function d(e,t){var r={height:e.clientHeight,width:e.clientWidth};return r.height||r.width?(e.removeAttribute("data-holder-invisible"),r):(c(e,{"data-holder-invisible":!0}),t.call(this,e),void 0)}function h(e){if(e.holderData){var t=d(e,k.invisibleErrorFn(h));if(t){var r=e.holderData.flags,n={fluidHeight:"%"==r.dimensions.height.slice(-1),fluidWidth:"%"==r.dimensions.width.slice(-1),mode:null,initialDimensions:t};n.fluidWidth&&!n.fluidHeight?(n.mode="width",n.ratio=n.initialDimensions.width/parseFloat(r.dimensions.height)):!n.fluidWidth&&n.fluidHeight&&(n.mode="height",n.ratio=parseFloat(r.dimensions.width)/n.initialDimensions.height),e.holderData.fluidConfig=n}}}function u(e,t){return null==t?E.createElement(e):E.createElementNS(t,e)}function c(e,t){for(var r in t)e.setAttribute(r,t[r])}function f(e,t,r){if(null==e){e=u("svg",C);var n=u("defs",C);e.appendChild(n)}return e.webkitMatchesSelector&&e.setAttribute("xmlns",C),c(e,{width:t,height:r,viewBox:"0 0 "+t+" "+r,preserveAspectRatio:"none"}),e}function g(e,r){if(t.XMLSerializer){{var n=new XMLSerializer,i="",o=r.stylesheets;e.querySelector("defs")}if(r.svgXMLStylesheet){for(var a=(new DOMParser).parseFromString("<xml />","application/xml"),l=o.length-1;l>=0;l--){var s=a.createProcessingInstruction("xml-stylesheet",'href="'+o[l]+'" rel="stylesheet"');a.insertBefore(s,a.firstChild)}var d=a.createProcessingInstruction("xml",'version="1.0" encoding="UTF-8" standalone="yes"');a.insertBefore(d,a.firstChild),a.removeChild(a.documentElement),i=n.serializeToString(a)}var h=n.serializeToString(e);return h=h.replace(/\&amp;(\#[0-9]{2,}\;)/g,"&$1"),i+h}}function p(e,t){var r={};for(var n in e)e.hasOwnProperty(n)&&(r[n]=e[n]);if(null!=t)for(var i in t)t.hasOwnProperty(i)&&(r[i]=t[i]);return r}function m(e){var t=[];for(var r in e)e.hasOwnProperty(r)&&t.push(r+":"+e[r]);return t.join(";")}function v(e){A.vars.debounceTimer||e.call(this),A.vars.debounceTimer&&clearTimeout(A.vars.debounceTimer),A.vars.debounceTimer=setTimeout(function(){A.vars.debounceTimer=null,e.call(this)},A.setup.debounce)}function x(){v(function(){s(null)})}function y(e){var r=null;return"string"==typeof e?r=E.querySelectorAll(e):t.NodeList&&e instanceof t.NodeList?r=e:t.Node&&e instanceof t.Node?r=[e]:t.HTMLCollection&&e instanceof t.HTMLCollection?r=e:null===e&&(r=[]),r}function w(e,t){var r=new Image;r.onerror=function(){t.call(this,!1)},r.onload=function(){t.call(this,!0)},r.src=e}function b(e){for(var t=[],r=0,n=e.length-1;n>=0;n--)r=e.charCodeAt(n),r>128?t.unshift(["&#",r,";"].join("")):t.unshift(e[n]);return t.join("")}function S(e){return e.replace(/&#(\d+);/g,function(e,t){return String.fromCharCode(t)})}var C="http://www.w3.org/2000/svg",E=t.document,k={addTheme:function(e,t){return null!=e&&null!=t&&(A.settings.themes[e]=t),delete A.vars.cache.themeKeys,this},addImage:function(e,t){var r=E.querySelectorAll(t);if(r.length)for(var n=0,i=r.length;i>n;n++){var o=u("img");c(o,{"data-src":e}),r[n].appendChild(o)}return this},run:function(e){e=e||{};var o={};A.vars.preempted=!0;var a=p(A.settings,e);o.renderer=a.renderer?a.renderer:A.setup.renderer,-1===A.setup.renderers.join(",").indexOf(o.renderer)&&(o.renderer=A.setup.supportsSVG?"svg":A.setup.supportsCanvas?"canvas":"html"),a.use_canvas?o.renderer="canvas":a.use_svg&&(o.renderer="svg");var l=y(a.images),s=y(a.bgnodes),d=y(a.stylenodes),h=y(a.objects);o.stylesheets=[],o.svgXMLStylesheet=!0,o.noFontFallback=a.noFontFallback?a.noFontFallback:!1;for(var c=0;c<d.length;c++){var f=d[c];if(f.attributes.rel&&f.attributes.href&&"stylesheet"==f.attributes.rel.value){var g=f.attributes.href.value,m=u("a");m.href=g;var v=m.protocol+"//"+m.host+m.pathname+m.search;o.stylesheets.push(v)}}for(c=0;c<s.length;c++){var x=t.getComputedStyle(s[c],null).getPropertyValue("background-image"),b=s[c].getAttribute("data-background-src"),S=null;S=null==b?x:b;var C=null,E="?"+a.domain+"/";if(0===S.indexOf(E))C=S.slice(1);else if(-1!=S.indexOf(E)){var k=S.substr(S.indexOf(E)).slice(1),T=k.match(/([^\"]*)"?\)/);null!=T&&(C=T[1])}if(null!=C){var L=n(C,a);L&&i("background",s[c],L,o)}}for(c=0;c<h.length;c++){var O=h[c],z={};try{z.data=O.getAttribute("data"),z.dataSrc=O.getAttribute("data-src")}catch(F){}var M=null!=z.data&&0===z.data.indexOf(a.domain),D=null!=z.dataSrc&&0===z.dataSrc.indexOf(a.domain);M?r(a,o,z.data,O):D&&r(a,o,z.dataSrc,O)}for(c=0;c<l.length;c++){var R=l[c],j={};try{j.src=R.getAttribute("src"),j.dataSrc=R.getAttribute("data-src"),j.rendered=R.getAttribute("data-holder-rendered")}catch(F){}var B=null!=j.src,P=null!=j.dataSrc&&0===j.dataSrc.indexOf(a.domain),N=null!=j.rendered&&"true"==j.rendered;B?0===j.src.indexOf(a.domain)?r(a,o,j.src,R):P&&(N?r(a,o,j.dataSrc,R):!function(e,t,n,i,o){w(e,function(e){e||r(t,n,i,o)})}(j.src,a,o,j.dataSrc,R)):P&&r(a,o,j.dataSrc,R)}return this},invisibleErrorFn:function(){return function(e){if(e.hasAttribute("data-holder-invisible"))throw"Holder: invisible placeholder"}}};k.add_theme=k.addTheme,k.add_image=k.addImage,k.invisible_error_fn=k.invisibleErrorFn;var A={settings:{domain:"holder.js",images:"img",objects:"object",bgnodes:"body .holderjs",stylenodes:"head link.holderjs",stylesheets:[],themes:{gray:{background:"#EEEEEE",foreground:"#AAAAAA"},social:{background:"#3a5a97",foreground:"#FFFFFF"},industrial:{background:"#434A52",foreground:"#C2F200"},sky:{background:"#0D8FDB",foreground:"#FFFFFF"},vine:{background:"#39DBAC",foreground:"#1E292C"},lava:{background:"#F8591A",foreground:"#1C2846"}}},defaults:{size:10,units:"pt",scale:1/16},flags:{dimensions:{regex:/^(\d+)x(\d+)$/,output:function(e){var t=this.regex.exec(e);return{width:+t[1],height:+t[2]}}},fluid:{regex:/^([0-9]+%?)x([0-9]+%?)$/,output:function(e){var t=this.regex.exec(e);return{width:t[1],height:t[2]}}},colors:{regex:/(?:#|\^)([0-9a-f]{3,})\:(?:#|\^)([0-9a-f]{3,})/i,output:function(e){var t=this.regex.exec(e);return{foreground:"#"+t[2],background:"#"+t[1]}}},text:{regex:/text\:(.*)/,output:function(e){return this.regex.exec(e)[1].replace("\\/","/")}},font:{regex:/font\:(.*)/,output:function(e){return this.regex.exec(e)[1]}},auto:{regex:/^auto$/},textmode:{regex:/textmode\:(.*)/,output:function(e){return this.regex.exec(e)[1]}},random:{regex:/^random$/}}},T=function(){var e=null,t=null,r=null;return function(n){var i=n.root;if(A.setup.supportsSVG){var o=!1,a=function(e){return E.createTextNode(e)};null==e&&(o=!0),e=f(e,i.properties.width,i.properties.height),o&&(t=u("text",C),r=a(null),c(t,{x:0}),t.appendChild(r),e.appendChild(t),E.body.appendChild(e),e.style.visibility="hidden",e.style.position="absolute",e.style.top="-100%",e.style.left="-100%");var l=i.children.holderTextGroup,s=l.properties;c(t,{y:s.font.size,style:m({"font-weight":s.font.weight,"font-size":s.font.size+s.font.units,"font-family":s.font.family,"dominant-baseline":"middle"})}),r.nodeValue=s.text;var d=t.getBBox(),h=Math.ceil(d.width/(i.properties.width*A.setup.lineWrapRatio)),g=s.text.split(" "),p=s.text.match(/\\n/g);h+=null==p?0:p.length,r.nodeValue=s.text.replace(/[ ]+/g,"");var v=t.getComputedTextLength(),x=d.width-v,y=Math.round(x/Math.max(1,g.length-1)),w=[];if(h>1){r.nodeValue="";for(var b=0;b<g.length;b++)if(0!==g[b].length){r.nodeValue=S(g[b]);var k=t.getBBox();w.push({text:g[b],width:k.width})}}return{spaceWidth:y,lineCount:h,boundingBox:d,words:w}}return!1}}(),L=function(){var e=u("canvas"),t=null;return function(r){null==t&&(t=e.getContext("2d"));var n=r.root;e.width=A.dpr(n.properties.width),e.height=A.dpr(n.properties.height),t.textBaseline="middle",t.fillStyle=n.children.holderBg.properties.fill,t.fillRect(0,0,A.dpr(n.children.holderBg.width),A.dpr(n.children.holderBg.height));{var i=n.children.holderTextGroup;i.properties}t.font=i.properties.font.weight+" "+A.dpr(i.properties.font.size)+i.properties.font.units+" "+i.properties.font.family+", monospace",t.fillStyle=i.properties.fill;for(var o in i.children){var a=i.children[o];for(var l in a.children){var s=a.children[l],d=A.dpr(i.x+a.x+s.x),h=A.dpr(i.y+a.y+s.y+i.properties.leading/2);t.fillText(s.properties.text,d,h)}}return e.toDataURL("image/png")}}(),O=function(){if(t.XMLSerializer){var e=f(null,0,0),r=u("rect",C);return e.appendChild(r),function(t,n){var i=t.root;f(e,i.properties.width,i.properties.height);for(var o=e.querySelectorAll("g"),a=0;a<o.length;a++)o[a].parentNode.removeChild(o[a]);c(r,{width:i.children.holderBg.width,height:i.children.holderBg.height,fill:i.children.holderBg.properties.fill});var l=i.children.holderTextGroup,s=l.properties,d=u("g",C);e.appendChild(d);for(var h in l.children){var p=l.children[h];for(var v in p.children){var x=p.children[v],y=l.x+p.x+x.x,w=l.y+p.y+x.y+l.properties.leading/2,b=u("text",C),S=E.createTextNode(null);c(b,{x:y,y:w,style:m({fill:s.fill,"font-weight":s.font.weight,"font-family":s.font.family+", monospace","font-size":s.font.size+s.font.units,"dominant-baseline":"central"})}),S.nodeValue=x.properties.text,b.appendChild(S),d.appendChild(b)}}var k="data:image/svg+xml;base64,"+btoa(unescape(encodeURIComponent(g(e,n))));return k}}}(),z=function(e){function t(e,t){for(var r in t)e[r]=t[r];return e}var r=1,n=augment.defclass({constructor:function(e){r++,this.parent=null,this.children={},this.id=r,this.name="n"+r,null!=e&&(this.name=e),this.x=0,this.y=0,this.z=0,this.width=0,this.height=0},resize:function(e,t){null!=e&&(this.width=e),null!=t&&(this.height=t)},moveTo:function(e,t,r){this.x=null!=e?e:this.x,this.y=null!=t?t:this.y,this.z=null!=r?r:this.z},add:function(e){var t=e.name;if(null!=this.children[t])throw"SceneGraph: child with that name already exists: "+t;this.children[t]=e,e.parent=this}}),i=augment(n,function(t){this.constructor=function(){t.constructor.call(this,"root"),this.properties=e}}),o=augment(n,function(e){function r(r,n){if(e.constructor.call(this,r),this.properties={fill:"#000"},null!=n)t(this.properties,n);else if(null!=r&&"string"!=typeof r)throw"SceneGraph: invalid node name"}this.Group=augment.extend(this,{constructor:r,type:"group"}),this.Rect=augment.extend(this,{constructor:r,type:"rect"}),this.Text=augment.extend(this,{constructor:function(e){r.call(this),this.properties.text=e},type:"text"})}),a=new i;return this.Shape=o,this.root=a,this};for(var F in A.flags)A.flags.hasOwnProperty(F)&&(A.flags[F].match=function(e){return e.match(this.regex)});A.setup={renderer:"html",debounce:100,ratio:1,supportsCanvas:!1,supportsSVG:!1,lineWrapRatio:.9,renderers:["html","canvas","svg"]},A.dpr=function(e){return e*A.setup.ratio},A.vars={preempted:!1,resizableImages:[],debounceTimer:null,cache:{}},function(){var e=1,r=1,n=u("canvas"),i=null;n.getContext&&-1!=n.toDataURL("image/png").indexOf("data:image/png")&&(A.setup.renderer="canvas",i=n.getContext("2d"),A.setup.supportsCanvas=!0),A.setup.supportsCanvas&&(e=t.devicePixelRatio||1,r=i.webkitBackingStorePixelRatio||i.mozBackingStorePixelRatio||i.msBackingStorePixelRatio||i.oBackingStorePixelRatio||i.backingStorePixelRatio||1),A.setup.ratio=e/r,E.createElementNS&&E.createElementNS(C,"svg").createSVGRect&&(A.setup.renderer="svg",A.setup.supportsSVG=!0)}(),e(k,"Holder",t),t.onDomReady&&t.onDomReady(function(){A.vars.preempted||k.run(),t.addEventListener?(t.addEventListener("resize",x,!1),t.addEventListener("orientationchange",x,!1)):t.attachEvent("onresize",x),"object"==typeof t.Turbolinks&&t.document.addEventListener("page:change",function(){k.run()})})}(function(e,t,r){var n="function"==typeof define&&define.amd;n?define(e):r[t]=e},this);
+/*!
+ * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
+ *
+ * Specially modified to work with Holder.js
+ */
+
+;(function(name, global, callback){
+		global[name] = callback;
+})("onDomReady", this,
+
+(function(win) {
+
+    'use strict';
+
+    //Lazy loading fix for Firefox < 3.6
+    //http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
+    if (document.readyState == null && document.addEventListener) {
+        document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
+            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+            document.readyState = "complete";
+        }, false);
+        document.readyState = "loading";
+    }
+
+    var doc = win.document,
+        docElem = doc.documentElement,
+
+        LOAD = "load",
+        FALSE = false,
+        ONLOAD = "on"+LOAD,
+        COMPLETE = "complete",
+        READYSTATE = "readyState",
+        ATTACHEVENT = "attachEvent",
+        DETACHEVENT = "detachEvent",
+        ADDEVENTLISTENER = "addEventListener",
+        DOMCONTENTLOADED = "DOMContentLoaded",
+        ONREADYSTATECHANGE = "onreadystatechange",
+        REMOVEEVENTLISTENER = "removeEventListener",
+
+        // W3C Event model
+        w3c = ADDEVENTLISTENER in doc,
+        top = FALSE,
+
+        // isReady: Is the DOM ready to be used? Set to true once it occurs.
+        isReady = FALSE,
+
+        // Callbacks pending execution until DOM is ready
+        callbacks = [];
+
+    // Handle when the DOM is ready
+    function ready( fn ) {
+        if ( !isReady ) {
+
+            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+            if ( !doc.body ) {
+                return defer( ready );
+            }
+
+            // Remember that the DOM is ready
+            isReady = true;
+
+            // Execute all callbacks
+            while ( fn = callbacks.shift() ) {
+                defer( fn );
+            }
+        }
+    }
+
+    // The ready event handler
+    function completed( event ) {
+        // readyState === "complete" is good enough for us to call the dom ready in oldIE
+        if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
+            detach();
+            ready();
+        }
+    }
+
+    // Clean-up method for dom ready events
+    function detach() {
+        if ( w3c ) {
+            doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+            win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
+        } else {
+            doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
+            win[DETACHEVENT]( ONLOAD, completed );
+        }
+    }
+
+    // Defers a function, scheduling it to run after the current call stack has cleared.
+    function defer( fn, wait ) {
+        // Allow 0 to be passed
+        setTimeout( fn, +wait >= 0 ? wait : 1 );
+    }
+
+    // Attach the listeners:
+
+    // Catch cases where onDomReady is called after the browser event has already occurred.
+    // we once tried to use readyState "interactive" here, but it caused issues like the one
+    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+    if ( doc[READYSTATE] === COMPLETE ) {
+        // Handle it asynchronously to allow scripts the opportunity to delay ready
+        defer( ready );
+
+    // Standards-based browsers support DOMContentLoaded
+    } else if ( w3c ) {
+        // Use the handy event callback
+        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+
+        // A fallback to window.onload, that will always work
+        win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
+
+    // If IE event model is used
+    } else {
+        // Ensure firing before onload, maybe late but safe also for iframes
+        doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
+
+        // A fallback to window.onload, that will always work
+        win[ATTACHEVENT]( ONLOAD, completed );
+
+        // If IE and not a frame
+        // continually check to see if the document is ready
+        try {
+            top = win.frameElement == null && docElem;
+        } catch(e) {}
+
+        if ( top && top.doScroll ) {
+            (function doScrollCheck() {
+                if ( !isReady ) {
+                    try {
+                        // Use the trick by Diego Perini
+                        // http://javascript.nwbox.com/IEContentLoaded/
+                        top.doScroll("left");
+                    } catch(e) {
+                        return defer( doScrollCheck, 50 );
+                    }
+
+                    // detach all dom ready events
+                    detach();
+
+                    // and execute any waiting functions
+                    ready();
+                }
+            })();
+        }
+    }
+
+    function onDomReady( fn ) {
+        // If DOM is ready, execute the function (async), otherwise wait
+        isReady ? defer( fn ) : callbacks.push( fn );
+    }
+
+    // Add version
+    onDomReady.version = "1.4.0";
+    // Add method to check if DOM is ready
+    onDomReady.isReady = function(){
+        return isReady;
+    };
+
+    return onDomReady;
+})(this));
+
+//https://github.com/inexorabletash/polyfill/blob/master/web.js
+  if (!document.querySelectorAll) {
+    document.querySelectorAll = function (selectors) {
+      var style = document.createElement('style'), elements = [], element;
+      document.documentElement.firstChild.appendChild(style);
+      document._qsa = [];
+
+      style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
+      window.scrollBy(0, 0);
+      style.parentNode.removeChild(style);
+
+      while (document._qsa.length) {
+        element = document._qsa.shift();
+        element.style.removeAttribute('x-qsa');
+        elements.push(element);
+      }
+      document._qsa = null;
+      return elements;
+    };
+  }
+
+  if (!document.querySelector) {
+    document.querySelector = function (selectors) {
+      var elements = document.querySelectorAll(selectors);
+      return (elements.length) ? elements[0] : null;
+    };
+  }
+
+  if (!document.getElementsByClassName) {
+    document.getElementsByClassName = function (classNames) {
+      classNames = String(classNames).replace(/^|\s+/g, '.');
+      return document.querySelectorAll(classNames);
+    };
+  }
+
+//https://github.com/inexorabletash/polyfill
+// ES5 15.2.3.14 Object.keys ( O )
+// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
+if (!Object.keys) {
+  Object.keys = function (o) {
+    if (o !== Object(o)) { throw TypeError('Object.keys called on non-object'); }
+    var ret = [], p;
+    for (p in o) {
+      if (Object.prototype.hasOwnProperty.call(o, p)) {
+        ret.push(p);
+      }
+    }
+    return ret;
+  };
+}
+
+//https://github.com/inexorabletash/polyfill/blob/master/web.js
+(function (global) {
+  var B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  global.atob = global.atob || function (input) {
+    input = String(input);
+    var position = 0,
+        output = [],
+        buffer = 0, bits = 0, n;
+
+    input = input.replace(/\s/g, '');
+    if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
+    if ((input.length % 4) === 1) { throw Error("InvalidCharacterError"); }
+    if (/[^+/0-9A-Za-z]/.test(input)) { throw Error("InvalidCharacterError"); }
+
+    while (position < input.length) {
+      n = B64_ALPHABET.indexOf(input.charAt(position));
+      buffer = (buffer << 6) | n;
+      bits += 6;
+
+      if (bits === 24) {
+        output.push(String.fromCharCode((buffer >> 16) & 0xFF));
+        output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+        output.push(String.fromCharCode(buffer & 0xFF));
+        bits = 0;
+        buffer = 0;
+      }
+      position += 1;
+    }
+
+    if (bits === 12) {
+      buffer = buffer >> 4;
+      output.push(String.fromCharCode(buffer & 0xFF));
+    } else if (bits === 18) {
+      buffer = buffer >> 2;
+      output.push(String.fromCharCode((buffer >> 8) & 0xFF));
+      output.push(String.fromCharCode(buffer & 0xFF));
+    }
+
+    return output.join('');
+  };
+
+  global.btoa = global.btoa || function (input) {
+    input = String(input);
+    var position = 0,
+        out = [],
+        o1, o2, o3,
+        e1, e2, e3, e4;
+
+    if (/[^\x00-\xFF]/.test(input)) { throw Error("InvalidCharacterError"); }
+
+    while (position < input.length) {
+      o1 = input.charCodeAt(position++);
+      o2 = input.charCodeAt(position++);
+      o3 = input.charCodeAt(position++);
+
+      // 111111 112222 222233 333333
+      e1 = o1 >> 2;
+      e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
+      e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
+      e4 = o3 & 0x3f;
+
+      if (position === input.length + 2) {
+        e3 = 64; e4 = 64;
+      }
+      else if (position === input.length + 1) {
+        e4 = 64;
+      }
+
+      out.push(B64_ALPHABET.charAt(e1),
+               B64_ALPHABET.charAt(e2),
+               B64_ALPHABET.charAt(e3),
+               B64_ALPHABET.charAt(e4));
+    }
+
+    return out.join('');
+  };
+}(this));
+
+//https://github.com/jonathantneal/polyfill/blob/master/source/Window.prototype.getComputedStyle.ie8.js
+(function () {
+	if(window.getComputedStyle) return; //Add an exit if already defined
+	function getComputedStylePixel(element, property, fontSize) {
+		element.document; // Internet Explorer sometimes struggles to read currentStyle until the element's document is accessed.
+
+		var
+		value = element.currentStyle[property].match(/([\d\.]+)(%|cm|em|in|mm|pc|pt|)/) || [0, 0, ''],
+		size = value[1],
+		suffix = value[2],
+		rootSize;
+
+		fontSize = !fontSize ? fontSize : /%|em/.test(suffix) && element.parentElement ? getComputedStylePixel(element.parentElement, 'fontSize', null) : 16;
+		rootSize = property == 'fontSize' ? fontSize : /width/i.test(property) ? element.clientWidth : element.clientHeight;
+
+		return suffix == '%' ? size / 100 * rootSize :
+		       suffix == 'cm' ? size * 0.3937 * 96 :
+		       suffix == 'em' ? size * fontSize :
+		       suffix == 'in' ? size * 96 :
+		       suffix == 'mm' ? size * 0.3937 * 96 / 10 :
+		       suffix == 'pc' ? size * 12 * 96 / 72 :
+		       suffix == 'pt' ? size * 96 / 72 :
+		       size;
+	}
+
+	function setShortStyleProperty(style, property) {
+		var
+		borderSuffix = property == 'border' ? 'Width' : '',
+		t = property + 'Top' + borderSuffix,
+		r = property + 'Right' + borderSuffix,
+		b = property + 'Bottom' + borderSuffix,
+		l = property + 'Left' + borderSuffix;
+
+		style[property] = (style[t] == style[r] && style[t] == style[b] && style[t] == style[l] ? [ style[t] ] :
+		                   style[t] == style[b] && style[l] == style[r] ? [ style[t], style[r] ] :
+		                   style[l] == style[r] ? [ style[t], style[r], style[b] ] :
+		                   [ style[t], style[r], style[b], style[l] ]).join(' ');
+	}
+
+	// <CSSStyleDeclaration>
+	function CSSStyleDeclaration(element) {
+		var
+		style = this,
+		currentStyle = element.currentStyle,
+		fontSize = getComputedStylePixel(element, 'fontSize'),
+		unCamelCase = function (match) {
+			return '-' + match.toLowerCase();
+		},
+		property;
+
+		for (property in currentStyle) {
+			Array.prototype.push.call(style, property == 'styleFloat' ? 'float' : property.replace(/[A-Z]/, unCamelCase));
+			if (property == 'width') {
+				style[property] = element.offsetWidth + 'px';
+			} else if (property == 'height') {
+				style[property] = element.offsetHeight + 'px';
+			} else if (property == 'styleFloat') {
+				style.float = currentStyle[property];
+			} else if (/margin.|padding.|border.+W/.test(property) && style[property] != 'auto') {
+				style[property] = Math.round(getComputedStylePixel(element, property, fontSize)) + 'px';
+			} else if (/^outline/.test(property)) {
+				// errors on checking outline
+				try {
+					style[property] = currentStyle[property];
+				} catch (error) {
+					style.outlineColor = currentStyle.color;
+					style.outlineStyle = style.outlineStyle || 'none';
+					style.outlineWidth = style.outlineWidth || '0px';
+					style.outline = [style.outlineColor, style.outlineWidth, style.outlineStyle].join(' ');
+				}
+			} else {
+				style[property] = currentStyle[property];
+			}
+		}
+
+		setShortStyleProperty(style, 'margin');
+		setShortStyleProperty(style, 'padding');
+		setShortStyleProperty(style, 'border');
+
+		style.fontSize = Math.round(fontSize) + 'px';
+	}
+
+	CSSStyleDeclaration.prototype = {
+		constructor: CSSStyleDeclaration,
+		// <CSSStyleDeclaration>.getPropertyPriority
+		getPropertyPriority: function () {
+			throw new Error('NotSupportedError: DOM Exception 9');
+		},
+		// <CSSStyleDeclaration>.getPropertyValue
+		getPropertyValue: function(property) {
+		    var lookup = property.replace(/-([a-z])/g, function(match) {
+		        match = match.charAt ? match.split('') : match;
+		        return match[1].toUpperCase();
+		    });
+		    var ret = this[lookup];
+		    return ret;
+		},
+		// <CSSStyleDeclaration>.item
+		item: function (index) {
+			return this[index];
+		},
+		// <CSSStyleDeclaration>.removeProperty
+		removeProperty: function () {
+			throw new Error('NoModificationAllowedError: DOM Exception 7');
+		},
+		// <CSSStyleDeclaration>.setProperty
+		setProperty: function () {
+			throw new Error('NoModificationAllowedError: DOM Exception 7');
+		},
+		// <CSSStyleDeclaration>.getPropertyCSSValue
+		getPropertyCSSValue: function () {
+			throw new Error('NotSupportedError: DOM Exception 9');
+		}
+	};
+
+	// <window>.getComputedStyle
+	window.getComputedStyle = function (element) {
+		return new CSSStyleDeclaration(element);
+	};
+})();
+
+//https://gist.github.com/jimeh/332357
+if (!Object.prototype.hasOwnProperty){
+    /*jshint -W001, -W103 */
+    Object.prototype.hasOwnProperty = function(prop) {
+		var proto = this.__proto__ || this.constructor.prototype;
+		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
+	}
+    /*jshint +W001, +W103 */
+}
+
+(function (global, factory) {
+	global.augment = factory();
+}(this, function () {
+    "use strict";
+
+    var Factory = function () {};
+    var slice = Array.prototype.slice;
+
+    var augment = function (base, body) {
+        var uber = Factory.prototype = typeof base === "function" ? base.prototype : base;
+        var prototype = new Factory(), properties = body.apply(prototype, slice.call(arguments, 2).concat(uber));
+        if (typeof properties === "object") for (var key in properties) prototype[key] = properties[key];
+        if (!prototype.hasOwnProperty("constructor")) return prototype;
+        var constructor = prototype.constructor;
+        constructor.prototype = prototype;
+        return constructor;
+    };
+
+    augment.defclass = function (prototype) {
+        var constructor = prototype.constructor;
+        constructor.prototype = prototype;
+        return constructor;
+    };
+
+    augment.extend = function (base, body) {
+        return augment(base, function (uber) {
+            this.uber = uber;
+            return body;
+        });
+    };
+
+    return augment;
+}));
+
+/*
+Holder.js - client side image placeholders
+© 2012-2014 Ivan Malopinsky - http://imsky.co
+*/
+(function(register, global, undefined) {
+
+	//Constants and definitions
+
+	var SVG_NS = 'http://www.w3.org/2000/svg';
+	var document = global.document;
+
+	var Holder = {
+		/**
+		 * Adds a theme to default settings
+		 *
+		 * @param {string} name Theme name
+		 * @param {Object} theme Theme object, with foreground, background, size, font, and fontweight properties.
+		 */
+		addTheme: function(name, theme) {
+			name != null && theme != null && (App.settings.themes[name] = theme);
+			delete App.vars.cache.themeKeys;
+			return this;
+		},
+
+		/**
+		 * Appends a placeholder to an element
+		 *
+		 * @param {string} src Placeholder URL string
+		 * @param {string} el Selector of target element(s)
+		 */
+		addImage: function(src, el) {
+			var node = document.querySelectorAll(el);
+			if (node.length) {
+				for (var i = 0, l = node.length; i < l; i++) {
+					var img = newEl('img');
+					setAttr(img, {
+						'data-src': src
+					});
+					node[i].appendChild(img);
+				}
+			}
+			return this;
+		},
+
+		/**
+		 * Runs Holder with options. By default runs Holder on all images with "holder.js" in their source attributes.
+		 *
+		 * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
+		 */
+		run: function(userOptions) {
+			userOptions = userOptions || {};
+			var renderSettings = {};
+
+			App.vars.preempted = true;
+
+			var options = extend(App.settings, userOptions);
+
+			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+			if (App.setup.renderers.join(',').indexOf(renderSettings.renderer) === -1) {
+				renderSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
+			}
+
+			//< v2.4 API compatibility
+			if (options.use_canvas) {
+				renderSettings.renderer = 'canvas';
+			} else if (options.use_svg) {
+				renderSettings.renderer = 'svg';
+			}
+
+			var images = getNodeArray(options.images);
+			var bgnodes = getNodeArray(options.bgnodes);
+			var stylenodes = getNodeArray(options.stylenodes);
+			var objects = getNodeArray(options.objects);
+
+			renderSettings.stylesheets = [];
+			renderSettings.svgXMLStylesheet = true;
+			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
+
+			for (var i = 0; i < stylenodes.length; i++) {
+				var styleNode = stylenodes[i];
+				if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
+					var href = styleNode.attributes.href.value;
+					//todo: write isomorphic relative-to-absolute URL function
+					var proxyLink = newEl('a');
+					proxyLink.href = href;
+					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
+					renderSettings.stylesheets.push(stylesheetURL);
+				}
+			}
+
+			for (i = 0; i < bgnodes.length; i++) {
+				var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
+				var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
+				var rawURL = null;
+
+				if (dataBackgroundImage == null) {
+					rawURL = backgroundImage;
+				} else {
+					rawURL = dataBackgroundImage;
+				}
+
+				var holderURL = null;
+				var holderString = '?' + options.domain + '/';
+
+				if (rawURL.indexOf(holderString) === 0) {
+					holderURL = rawURL.slice(1);
+				} else if (rawURL.indexOf(holderString) != -1) {
+					var fragment = rawURL.substr(rawURL.indexOf(holderString)).slice(1);
+					var fragmentMatch = fragment.match(/([^\"]*)"?\)/);
+
+					if (fragmentMatch != null) {
+						holderURL = fragmentMatch[1];
+					}
+				}
+
+				if (holderURL != null) {
+					var holderFlags = parseURL(holderURL, options);
+					if (holderFlags) {
+						prepareDOMElement('background', bgnodes[i], holderFlags, renderSettings);
+					}
+				}
+			}
+
+			for (i = 0; i < objects.length; i++) {
+				var object = objects[i];
+				var objectAttr = {};
+
+				try {
+					objectAttr.data = object.getAttribute('data');
+					objectAttr.dataSrc = object.getAttribute('data-src');
+				} catch (e) {}
+
+				var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
+				var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
+
+				if (objectHasSrcURL) {
+					prepareImageElement(options, renderSettings, objectAttr.data, object);
+				} else if (objectHasDataSrcURL) {
+					prepareImageElement(options, renderSettings, objectAttr.dataSrc, object);
+				}
+			}
+
+			for (i = 0; i < images.length; i++) {
+				var image = images[i];
+				var imageAttr = {};
+
+				try {
+					imageAttr.src = image.getAttribute('src');
+					imageAttr.dataSrc = image.getAttribute('data-src');
+					imageAttr.rendered = image.getAttribute('data-holder-rendered');
+				} catch (e) {}
+
+				var imageHasSrc = imageAttr.src != null;
+				var imageHasDataSrcURL = imageAttr.dataSrc != null && imageAttr.dataSrc.indexOf(options.domain) === 0;
+				var imageRendered = imageAttr.rendered != null && imageAttr.rendered == 'true';
+
+				if (imageHasSrc) {
+					if (imageAttr.src.indexOf(options.domain) === 0) {
+						prepareImageElement(options, renderSettings, imageAttr.src, image);
+					} else if (imageHasDataSrcURL) {
+						//Image has a valid data-src and an invalid src
+						if (imageRendered) {
+							//If the placeholder has already been render, re-render it
+							prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
+						} else {
+							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
+              (function(src, options, renderSettings, dataSrc, image){
+                imageExists(src, function(exists){
+                  if(!exists){
+                    prepareImageElement(options, renderSettings, dataSrc, image);
+                  }
+                });
+              })(imageAttr.src, options, renderSettings, imageAttr.dataSrc, image);
+						}
+					}
+				} else if (imageHasDataSrcURL) {
+					prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
+				}
+			}
+
+			return this;
+		},
+		//todo: remove invisibleErrorFn for 2.5
+		invisibleErrorFn: function(fn) {
+			return function(el) {
+				if (el.hasAttribute('data-holder-invisible')) {
+					throw 'Holder: invisible placeholder';
+				}
+			};
+		}
+	};
+
+	//< v2.4 API compatibility
+
+	Holder.add_theme = Holder.addTheme;
+	Holder.add_image = Holder.addImage;
+	Holder.invisible_error_fn = Holder.invisibleErrorFn;
+
+	var App = {
+		settings: {
+			domain: 'holder.js',
+			images: 'img',
+			objects: 'object',
+			bgnodes: 'body .holderjs',
+			stylenodes: 'head link.holderjs',
+			stylesheets: [],
+			themes: {
+				'gray': {
+					background: '#EEEEEE',
+					foreground: '#AAAAAA'
+				},
+				'social': {
+					background: '#3a5a97',
+					foreground: '#FFFFFF'
+				},
+				'industrial': {
+					background: '#434A52',
+					foreground: '#C2F200'
+				},
+				'sky': {
+					background: '#0D8FDB',
+					foreground: '#FFFFFF'
+				},
+				'vine': {
+					background: '#39DBAC',
+					foreground: '#1E292C'
+				},
+				'lava': {
+					background: '#F8591A',
+					foreground: '#1C2846'
+				}
+			}
+		},
+    defaults: {
+      size: 10,
+      units: 'pt',
+      scale: 1/16
+    },
+		flags: {
+			dimensions: {
+				regex: /^(\d+)x(\d+)$/,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						width: +exec[1],
+						height: +exec[2]
+					};
+				}
+			},
+			fluid: {
+				regex: /^([0-9]+%?)x([0-9]+%?)$/,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						width: exec[1],
+						height: exec[2]
+					};
+				}
+			},
+			colors: {
+				regex: /(?:#|\^)([0-9a-f]{3,})\:(?:#|\^)([0-9a-f]{3,})/i,
+				output: function(val) {
+					var exec = this.regex.exec(val);
+					return {
+						foreground: '#' + exec[2],
+						background: '#' + exec[1]
+					};
+				}
+			},
+			text: {
+				regex: /text\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1].replace('\\/', '/');
+				}
+			},
+			font: {
+				regex: /font\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1];
+				}
+			},
+			auto: {
+				regex: /^auto$/
+			},
+			textmode: {
+				regex: /textmode\:(.*)/,
+				output: function(val) {
+					return this.regex.exec(val)[1];
+				}
+			},
+			random: {
+				regex: /^random$/
+			}
+		}
+	};
+
+	/**
+	 * Processes provided source attribute and sets up the appropriate rendering workflow
+	 *
+	 * @private
+	 * @param options Instance options from Holder.run
+	 * @param renderSettings Instance configuration
+	 * @param src Image URL
+	 * @param el Image DOM element
+	 */
+	function prepareImageElement(options, renderSettings, src, el) {
+		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
+		if (holderFlags) {
+			prepareDOMElement(null, el, holderFlags, renderSettings);
+		}
+	}
+
+	/**
+	 * Processes a Holder URL and extracts flags
+	 *
+	 * @private
+	 * @param url URL
+	 * @param options Instance options from Holder.run
+	 */
+	function parseURL(url, options) {
+		var ret = {
+			theme: extend(App.settings.themes.gray, null),
+			stylesheets: options.stylesheets,
+			holderURL: []
+		};
+		var render = false;
+		var vtab = String.fromCharCode(11);
+		var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
+		var uriRegex = /%[0-9a-f]{2}/gi;
+		for (var fl = flags.length, j = 0; j < fl; j++) {
+			var flag = flags[j];
+			if (flag.match(uriRegex)) {
+				try {
+					flag = decodeURIComponent(flag);
+				} catch (e) {
+					flag = flags[j];
+				}
+			}
+
+			var push = false;
+
+			if (App.flags.dimensions.match(flag)) {
+				render = true;
+				ret.dimensions = App.flags.dimensions.output(flag);
+				push = true;
+			} else if (App.flags.fluid.match(flag)) {
+				render = true;
+				ret.dimensions = App.flags.fluid.output(flag);
+				ret.fluid = true;
+				push = true;
+			} else if (App.flags.textmode.match(flag)) {
+				ret.textmode = App.flags.textmode.output(flag);
+				push = true;
+			} else if (App.flags.colors.match(flag)) {
+				var colors = App.flags.colors.output(flag);
+				ret.theme = extend(ret.theme, colors);
+				//todo: convert implicit theme use to a theme: flag
+				push = true;
+			} else if (options.themes[flag]) {
+				//If a theme is specified, it will override custom colors
+				if (options.themes.hasOwnProperty(flag)) {
+					ret.theme = extend(options.themes[flag], null);
+				}
+				push = true;
+			} else if (App.flags.font.match(flag)) {
+				ret.font = App.flags.font.output(flag);
+				push = true;
+			} else if (App.flags.auto.match(flag)) {
+				ret.auto = true;
+				push = true;
+			} else if (App.flags.text.match(flag)) {
+				ret.text = App.flags.text.output(flag);
+				push = true;
+			} else if (App.flags.random.match(flag)) {
+				if (App.vars.cache.themeKeys == null) {
+					App.vars.cache.themeKeys = Object.keys(options.themes);
+				}
+				var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
+				ret.theme = extend(options.themes[theme], null);
+				push = true;
+			}
+
+			if (push) {
+				ret.holderURL.push(flag);
+			}
+		}
+		ret.holderURL.unshift(options.domain);
+		ret.holderURL = ret.holderURL.join('/');
+		return render ? ret : false;
+	}
+
+	/**
+	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
+	 *
+	 * @private
+	 * @param el Image DOM element
+	 * @param flags Placeholder-specific configuration
+	 * @param _renderSettings Instance configuration
+	 */
+	function prepareDOMElement(mode, el, flags, _renderSettings) {
+		var dimensions = flags.dimensions,
+			theme = flags.theme;
+		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
+		mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
+
+		if (flags.text != null) {
+			theme.text = flags.text;
+
+			//<object> SVG embedding doesn't parse Unicode properly
+			if (el.nodeName.toLowerCase() === 'object') {
+				var textLines = theme.text.split('\\n');
+				for (var k = 0; k < textLines.length; k++) {
+					textLines[k] = encodeHtmlEntity(textLines[k]);
+				}
+				theme.text = textLines.join('\\n');
+			}
+		}
+
+		var holderURL = flags.holderURL;
+		var renderSettings = extend(_renderSettings, null);
+
+		if (flags.font) {
+			theme.font = flags.font;
+			//Only run the <canvas> webfont fallback if noFontFallback is false, if the node is not an image, and if canvas is supported
+			if (!renderSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && renderSettings.renderer === 'svg') {
+				renderSettings = extend(renderSettings, {
+					renderer: 'canvas'
+				});
+			}
+		}
+
+		//Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
+		if (flags.font && renderSettings.renderer == 'canvas') {
+			renderSettings.reRender = true;
+		}
+
+		if (mode == 'background') {
+			if (el.getAttribute('data-background-src') == null) {
+				setAttr(el, {
+					'data-background-src': holderURL
+				});
+			}
+		} else {
+			setAttr(el, {
+				'data-src': holderURL
+			});
+		}
+
+		flags.theme = theme;
+
+		el.holderData = {
+			flags: flags,
+			renderSettings: renderSettings
+		};
+
+		if (mode == 'image' || mode == 'fluid') {
+			setAttr(el, {
+				'alt': (theme.text ? (theme.text.length > 16 ? theme.text.substring(0, 16) + '…' : theme.text) + ' [' + dimensionsCaption + ']' : dimensionsCaption)
+			});
+		}
+
+		if (mode == 'image') {
+			if (renderSettings.renderer == 'html' || !flags.auto) {
+				el.style.width = dimensions.width + 'px';
+				el.style.height = dimensions.height + 'px';
+			}
+			if (renderSettings.renderer == 'html') {
+				el.style.backgroundColor = theme.background;
+			} else {
+				render(mode, {
+					dimensions: dimensions,
+					theme: theme,
+					flags: flags
+				}, el, renderSettings);
+
+				if (flags.textmode && flags.textmode == 'exact') {
+					App.vars.resizableImages.push(el);
+					updateResizableElements(el);
+				}
+			}
+		} else if (mode == 'background' && renderSettings.renderer != 'html') {
+			render(mode, {
+					dimensions: dimensions,
+					theme: theme,
+					flags: flags
+				},
+				el, renderSettings);
+		} else if (mode == 'fluid') {
+			if (dimensions.height.slice(-1) == '%') {
+				el.style.height = dimensions.height;
+			} else if (flags.auto == null || !flags.auto) {
+				el.style.height = dimensions.height + 'px';
+			}
+			if (dimensions.width.slice(-1) == '%') {
+				el.style.width = dimensions.width;
+			} else if (flags.auto == null || !flags.auto) {
+				el.style.width = dimensions.width + 'px';
+			}
+			if (el.style.display == 'inline' || el.style.display === '' || el.style.display == 'none') {
+				el.style.display = 'block';
+			}
+
+			setInitialDimensions(el);
+
+			if (renderSettings.renderer == 'html') {
+				el.style.backgroundColor = theme.background;
+			} else {
+				App.vars.resizableImages.push(el);
+				updateResizableElements(el);
+			}
+		}
+	}
+
+	/**
+	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
+	 *
+	 * @private
+	 * @param mode Placeholder mode, either background or image
+	 * @param params Placeholder-specific parameters
+	 * @param el Image DOM element
+	 * @param renderSettings Instance configuration
+	 */
+
+	function render(mode, params, el, renderSettings) {
+		var image = null;
+
+		switch (renderSettings.renderer) {
+			case 'svg':
+				if (!App.setup.supportsSVG) return;
+				break;
+			case 'canvas':
+				if (!App.setup.supportsCanvas) return;
+				break;
+			default:
+				return;
+		}
+
+		//todo: move generation of scene up to flag generation to reduce extra object creation
+		var scene = {
+			width: params.dimensions.width,
+			height: params.dimensions.height,
+			theme: params.theme,
+			flags: params.flags
+		};
+
+		var sceneGraph = buildSceneGraph(scene);
+
+		var rendererParams = {
+			text: scene.text,
+			width: scene.width,
+			height: scene.height,
+			textHeight: scene.font.size,
+			font: scene.font.family,
+			fontWeight: scene.font.weight,
+			template: scene.theme
+		};
+
+		function getRenderedImage() {
+			var image = null;
+			switch (renderSettings.renderer) {
+				case 'canvas':
+					image = sgCanvasRenderer(sceneGraph);
+					break;
+				case 'svg':
+					image = sgSVGRenderer(sceneGraph, renderSettings);
+					break;
+				default:
+					throw 'Holder: invalid renderer: ' + renderSettings.renderer;
+			}
+			return image;
+		}
+
+		image = getRenderedImage();
+
+		if (image == null) {
+			throw 'Holder: couldn\'t render placeholder';
+		}
+
+		//todo: add <object> canvas rendering
+		if (mode == 'background') {
+			el.style.backgroundImage = 'url(' + image + ')';
+			el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+		} else {
+			if (el.nodeName.toLowerCase() === 'img') {
+				setAttr(el, {
+					'src': image
+				});
+			} else if (el.nodeName.toLowerCase() === 'object') {
+				setAttr(el, {
+					'data': image
+				});
+				setAttr(el, {
+					'type': 'image/svg+xml'
+				});
+			}
+			if (renderSettings.reRender) {
+				setTimeout(function() {
+					var image = getRenderedImage();
+					if (image == null) {
+						throw 'Holder: couldn\'t render placeholder';
+					}
+					if (el.nodeName.toLowerCase() === 'img') {
+						setAttr(el, {
+							'src': image
+						});
+					} else if (el.nodeName.toLowerCase() === 'object') {
+						setAttr(el, {
+							'data': image
+						});
+						setAttr(el, {
+							'type': 'image/svg+xml'
+						});
+					}
+				}, 100);
+			}
+		}
+		setAttr(el, {
+			'data-holder-rendered': true
+		});
+	}
+
+	/**
+	 * Core function that takes a Holder scene description and builds a scene graph
+	 *
+	 * @private
+	 * @param scene Holder scene object
+	 */
+	function buildSceneGraph(scene) {
+		scene.font = {
+			family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
+			size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : App.defaults.size),
+      units: scene.theme.units ? scene.theme.units : App.defaults.units,
+			weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
+		};
+		scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+		switch (scene.flags.textmode) {
+			case 'literal':
+				scene.text = scene.flags.dimensions.width + 'x' + scene.flags.dimensions.height;
+				break;
+			case 'exact':
+				if (!scene.flags.exactDimensions) break;
+				scene.text = Math.floor(scene.flags.exactDimensions.width) + 'x' + Math.floor(scene.flags.exactDimensions.height);
+				break;
+		}
+
+		var sceneGraph = new SceneGraph({
+			width: scene.width,
+			height: scene.height
+		});
+
+		var Shape = sceneGraph.Shape;
+
+		var holderBg = new Shape.Rect('holderBg', {
+			fill: scene.theme.background
+		});
+
+		holderBg.resize(scene.width, scene.height);
+		sceneGraph.root.add(holderBg);
+
+		var holderTextGroup = new Shape.Group('holderTextGroup', {
+			text: scene.text,
+			align: 'center',
+			font: scene.font,
+			fill: scene.theme.foreground
+		});
+
+		holderTextGroup.moveTo(null, null, 1);
+		sceneGraph.root.add(holderTextGroup);
+
+		var tpdata = holderTextGroup.textPositionData = stagingRenderer(sceneGraph);
+		if (!tpdata) {
+			throw 'Holder: staging fallback not supported yet.';
+		}
+		holderTextGroup.properties.leading = tpdata.boundingBox.height;
+
+		//todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
+		var textNode = null;
+		var line = null;
+
+		function finalizeLine(parent, line, width, height) {
+			line.width = width;
+			line.height = height;
+			parent.width = Math.max(parent.width, line.width);
+			parent.height += line.height;
+			parent.add(line);
+		}
+
+		if (tpdata.lineCount > 1) {
+			var offsetX = 0;
+			var offsetY = 0;
+			var maxLineWidth = scene.width * App.setup.lineWrapRatio;
+			var lineIndex = 0;
+			line = new Shape.Group('line' + lineIndex);
+
+			for (var i = 0; i < tpdata.words.length; i++) {
+				var word = tpdata.words[i];
+				textNode = new Shape.Text(word.text);
+				var newline = word.text == '\\n';
+				if (offsetX + word.width >= maxLineWidth || newline === true) {
+					finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+					offsetX = 0;
+					offsetY += holderTextGroup.properties.leading;
+					lineIndex += 1;
+					line = new Shape.Group('line' + lineIndex);
+					line.y = offsetY;
+				}
+				if (newline === true) {
+					continue;
+				}
+				textNode.moveTo(offsetX, 0);
+				offsetX += tpdata.spaceWidth + word.width;
+				line.add(textNode);
+			}
+
+			finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+
+			for (var lineKey in holderTextGroup.children) {
+				line = holderTextGroup.children[lineKey];
+				line.moveTo(
+					(holderTextGroup.width - line.width) / 2,
+					null,
+					null);
+			}
+
+			holderTextGroup.moveTo(
+				(scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
+				null);
+
+			//If the text exceeds vertical space, move it down so the first line is visible
+			if ((scene.height - holderTextGroup.height) / 2 < 0) {
+				holderTextGroup.moveTo(null, 0, null);
+			}
+		} else {
+			textNode = new Shape.Text(scene.text);
+			line = new Shape.Group('line0');
+			line.add(textNode);
+			holderTextGroup.add(line);
+
+			holderTextGroup.moveTo(
+				(scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
+				null);
+		}
+
+		//todo: renderlist
+
+		return sceneGraph;
+	}
+
+	/**
+	 * Adaptive text sizing function
+	 *
+	 * @private
+	 * @param width Parent width
+	 * @param height Parent height
+	 * @param fontSize Requested text size
+	 */
+	function textSize(width, height, fontSize) {
+		height = parseInt(height, 10);
+		width = parseInt(width, 10);
+		var bigSide = Math.max(height, width);
+		var smallSide = Math.min(height, width);
+		var scale = App.defaults.scale;
+		var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
+		return Math.round(Math.max(fontSize, newHeight));
+	}
+
+	/**
+	 * Iterates over resizable (fluid or auto) placeholders and renders them
+	 *
+	 * @private
+	 * @param element Optional element selector, specified only if a specific element needs to be re-rendered
+	 */
+	function updateResizableElements(element) {
+		var images;
+		if (element == null || element.nodeType == null) {
+			images = App.vars.resizableImages;
+		} else {
+			images = [element];
+		}
+		for (var i in images) {
+			if (!images.hasOwnProperty(i)) {
+				continue;
+			}
+			var el = images[i];
+			if (el.holderData) {
+				var flags = el.holderData.flags;
+				var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements));
+				if (dimensions) {
+					if (flags.fluid && flags.auto) {
+						var fluidConfig = el.holderData.fluidConfig;
+						switch (fluidConfig.mode) {
+							case 'width':
+								dimensions.height = dimensions.width / fluidConfig.ratio;
+								break;
+							case 'height':
+								dimensions.width = dimensions.height * fluidConfig.ratio;
+								break;
+						}
+					}
+
+					var drawParams = {
+						dimensions: dimensions,
+						theme: flags.theme,
+						flags: flags
+					};
+
+					if (flags.textmode && flags.textmode == 'exact') {
+						flags.exactDimensions = dimensions;
+						drawParams.dimensions = flags.dimensions;
+					}
+
+					render('image', drawParams, el, el.holderData.renderSettings);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Checks if an element is visible
+	 *
+	 * @private
+	 * @param el DOM element
+	 * @param callback Callback function executed if the element is invisible
+	 */
+	function dimensionCheck(el, callback) {
+		var dimensions = {
+			height: el.clientHeight,
+			width: el.clientWidth
+		};
+		if (!dimensions.height && !dimensions.width) {
+			setAttr(el, {
+				'data-holder-invisible': true
+			});
+			callback.call(this, el);
+		} else {
+			el.removeAttribute('data-holder-invisible');
+			return dimensions;
+		}
+	}
+
+	/**
+	 * Sets up aspect ratio metadata for fluid placeholders, in order to preserve proportions when resizing
+	 *
+	 * @private
+	 * @param el Image DOM element
+	 */
+	function setInitialDimensions(el) {
+		if (el.holderData) {
+			var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions));
+			if (dimensions) {
+				var flags = el.holderData.flags;
+
+				var fluidConfig = {
+					fluidHeight: flags.dimensions.height.slice(-1) == '%',
+					fluidWidth: flags.dimensions.width.slice(-1) == '%',
+					mode: null,
+					initialDimensions: dimensions
+				};
+
+				if (fluidConfig.fluidWidth && !fluidConfig.fluidHeight) {
+					fluidConfig.mode = 'width';
+					fluidConfig.ratio = fluidConfig.initialDimensions.width / parseFloat(flags.dimensions.height);
+				} else if (!fluidConfig.fluidWidth && fluidConfig.fluidHeight) {
+					fluidConfig.mode = 'height';
+					fluidConfig.ratio = parseFloat(flags.dimensions.width) / fluidConfig.initialDimensions.height;
+				}
+
+				el.holderData.fluidConfig = fluidConfig;
+			}
+		}
+	}
+
+	//todo: see if possible to convert stagingRenderer to use HTML only
+	var stagingRenderer = (function() {
+		var svg = null,
+			stagingText = null,
+			stagingTextNode = null;
+		return function(graph) {
+			var rootNode = graph.root;
+			if (App.setup.supportsSVG) {
+				var firstTimeSetup = false;
+				var tnode = function(text) {
+					return document.createTextNode(text);
+				};
+				if (svg == null) {
+					firstTimeSetup = true;
+				}
+				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
+				if (firstTimeSetup) {
+					stagingText = newEl('text', SVG_NS);
+					stagingTextNode = tnode(null);
+					setAttr(stagingText, {
+						x: 0
+					});
+					stagingText.appendChild(stagingTextNode);
+					svg.appendChild(stagingText);
+					document.body.appendChild(svg);
+					svg.style.visibility = 'hidden';
+					svg.style.position = 'absolute';
+					svg.style.top = '-100%';
+					svg.style.left = '-100%';
+					//todo: workaround for zero-dimension <svg> tag in Opera 12
+					//svg.setAttribute('width', 0);
+					//svg.setAttribute('height', 0);
+				}
+
+				var holderTextGroup = rootNode.children.holderTextGroup;
+				var htgProps = holderTextGroup.properties;
+				setAttr(stagingText, {
+					'y': htgProps.font.size,
+					'style': cssProps({
+						'font-weight': htgProps.font.weight,
+						'font-size': htgProps.font.size + htgProps.font.units,
+						'font-family': htgProps.font.family,
+						'dominant-baseline': 'middle'
+					})
+				});
+
+				//Get bounding box for the whole string (total width and height)
+				stagingTextNode.nodeValue = htgProps.text;
+				var stagingTextBBox = stagingText.getBBox();
+
+				//Get line count and split the string into words
+				var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.setup.lineWrapRatio));
+				var words = htgProps.text.split(' ');
+				var newlines = htgProps.text.match(/\\n/g);
+				lineCount += newlines == null ? 0 : newlines.length;
+
+				//Get bounding box for the string with spaces removed
+				stagingTextNode.nodeValue = htgProps.text.replace(/[ ]+/g, '');
+				var computedNoSpaceLength = stagingText.getComputedTextLength();
+
+				//Compute average space width
+				var diffLength = stagingTextBBox.width - computedNoSpaceLength;
+				var spaceWidth = Math.round(diffLength / Math.max(1, words.length - 1));
+
+				//Get widths for every word with space only if there is more than one line
+				var wordWidths = [];
+				if (lineCount > 1) {
+					stagingTextNode.nodeValue = '';
+					for (var i = 0; i < words.length; i++) {
+						if (words[i].length === 0) continue;
+						stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
+						var bbox = stagingText.getBBox();
+						wordWidths.push({
+							text: words[i],
+							width: bbox.width
+						});
+					}
+				}
+
+				return {
+					spaceWidth: spaceWidth,
+					lineCount: lineCount,
+					boundingBox: stagingTextBBox,
+					words: wordWidths
+				};
+			} else {
+				//todo: canvas fallback for measuring text on android 2.3
+				return false;
+			}
+		};
+	})();
+
+	var sgCanvasRenderer = (function() {
+		var canvas = newEl('canvas');
+		var ctx = null;
+
+		return function(sceneGraph) {
+			if (ctx == null) {
+				ctx = canvas.getContext('2d');
+			}
+			var root = sceneGraph.root;
+			canvas.width = App.dpr(root.properties.width);
+			canvas.height = App.dpr(root.properties.height);
+			ctx.textBaseline = 'middle';
+
+			ctx.fillStyle = root.children.holderBg.properties.fill;
+			ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
+
+			var textGroup = root.children.holderTextGroup;
+			var tgProps = textGroup.properties;
+			ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
+			ctx.fillStyle = textGroup.properties.fill;
+
+			for (var lineKey in textGroup.children) {
+				var line = textGroup.children[lineKey];
+				for (var wordKey in line.children) {
+					var word = line.children[wordKey];
+					var x = App.dpr(textGroup.x + line.x + word.x);
+					var y = App.dpr(textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
+
+					ctx.fillText(word.properties.text, x, y);
+				}
+			}
+
+			return canvas.toDataURL('image/png');
+		};
+	})();
+
+	var sgSVGRenderer = (function() {
+		//Prevent IE <9 from initializing SVG renderer
+		if (!global.XMLSerializer) return;
+		var svg = initSVG(null, 0, 0);
+		var bgEl = newEl('rect', SVG_NS);
+		svg.appendChild(bgEl);
+
+		//todo: create a reusable pool for textNodes, resize if more words present
+
+		return function(sceneGraph, renderSettings) {
+			var root = sceneGraph.root;
+
+			initSVG(svg, root.properties.width, root.properties.height);
+			var groups = svg.querySelectorAll('g');
+
+			for (var i = 0; i < groups.length; i++) {
+				groups[i].parentNode.removeChild(groups[i]);
+			}
+
+			setAttr(bgEl, {
+				'width': root.children.holderBg.width,
+				'height': root.children.holderBg.height,
+				'fill': root.children.holderBg.properties.fill
+			});
+
+			var textGroup = root.children.holderTextGroup;
+			var tgProps = textGroup.properties;
+			var textGroupEl = newEl('g', SVG_NS);
+			svg.appendChild(textGroupEl);
+
+			for (var lineKey in textGroup.children) {
+				var line = textGroup.children[lineKey];
+				for (var wordKey in line.children) {
+					var word = line.children[wordKey];
+					var x = textGroup.x + line.x + word.x;
+					var y = textGroup.y + line.y + word.y + (textGroup.properties.leading / 2);
+
+					var textEl = newEl('text', SVG_NS);
+					var textNode = document.createTextNode(null);
+
+					setAttr(textEl, {
+						'x': x,
+						'y': y,
+						'style': cssProps({
+							'fill': tgProps.fill,
+							'font-weight': tgProps.font.weight,
+							'font-family': tgProps.font.family + ', monospace',
+							'font-size': tgProps.font.size + tgProps.font.units,
+							'dominant-baseline': 'central'
+						})
+					});
+
+					textNode.nodeValue = word.properties.text;
+					textEl.appendChild(textNode);
+					textGroupEl.appendChild(textEl);
+				}
+			}
+
+			var svgString = 'data:image/svg+xml;base64,' +
+				btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings))));
+			return svgString;
+		};
+	})();
+
+	//Helpers
+
+	/**
+	 * Generic new DOM element function
+	 *
+	 * @private
+	 * @param tag Tag to create
+	 * @param namespace Optional namespace value
+	 */
+	function newEl(tag, namespace) {
+		if (namespace == null) {
+			return document.createElement(tag);
+		} else {
+			return document.createElementNS(namespace, tag);
+		}
+	}
+
+	/**
+	 * Generic setAttribute function
+	 *
+	 * @private
+	 * @param el Reference to DOM element
+	 * @param attrs Object with attribute keys and values
+	 */
+	function setAttr(el, attrs) {
+		for (var a in attrs) {
+			el.setAttribute(a, attrs[a]);
+		}
+	}
+
+	/**
+	 * Generic SVG element creation function
+	 *
+	 * @private
+	 * @param svg SVG context, set to null if new
+	 * @param width Document width
+	 * @param height Document height
+	 */
+	function initSVG(svg, width, height) {
+		if (svg == null) {
+			svg = newEl('svg', SVG_NS);
+			var defs = newEl('defs', SVG_NS);
+			svg.appendChild(defs);
+		}
+		//IE throws an exception if this is set and Chrome requires it to be set
+		if (svg.webkitMatchesSelector) {
+			svg.setAttribute('xmlns', SVG_NS);
+		}
+
+		setAttr(svg, {
+			'width': width,
+			'height': height,
+			'viewBox': '0 0 ' + width + ' ' + height,
+			'preserveAspectRatio': 'none'
+		});
+		return svg;
+	}
+
+	/**
+	 * Generic SVG serialization function
+	 *
+	 * @private
+	 * @param svg SVG context
+	 * @param stylesheets CSS stylesheets to include
+	 */
+	function serializeSVG(svg, renderSettings) {
+		if (!global.XMLSerializer) return;
+		var serializer = new XMLSerializer();
+		var svgCSS = '';
+		var stylesheets = renderSettings.stylesheets;
+		var defs = svg.querySelector('defs');
+
+		//External stylesheets: Processing Instruction method
+		if (renderSettings.svgXMLStylesheet) {
+			var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
+			//Add <?xml-stylesheet ?> directives
+			for (var i = stylesheets.length - 1; i >= 0; i--) {
+				var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
+				xml.insertBefore(csspi, xml.firstChild);
+			}
+
+			//Add <?xml ... ?> UTF-8 directive
+			var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+			xml.insertBefore(xmlpi, xml.firstChild);
+			xml.removeChild(xml.documentElement);
+			svgCSS = serializer.serializeToString(xml);
+		}
+
+		/*
+
+		//External stylesheets: <link> method
+		if (renderSettings.svgLinkStylesheet) {
+
+			defs.removeChild(defs.firstChild);
+			for (i = 0; i < stylesheets.length; i++) {
+				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
+				link.setAttribute('href', stylesheets[i]);
+				link.setAttribute('rel', 'stylesheet');
+				link.setAttribute('type', 'text/css');
+				defs.appendChild(link);
+			}
+		}
+
+		//External stylesheets: <style> and @import method
+		if (renderSettings.svgImportStylesheet) {
+			var style = document.createElementNS(SVG_NS, 'style');
+			var styleText = [];
+
+			for (i = 0; i < stylesheets.length; i++) {
+				styleText.push('@import url(' + stylesheets[i] + ');');
+			}
+
+			var styleTextNode = document.createTextNode(styleText.join('\n'));
+			style.appendChild(styleTextNode);
+			defs.appendChild(style);
+		}
+
+		*/
+
+		var svgText = serializer.serializeToString(svg);
+		svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
+		return svgCSS + svgText;
+	}
+
+	/**
+	 * Shallow object clone and merge
+	 *
+	 * @param a Object A
+	 * @param b Object B
+	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
+	 */
+	function extend(a, b) {
+		var c = {};
+		for (var x in a) {
+			if (a.hasOwnProperty(x)) {
+				c[x] = a[x];
+			}
+		}
+		if (b != null) {
+			for (var y in b) {
+				if (b.hasOwnProperty(y)) {
+					c[y] = b[y];
+				}
+			}
+		}
+		return c;
+	}
+
+	/**
+	 * Takes a k/v list of CSS properties and returns a rule
+	 *
+	 * @param props CSS properties object
+	 */
+	function cssProps(props) {
+		var ret = [];
+		for (var p in props) {
+			if (props.hasOwnProperty(p)) {
+				ret.push(p + ':' + props[p]);
+			}
+		}
+		return ret.join(';');
+	}
+
+	/**
+	 * Prevents a function from being called too often, waits until a timer elapses to call it again
+	 *
+	 * @param fn Function to call
+	 */
+	function debounce(fn) {
+		if (!App.vars.debounceTimer) fn.call(this);
+		if (App.vars.debounceTimer) clearTimeout(App.vars.debounceTimer);
+		App.vars.debounceTimer = setTimeout(function() {
+			App.vars.debounceTimer = null;
+			fn.call(this);
+		}, App.setup.debounce);
+	}
+
+	/**
+	 * Holder-specific resize/orientation change callback, debounced to prevent excessive execution
+	 */
+	function resizeEvent() {
+		debounce(function() {
+			updateResizableElements(null);
+		});
+	}
+
+	/**
+	 * Converts a value into an array of DOM nodes
+	 *
+	 * @param val A string, a NodeList, a Node, or an HTMLCollection
+	 */
+	function getNodeArray(val) {
+		var retval = null;
+		if (typeof(val) == 'string') {
+			retval = document.querySelectorAll(val);
+		} else if (global.NodeList && val instanceof global.NodeList) {
+			retval = val;
+		} else if (global.Node && val instanceof global.Node) {
+			retval = [val];
+		} else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+			retval = val;
+		} else if (val === null) {
+			retval = [];
+		}
+		return retval;
+	}
+
+	/**
+	 * Checks if an image exists
+	 *
+	 * @param params Configuration object, must specify at least a src key
+	 * @param callback Callback to call once image status has been found
+	 */
+	function imageExists(src, callback) {
+		var image = new Image();
+		image.onerror = function() {
+			callback.call(this, false);
+		};
+		image.onload = function() {
+			callback.call(this, true);
+		};
+		image.src = src;
+	}
+
+	/**
+	 * Encodes HTML entities in a string
+	 *
+	 * @param str Input string
+	 */
+	function encodeHtmlEntity(str) {
+		var buf = [];
+		var charCode = 0;
+		for (var i = str.length - 1; i >= 0; i--) {
+			charCode = str.charCodeAt(i);
+			if (charCode > 128) {
+				buf.unshift(['&#', charCode, ';'].join(''));
+			} else {
+				buf.unshift(str[i]);
+			}
+		}
+		return buf.join('');
+	}
+
+	/**
+	 * Decodes HTML entities in a stirng
+	 *
+	 * @param str Input string
+	 */
+	function decodeHtmlEntity(str) {
+		return str.replace(/&#(\d+);/g, function(match, dec) {
+			return String.fromCharCode(dec);
+		});
+	}
+
+	// Scene graph
+
+	var SceneGraph = function(sceneProperties) {
+		var nodeCount = 1;
+
+		//todo: move merge to helpers section
+		function merge(parent, child) {
+			for (var prop in child) {
+				parent[prop] = child[prop];
+			}
+			return parent;
+		}
+
+		var SceneNode = augment.defclass({
+			constructor: function(name) {
+				nodeCount++;
+				this.parent = null;
+				this.children = {};
+				this.id = nodeCount;
+				this.name = 'n' + nodeCount;
+				if (name != null) {
+					this.name = name;
+				}
+				this.x = 0;
+				this.y = 0;
+				this.z = 0;
+				this.width = 0;
+				this.height = 0;
+			},
+			resize: function(width, height) {
+				if (width != null) {
+					this.width = width;
+				}
+				if (height != null) {
+					this.height = height;
+				}
+			},
+			moveTo: function(x, y, z) {
+				this.x = x != null ? x : this.x;
+				this.y = y != null ? y : this.y;
+				this.z = z != null ? z : this.z;
+			},
+			add: function(child) {
+					var name = child.name;
+					if (this.children[name] == null) {
+						this.children[name] = child;
+						child.parent = this;
+					} else {
+						throw 'SceneGraph: child with that name already exists: ' + name;
+					}
+				}
+				/*,	// probably unnecessary in Holder
+				remove: function(name){
+					if(this.children[name] == null){
+						throw 'SceneGraph: child with that name doesn\'t exist: '+name;
+					}
+					else{
+						child.parent = null;
+						delete this.children[name];
+					}
+				},
+				removeAll: function(){
+					for(var child in this.children){
+						this.remove(child);
+					}
+				}*/
+		});
+
+		var RootNode = augment(SceneNode, function(uber) {
+			this.constructor = function() {
+				uber.constructor.call(this, 'root');
+				this.properties = sceneProperties;
+			};
+		});
+
+		var Shape = augment(SceneNode, function(uber) {
+			function constructor(name, props) {
+				uber.constructor.call(this, name);
+				this.properties = {
+					fill: '#000'
+				};
+				if (props != null) {
+					merge(this.properties, props);
+				} else if (name != null && typeof name !== 'string') {
+					throw 'SceneGraph: invalid node name';
+				}
+			}
+
+			this.Group = augment.extend(this, {
+				constructor: constructor,
+				type: 'group'
+			});
+
+			this.Rect = augment.extend(this, {
+				constructor: constructor,
+				type: 'rect'
+			});
+
+			this.Text = augment.extend(this, {
+				constructor: function(text) {
+					constructor.call(this);
+					this.properties.text = text;
+				},
+				type: 'text'
+			});
+		});
+
+		var root = new RootNode();
+
+		this.Shape = Shape;
+		this.root = root;
+
+		return this;
+	};
+
+	//Set up flags
+
+	for (var flag in App.flags) {
+		if (!App.flags.hasOwnProperty(flag)) continue;
+		App.flags[flag].match = function(val) {
+			return val.match(this.regex);
+		};
+	}
+
+	//Properties set once on setup
+
+	App.setup = {
+		renderer: 'html',
+		debounce: 100,
+		ratio: 1,
+		supportsCanvas: false,
+		supportsSVG: false,
+		lineWrapRatio: 0.9,
+		renderers: ['html', 'canvas', 'svg']
+	};
+
+	App.dpr = function(val) {
+		return val * App.setup.ratio;
+	};
+
+	//Properties modified during runtime
+
+	App.vars = {
+		preempted: false,
+		resizableImages: [],
+		debounceTimer: null,
+		cache: {}
+	};
+
+	//Pre-flight
+
+	(function() {
+		var devicePixelRatio = 1,
+			backingStoreRatio = 1;
+
+		var canvas = newEl('canvas');
+		var ctx = null;
+
+		if (canvas.getContext) {
+			if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
+				App.setup.renderer = 'canvas';
+				ctx = canvas.getContext('2d');
+				App.setup.supportsCanvas = true;
+			}
+		}
+
+		if (App.setup.supportsCanvas) {
+			devicePixelRatio = global.devicePixelRatio || 1;
+			backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+		}
+
+		App.setup.ratio = devicePixelRatio / backingStoreRatio;
+
+		if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
+			App.setup.renderer = 'svg';
+			App.setup.supportsSVG = true;
+		}
+	})();
+
+	//Exposing to environment and setting up listeners
+	register(Holder, 'Holder', global);
+
+	if (global.onDomReady) {
+		global.onDomReady(function() {
+			if (!App.vars.preempted) {
+				Holder.run();
+			}
+			if (global.addEventListener) {
+				global.addEventListener('resize', resizeEvent, false);
+				global.addEventListener('orientationchange', resizeEvent, false);
+			} else {
+				global.attachEvent('onresize', resizeEvent);
+			}
+
+			if (typeof global.Turbolinks == 'object') {
+				global.document.addEventListener('page:change', function() {
+					Holder.run();
+				});
+			}
+		});
+	}
+
+})(function(fn, name, global) {
+	var isAMD = (typeof define === 'function' && define.amd);
+	var isNode = (typeof exports === 'object');
+	var isWeb = !isNode;
+
+	if (isAMD) {
+		define(fn);
+	} else {
+		//todo: npm/browserify registration
+		global[name] = fn;
+	}
+}, this);
