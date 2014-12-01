@@ -8,7 +8,7 @@ Holder.js - client side image placeholders
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var document = global.document;
-	var version = '2.4.1';
+	var version = '2.5.0-pre';
 	var generatorComment =	'\n' +
 				'Created with Holder.js ' + version + '.\n' +
 				'Learn more at http://holderjs.com\n' +
@@ -63,13 +63,6 @@ Holder.js - client side image placeholders
 			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
 			if (App.setup.renderers.join(',').indexOf(renderSettings.renderer) === -1) {
 				renderSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
-			}
-
-			//< v2.4 API compatibility
-			if (options.use_canvas) {
-				renderSettings.renderer = 'canvas';
-			} else if (options.use_svg) {
-				renderSettings.renderer = 'svg';
 			}
 
 			var images = getNodeArray(options.images);
@@ -195,12 +188,6 @@ Holder.js - client side image placeholders
 		},
 		version: version
 	};
-
-	//< v2.4 API compatibility
-
-	Holder.add_theme = Holder.addTheme;
-	Holder.add_image = Holder.addImage;
-	Holder.invisible_error_fn = Holder.invisibleErrorFn;
 
 	var App = {
 		settings: {
