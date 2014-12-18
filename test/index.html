@@ -197,17 +197,17 @@
 <script src="require.js" data-main="test.js"></script>
 -->
 <script>
-Holder.add_image("holder.js/300x200/sky", "#thumb1").run();
-Holder.add_theme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
+Holder.addImage("holder.js/300x200/sky", "#thumb1").run();
+Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
-	use_canvas: true
+	renderer: "canvas"
 })
-Holder.add_theme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
+Holder.addTheme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
 	domain: "fontawesome.holder"
 })
 Holder.run({
 	domain: "holder.canvas",
-	use_canvas: true
+	renderer: "canvas"
 });
 
 </script>
