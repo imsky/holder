@@ -68,6 +68,6 @@ gulp.task('watch', function(){
 });
 
 gulp.task('default', ['todo', 'jshint', 'scripts', 'minify', 'banner'], function(){
-	build = generateBuild();
 	gulputil.log("Finished build "+build);
+	build = generateBuild();
 });
