@@ -451,6 +451,17 @@ Holder.js - client side image placeholders
 				'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
 			});
 		}
+		
+		var settings = {
+				mode: mode,
+				params: {
+					dimensions: dimensions,
+					theme: theme,
+					flags: flags
+				},
+				el: el,
+				renderSettings: renderSettings
+		};
 
 		if (mode == 'image') {
 			if (renderSettings.renderer == 'html' || !flags.auto) {
@@ -460,11 +471,8 @@ Holder.js - client side image placeholders
 			if (renderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
-				render(mode, {
-					dimensions: dimensions,
-					theme: theme,
-					flags: flags
-				}, el, renderSettings);
+
+				render(settings);
 
 				if (flags.textmode && flags.textmode == 'exact') {
 					App.vars.resizableImages.push(el);
@@ -472,12 +480,7 @@ Holder.js - client side image placeholders
 				}
 			}
 		} else if (mode == 'background' && renderSettings.renderer != 'html') {
-			render(mode, {
-					dimensions: dimensions,
-					theme: theme,
-					flags: flags
-				},
-				el, renderSettings);
+				render(settings);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
 				el.style.height = dimensions.height;
@@ -508,14 +511,18 @@ Holder.js - client side image placeholders
 	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
 	 *
 	 * @private
-	 * @param mode Placeholder mode, either background or image
-	 * @param params Placeholder-specific parameters
-	 * @param el Image DOM element
-	 * @param renderSettings Instance configuration
+	 * @param settings Renderer settings
 	 */
 
-	function render(mode, params, el, renderSettings) {
+	function render(settings) {
 		var image = null;
+		var mode = settings.mode;
+		//todo rename params
+		var params = settings.params;
+		//todo rename el
+		var el = settings.el;
+		//todo rename renderSettings
+		var renderSettings = settings.renderSettings;
 
 		switch (renderSettings.renderer) {
 			case 'svg':
@@ -792,18 +799,23 @@ Holder.js - client side image placeholders
 						}
 					}
 
-					var drawParams = {
+					var settings = {
+						mode: 'image',
+						params: {
 						dimensions: dimensions,
 						theme: flags.theme,
 						flags: flags
+						},
+						el: el,
+						renderSettings: el.holderData.renderSettings
 					};
 
 					if (flags.textmode && flags.textmode == 'exact') {
 						flags.exactDimensions = dimensions;
-						drawParams.dimensions = flags.dimensions;
+						settings.params.dimensions = flags.dimensions;
 					}
 
-					render('image', drawParams, el, el.holderData.renderSettings);
+					render(settings);
 				}
 			}
 		}
