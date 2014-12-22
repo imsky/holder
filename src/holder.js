@@ -545,16 +545,6 @@ Holder.js - client side image placeholders
 
 		var sceneGraph = buildSceneGraph(scene);
 
-		var rendererParams = {
-			text: scene.text,
-			width: scene.width,
-			height: scene.height,
-			textHeight: scene.font.size,
-			font: scene.font.family,
-			fontWeight: scene.font.weight,
-			template: scene.theme
-		};
-
 		function getRenderedImage() {
 			var image = null;
 			switch (renderSettings.renderer) {
