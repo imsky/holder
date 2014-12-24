@@ -114,7 +114,12 @@ Holder.js - client side image placeholders
 				if (holderURL != null) {
 					var holderFlags = parseURL(holderURL, options);
 					if (holderFlags) {
-						prepareDOMElement('background', bgnodes[i], holderFlags, renderSettings);
+						prepareDOMElement({
+								mode:'background',
+								el: bgnodes[i],
+								flags: holderFlags,
+								renderSettings: renderSettings
+						});
 					}
 				}
 			}
@@ -299,7 +304,12 @@ Holder.js - client side image placeholders
 	function prepareImageElement(options, renderSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 		if (holderFlags) {
-			prepareDOMElement(null, el, holderFlags, renderSettings);
+			prepareDOMElement({
+				mode: null,
+				el: el,
+				flags: holderFlags,
+				renderSettings: renderSettings
+				});
 		}
 	}
 
@@ -386,11 +396,13 @@ Holder.js - client side image placeholders
 	 * Modifies the DOM to fit placeholders and sets up resizable image callbacks (for fluid and automatically sized placeholders)
 	 *
 	 * @private
-	 * @param el Image DOM element
-	 * @param flags Placeholder-specific configuration
-	 * @param _renderSettings Instance configuration
+	 * @param settings DOM prep settings
 	 */
-	function prepareDOMElement(mode, el, flags, _renderSettings) {
+	function prepareDOMElement(prepSettings) {
+		var mode = prepSettings.mode;
+		var el = prepSettings.el;
+		var flags = prepSettings.flags;
+		var _renderSettings = prepSettings.renderSettings;
 		var dimensions = flags.dimensions,
 			theme = flags.theme;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
@@ -471,7 +483,6 @@ Holder.js - client side image placeholders
 			if (renderSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
-
 				render(settings);
 
 				if (flags.textmode && flags.textmode == 'exact') {
@@ -511,20 +522,19 @@ Holder.js - client side image placeholders
 	 * Core function that takes output from renderers and sets it as the source or background-image of the target element
 	 *
 	 * @private
-	 * @param settings Renderer settings
+	 * @param renderSettings Renderer settings
 	 */
-
-	function render(settings) {
+	function render(renderSettings) {
 		var image = null;
-		var mode = settings.mode;
+		var mode = renderSettings.mode;
 		//todo rename params
-		var params = settings.params;
+		var params = renderSettings.params;
 		//todo rename el
-		var el = settings.el;
-		//todo rename renderSettings
-		var renderSettings = settings.renderSettings;
+		var el = renderSettings.el;
+		//todo rename renderSettings!
+		var engineSettings = renderSettings.renderSettings;
 
-		switch (renderSettings.renderer) {
+		switch (engineSettings.renderer) {
 			case 'svg':
 				if (!App.setup.supportsSVG) return;
 				break;
@@ -547,15 +557,15 @@ Holder.js - client side image placeholders
 
 		function getRenderedImage() {
 			var image = null;
-			switch (renderSettings.renderer) {
+			switch (engineSettings.renderer) {
 				case 'canvas':
-					image = sgCanvasRenderer(sceneGraph);
+					image = sgCanvasRenderer(sceneGraph, renderSettings);
 					break;
 				case 'svg':
 					image = sgSVGRenderer(sceneGraph, renderSettings);
 					break;
 				default:
-					throw 'Holder: invalid renderer: ' + renderSettings.renderer;
+					throw 'Holder: invalid renderer: ' + engineSettings.renderer;
 			}
 			return image;
 		}
@@ -583,7 +593,7 @@ Holder.js - client side image placeholders
 					'type': 'image/svg+xml'
 				});
 			}
-			if (renderSettings.reRender) {
+			if (engineSettings.reRender) {
 				setTimeout(function() {
 					var image = getRenderedImage();
 					if (image == null) {
@@ -1012,8 +1022,9 @@ Holder.js - client side image placeholders
 
 		//todo: create a reusable pool for textNodes, resize if more words present
 
-		return function(sceneGraph, renderSettings) {
+		return function(sceneGraph, settings) {
 			var root = sceneGraph.root;
+			var renderSettings = settings.renderSettings;
 
 			initSVG(svg, root.properties.width, root.properties.height);
 			var groups = svg.querySelectorAll('g');
