@@ -54,15 +54,15 @@ Holder.js - client side image placeholders
 		 */
 		run: function(userOptions) {
 			userOptions = userOptions || {};
-			var renderSettings = {};
+			var engineSettings = {};
 
 			App.vars.preempted = true;
 
 			var options = extend(App.settings, userOptions);
 
-			renderSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
-			if (App.setup.renderers.join(',').indexOf(renderSettings.renderer) === -1) {
-				renderSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
+			engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
+			if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
+				engineSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
 			}
 
 			var images = getNodeArray(options.images);
@@ -70,9 +70,9 @@ Holder.js - client side image placeholders
 			var stylenodes = getNodeArray(options.stylenodes);
 			var objects = getNodeArray(options.objects);
 
-			renderSettings.stylesheets = [];
-			renderSettings.svgXMLStylesheet = true;
-			renderSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
+			engineSettings.stylesheets = [];
+			engineSettings.svgXMLStylesheet = true;
+			engineSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 
 			for (var i = 0; i < stylenodes.length; i++) {
 				var styleNode = stylenodes[i];
@@ -82,7 +82,7 @@ Holder.js - client side image placeholders
 					var proxyLink = newEl('a');
 					proxyLink.href = href;
 					var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
-					renderSettings.stylesheets.push(stylesheetURL);
+					engineSettings.stylesheets.push(stylesheetURL);
 				}
 			}
 
@@ -118,7 +118,7 @@ Holder.js - client side image placeholders
 								mode:'background',
 								el: bgnodes[i],
 								flags: holderFlags,
-								renderSettings: renderSettings
+								engineSettings: engineSettings
 						});
 					}
 				}
@@ -137,9 +137,9 @@ Holder.js - client side image placeholders
 				var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
 
 				if (objectHasSrcURL) {
-					prepareImageElement(options, renderSettings, objectAttr.data, object);
+					prepareImageElement(options, engineSettings, objectAttr.data, object);
 				} else if (objectHasDataSrcURL) {
-					prepareImageElement(options, renderSettings, objectAttr.dataSrc, object);
+					prepareImageElement(options, engineSettings, objectAttr.dataSrc, object);
 				}
 			}
 
@@ -159,25 +159,25 @@ Holder.js - client side image placeholders
 
 				if (imageHasSrc) {
 					if (imageAttr.src.indexOf(options.domain) === 0) {
-						prepareImageElement(options, renderSettings, imageAttr.src, image);
+						prepareImageElement(options, engineSettings, imageAttr.src, image);
 					} else if (imageHasDataSrcURL) {
 						//Image has a valid data-src and an invalid src
 						if (imageRendered) {
 							//If the placeholder has already been render, re-render it
-							prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
+							prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
 						} else {
 							//If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
-							(function(src, options, renderSettings, dataSrc, image){
+							(function(src, options, engineSettings, dataSrc, image){
 							  imageExists(src, function(exists){
 							    if(!exists){
-							      prepareImageElement(options, renderSettings, dataSrc, image);
+							      prepareImageElement(options, engineSettings, dataSrc, image);
 							    }
 							  });
-							})(imageAttr.src, options, renderSettings, imageAttr.dataSrc, image);
+							})(imageAttr.src, options, engineSettings, imageAttr.dataSrc, image);
 						}
 					}
 				} else if (imageHasDataSrcURL) {
-					prepareImageElement(options, renderSettings, imageAttr.dataSrc, image);
+					prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
 				}
 			}
 
@@ -301,14 +301,14 @@ Holder.js - client side image placeholders
 	 * @param src Image URL
 	 * @param el Image DOM element
 	 */
-	function prepareImageElement(options, renderSettings, src, el) {
+	function prepareImageElement(options, engineSettings, src, el) {
 		var holderFlags = parseURL(src.substr(src.lastIndexOf(options.domain)), options);
 		if (holderFlags) {
 			prepareDOMElement({
 				mode: null,
 				el: el,
 				flags: holderFlags,
-				renderSettings: renderSettings
+				engineSettings: engineSettings
 				});
 		}
 	}
@@ -402,7 +402,7 @@ Holder.js - client side image placeholders
 		var mode = prepSettings.mode;
 		var el = prepSettings.el;
 		var flags = prepSettings.flags;
-		var _renderSettings = prepSettings.renderSettings;
+		var _engineSettings = prepSettings.engineSettings;
 		var dimensions = flags.dimensions,
 			theme = flags.theme;
 		var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
@@ -422,21 +422,21 @@ Holder.js - client side image placeholders
 		}
 
 		var holderURL = flags.holderURL;
-		var renderSettings = extend(_renderSettings, null);
+		var engineSettings = extend(_engineSettings, null);
 
 		if (flags.font) {
 			theme.font = flags.font;
 			//Only run the <canvas> webfont fallback if noFontFallback is false, if the node is not an image, and if canvas is supported
-			if (!renderSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && renderSettings.renderer === 'svg') {
-				renderSettings = extend(renderSettings, {
+			if (!engineSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && engineSettings.renderer === 'svg') {
+				engineSettings = extend(engineSettings, {
 					renderer: 'canvas'
 				});
 			}
 		}
 
 		//Chrome and Opera require a quick 10ms re-render if web fonts are used with canvas
-		if (flags.font && renderSettings.renderer == 'canvas') {
-			renderSettings.reRender = true;
+		if (flags.font && engineSettings.renderer == 'canvas') {
+			engineSettings.reRender = true;
 		}
 
 		if (mode == 'background') {
@@ -455,7 +455,7 @@ Holder.js - client side image placeholders
 
 		el.holderData = {
 			flags: flags,
-			renderSettings: renderSettings
+			engineSettings: engineSettings
 		};
 
 		if (mode == 'image' || mode == 'fluid') {
@@ -472,15 +472,15 @@ Holder.js - client side image placeholders
 					flags: flags
 				},
 				el: el,
-				renderSettings: renderSettings
+				engineSettings: engineSettings
 		};
 
 		if (mode == 'image') {
-			if (renderSettings.renderer == 'html' || !flags.auto) {
+			if (engineSettings.renderer == 'html' || !flags.auto) {
 				el.style.width = dimensions.width + 'px';
 				el.style.height = dimensions.height + 'px';
 			}
-			if (renderSettings.renderer == 'html') {
+			if (engineSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				render(settings);
@@ -490,7 +490,7 @@ Holder.js - client side image placeholders
 					updateResizableElements(el);
 				}
 			}
-		} else if (mode == 'background' && renderSettings.renderer != 'html') {
+		} else if (mode == 'background' && engineSettings.renderer != 'html') {
 				render(settings);
 		} else if (mode == 'fluid') {
 			if (dimensions.height.slice(-1) == '%') {
@@ -509,7 +509,7 @@ Holder.js - client side image placeholders
 
 			setInitialDimensions(el);
 
-			if (renderSettings.renderer == 'html') {
+			if (engineSettings.renderer == 'html') {
 				el.style.backgroundColor = theme.background;
 			} else {
 				App.vars.resizableImages.push(el);
@@ -532,7 +532,7 @@ Holder.js - client side image placeholders
 		//todo rename el
 		var el = renderSettings.el;
 		//todo rename renderSettings!
-		var engineSettings = renderSettings.renderSettings;
+		var engineSettings = renderSettings.engineSettings;
 
 		switch (engineSettings.renderer) {
 			case 'svg':
@@ -807,7 +807,7 @@ Holder.js - client side image placeholders
 						flags: flags
 						},
 						el: el,
-						renderSettings: el.holderData.renderSettings
+						engineSettings: el.holderData.engineSettings
 					};
 
 					if (flags.textmode && flags.textmode == 'exact') {
@@ -1024,7 +1024,7 @@ Holder.js - client side image placeholders
 
 		return function(sceneGraph, settings) {
 			var root = sceneGraph.root;
-			var renderSettings = settings.renderSettings;
+			var engineSettings = settings.engineSettings;
 
 			initSVG(svg, root.properties.width, root.properties.height);
 			var groups = svg.querySelectorAll('g');
@@ -1073,7 +1073,7 @@ Holder.js - client side image placeholders
 			}
 
 			var svgString = 'data:image/svg+xml;base64,' +
-				btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings))));
+				btoa(unescape(encodeURIComponent(serializeSVG(svg, engineSettings))));
 			return svgString;
 		};
 	})();
@@ -1143,15 +1143,15 @@ Holder.js - client side image placeholders
 	 * @param svg SVG context
 	 * @param stylesheets CSS stylesheets to include
 	 */
-	function serializeSVG(svg, renderSettings) {
+	function serializeSVG(svg, engineSettings) {
 		if (!global.XMLSerializer) return;
 		var serializer = new XMLSerializer();
 		var svgCSS = '';
-		var stylesheets = renderSettings.stylesheets;
+		var stylesheets = engineSettings.stylesheets;
 		var defs = svg.querySelector('defs');
 
 		//External stylesheets: Processing Instruction method
-		if (renderSettings.svgXMLStylesheet) {
+		if (engineSettings.svgXMLStylesheet) {
 			var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
 			//Add <?xml-stylesheet ?> directives
 			for (var i = stylesheets.length - 1; i >= 0; i--) {
