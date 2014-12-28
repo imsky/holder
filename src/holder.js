@@ -7,6 +7,7 @@ Holder.js - client side image placeholders
 	//Constants and definitions
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
+	var NODE_TYPE_COMMENT = 8;
 	var document = global.document;
 	var version = '2.5.0-pre';
 	var generatorComment =	'\n' +
@@ -1016,17 +1017,18 @@ Holder.js - client side image placeholders
 		if (!global.XMLSerializer) return;
 		var svg = initSVG(null, 0, 0);
 		var bgEl = newEl('rect', SVG_NS);
-		var commentNode = document.createComment(generatorComment);
-		svg.insertBefore(commentNode, svg.firstChild);
 		svg.appendChild(bgEl);
 
 		//todo: create a reusable pool for textNodes, resize if more words present
 
-		return function(sceneGraph, settings) {
+		return function(sceneGraph, renderSettings) {
 			var root = sceneGraph.root;
-			var engineSettings = settings.engineSettings;
+			var holderURL = renderSettings.params.flags.holderURL;
+			var commentNode = document.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
 
 			initSVG(svg, root.properties.width, root.properties.height);
+			svg.insertBefore(commentNode, svg.firstChild);
+
 			var groups = svg.querySelectorAll('g');
 
 			for (var i = 0; i < groups.length; i++) {
@@ -1073,7 +1075,7 @@ Holder.js - client side image placeholders
 			}
 
 			var svgString = 'data:image/svg+xml;base64,' +
-				btoa(unescape(encodeURIComponent(serializeSVG(svg, engineSettings))));
+				btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.engineSettings))));
 			return svgString;
 		};
 	})();
@@ -1125,6 +1127,12 @@ Holder.js - client side image placeholders
 		//IE throws an exception if this is set and Chrome requires it to be set
 		if (svg.webkitMatchesSelector) {
 			svg.setAttribute('xmlns', SVG_NS);
+		}
+		//Remove comment nodes
+		for (var i = 0; i < svg.childNodes.length; i++) {
+				if (svg.childNodes[i].nodeType === NODE_TYPE_COMMENT) {
+						svg.removeChild(svg.childNodes[i]);
+				}
 		}
 
 		setAttr(svg, {
