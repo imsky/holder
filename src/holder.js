@@ -883,7 +883,7 @@ Holder.js - client side image placeholders
 				var tnode = function(text) {
 					return document.createTextNode(text);
 				};
-				if (svg == null) {
+				if (svg == null || svg.parentNode !== document.body) {
 					firstTimeSetup = true;
 				}
 				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
