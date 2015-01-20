@@ -1,6 +1,6 @@
 /*
 Holder.js - client side image placeholders
-© 2012-2014 Ivan Malopinsky - http://imsky.co
+© 2012-2015 Ivan Malopinsky - http://imsky.co
 */
 (function(register, global, undefined) {
 
@@ -13,7 +13,7 @@ Holder.js - client side image placeholders
 	var generatorComment =	'\n' +
 				'Created with Holder.js ' + version + '.\n' +
 				'Learn more at http://holderjs.com\n' +
-				'(c) 2012-2014 Ivan Malopinsky - http://imsky.co\n';
+				'(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
 
 	var Holder = {
 		/**
