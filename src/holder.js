@@ -879,7 +879,11 @@ Holder.js - client side image placeholders
 				if (svg == null || svg.parentNode !== document.body) {
 					firstTimeSetup = true;
 				}
+
 				svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
+				//Show staging element before staging
+				svg.style.display = 'block';
+
 				if (firstTimeSetup) {
 					stagingText = newEl('text', SVG_NS);
 					stagingTextNode = tnode(null);
@@ -942,6 +946,9 @@ Holder.js - client side image placeholders
 						});
 					}
 				}
+
+				//Hide staging element after staging
+				svg.style.display = 'none';
 
 				return {
 					spaceWidth: spaceWidth,
