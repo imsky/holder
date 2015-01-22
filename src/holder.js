@@ -182,14 +182,6 @@ Holder.js - client side image placeholders
 
             return this;
         },
-        //todo: remove invisibleErrorFn for 2.5
-        invisibleErrorFn: function(fn) {
-            return function(el) {
-                if (el.hasAttribute('data-holder-invisible')) {
-                    throw 'Holder: invisible placeholder';
-                }
-            };
-        },
         version: version
     };
 
@@ -784,7 +776,7 @@ Holder.js - client side image placeholders
             var el = images[i];
             if (el.holderData) {
                 var flags = el.holderData.flags;
-                var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(updateResizableElements));
+                var dimensions = dimensionCheck(el);
                 if (dimensions) {
                     if (flags.fluid && flags.auto) {
                         var fluidConfig = el.holderData.fluidConfig;
@@ -827,19 +819,17 @@ Holder.js - client side image placeholders
      * @param el DOM element
      * @param callback Callback function executed if the element is invisible
      */
-    function dimensionCheck(el, callback) {
+    function dimensionCheck(el) {
         var dimensions = {
             height: el.clientHeight,
             width: el.clientWidth
         };
-        if (!dimensions.height && !dimensions.width) {
-            setAttr(el, {
-                'data-holder-invisible': true
-            });
-            callback.call(this, el);
-        } else {
-            el.removeAttribute('data-holder-invisible');
+
+        if (dimensions.height && dimensions.width) {
             return dimensions;
+        }
+        else{
+            return false;
         }
     }
 
@@ -851,7 +841,7 @@ Holder.js - client side image placeholders
      */
     function setInitialDimensions(el) {
         if (el.holderData) {
-            var dimensions = dimensionCheck(el, Holder.invisibleErrorFn(setInitialDimensions));
+            var dimensions = dimensionCheck(el);
             if (dimensions) {
                 var flags = el.holderData.flags;
 
