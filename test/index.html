@@ -190,6 +190,11 @@
 		 Plain placeholder to ensure themes aren't leaked forward
 	</div>
 </div>
+<div class="thumb">
+	<div id="invisible" style="display:none;width:300px;height:200px;">
+		<img data-src="holder.js/100%x100%">
+	</div>
+</div>
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="../holder.js"></script>
@@ -197,19 +202,26 @@
 <script src="require.js" data-main="test.js"></script>
 -->
 <script>
+	
+$(function () {
+	$("#invisible").show();
+});
+
 Holder.addImage("holder.js/300x200/sky", "#thumb1").run();
+
 Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
 	renderer: "canvas"
 })
+
 Holder.addTheme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
 	domain: "fontawesome.holder"
-})
+});
+
 Holder.run({
 	domain: "holder.canvas",
 	renderer: "canvas"
 });
-
 </script>
 </body>
 </html>

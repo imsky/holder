@@ -585,7 +585,7 @@ Holder.js - client side image placeholders
                 });
             }
             if (engineSettings.reRender) {
-                setTimeout(function() {
+                global.setTimeout(function() {
                     var image = getRenderedImage();
                     if (image == null) {
                         throw 'Holder: couldn\'t render placeholder';
@@ -807,29 +807,10 @@ Holder.js - client side image placeholders
                     }
 
                     render(settings);
+                } else {
+                    setInvisible(el);
                 }
             }
-        }
-    }
-
-    /**
-     * Checks if an element is visible
-     *
-     * @private
-     * @param el DOM element
-     * @param callback Callback function executed if the element is invisible
-     */
-    function dimensionCheck(el) {
-        var dimensions = {
-            height: el.clientHeight,
-            width: el.clientWidth
-        };
-
-        if (dimensions.height && dimensions.width) {
-            return dimensions;
-        }
-        else{
-            return false;
         }
     }
 
@@ -861,7 +842,68 @@ Holder.js - client side image placeholders
                 }
 
                 el.holderData.fluidConfig = fluidConfig;
+            } else {
+                setInvisible(el);
             }
+        }
+    }
+
+    /**
+     * Checks if an element is visible
+     *
+     * @private
+     * @param el DOM element
+     * @param callback Callback function executed if the element is invisible
+     */
+    function dimensionCheck(el) {
+        var dimensions = {
+            height: el.clientHeight,
+            width: el.clientWidth
+        };
+
+        if (dimensions.height && dimensions.width) {
+            return dimensions;
+        }
+        else{
+            return false;
+        }
+    }
+
+    //todo jsdoc
+    function visibilityCheck() {
+            var renderableImages = [];
+            var keys = Object.keys(App.vars.invisibleImages);
+            var el;
+            for (var i = 0, l = keys.length; i < l; i++) {
+                el = App.vars.invisibleImages[keys[i]];
+                if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
+                    renderableImages.push(el);
+                    delete App.vars.invisibleImages[keys[i]];
+                }
+            }
+
+            if (renderableImages.length) {
+                Holder.run({
+                    images: renderableImages
+                });
+            }
+            global.requestAnimationFrame(visibilityCheck);
+    }
+
+    //todo jsdoc
+    function startVisibilityCheck() {
+        if (!App.vars.visibilityCheckStarted) {
+            global.requestAnimationFrame(visibilityCheck);
+            App.vars.visibilityCheckStarted = true;
+        }
+    }
+
+    //todo jsdoc
+    function setInvisible(el) {
+        if (!el.holderData.invisibleId) {
+            App.vars.invisibleId += 1;
+            App.vars.invisibleImages['i' + App.vars.invisibleId] = el;
+            el.holderData.invisibleId = App.vars.invisibleId;
         }
     }
 
@@ -1244,8 +1286,8 @@ Holder.js - client side image placeholders
      */
     function debounce(fn) {
         if (!App.vars.debounceTimer) fn.call(this);
-        if (App.vars.debounceTimer) clearTimeout(App.vars.debounceTimer);
-        App.vars.debounceTimer = setTimeout(function() {
+        if (App.vars.debounceTimer) global.clearTimeout(App.vars.debounceTimer);
+        App.vars.debounceTimer = global.setTimeout(function() {
             App.vars.debounceTimer = null;
             fn.call(this);
         }, App.setup.debounce);
@@ -1274,6 +1316,8 @@ Holder.js - client side image placeholders
         } else if (global.Node && val instanceof global.Node) {
             retval = [val];
         } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+            retval = val;
+        } else if (val instanceof Array) {
             retval = val;
         } else if (val === null) {
             retval = [];
@@ -1473,6 +1517,9 @@ Holder.js - client side image placeholders
     App.vars = {
         preempted: false,
         resizableImages: [],
+        invisibleImages: {},
+        invisibleId: 0,
+        visibilityCheckStarted: false,
         debounceTimer: null,
         cache: {}
     };
@@ -1506,6 +1553,9 @@ Holder.js - client side image placeholders
             App.setup.supportsSVG = true;
         }
     })();
+    
+    //Starts checking for invisible placeholders
+    startVisibilityCheck();
 
     //Exposing to environment and setting up listeners
     register(Holder, 'Holder', global);
