@@ -869,28 +869,36 @@ Holder.js - client side image placeholders
         }
     }
 
-    //todo jsdoc
+    /**
+     * Iterates through all current invisible images, and if they're visible, renders them and removes them from further checks. Runs every animation frame.
+     *
+     * @private
+     */
     function visibilityCheck() {
-            var renderableImages = [];
-            var keys = Object.keys(App.vars.invisibleImages);
-            var el;
-            for (var i = 0, l = keys.length; i < l; i++) {
-                el = App.vars.invisibleImages[keys[i]];
-                if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
-                    renderableImages.push(el);
-                    delete App.vars.invisibleImages[keys[i]];
-                }
+        var renderableImages = [];
+        var keys = Object.keys(App.vars.invisibleImages);
+        var el;
+        for (var i = 0, l = keys.length; i < l; i++) {
+            el = App.vars.invisibleImages[keys[i]];
+            if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
+                renderableImages.push(el);
+                delete App.vars.invisibleImages[keys[i]];
             }
+        }
 
-            if (renderableImages.length) {
-                Holder.run({
-                    images: renderableImages
-                });
-            }
-            global.requestAnimationFrame(visibilityCheck);
+        if (renderableImages.length) {
+            Holder.run({
+                images: renderableImages
+            });
+        }
+        global.requestAnimationFrame(visibilityCheck);
     }
 
-    //todo jsdoc
+    /**
+     * Starts checking for invisible placeholders if not doing so yet. Does nothing otherwise.
+     *
+     * @private
+     */
     function startVisibilityCheck() {
         if (!App.vars.visibilityCheckStarted) {
             global.requestAnimationFrame(visibilityCheck);
@@ -898,7 +906,12 @@ Holder.js - client side image placeholders
         }
     }
 
-    //todo jsdoc
+    /**
+     * Sets a unique ID for an image detected to be invisible and adds it to the map of invisible images checked by visibilityCheck
+     *
+     * @private
+     * @param el Invisible DOM element
+     */
     function setInvisible(el) {
         if (!el.holderData.invisibleId) {
             App.vars.invisibleId += 1;
