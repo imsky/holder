@@ -474,14 +474,14 @@ Holder.js - client side image placeholders
             });
         }
 
-        var settings = {
+        var renderSettings = {
             mode: mode,
-            params: {
+            el: el,
+            holderSettings: {
                 dimensions: dimensions,
                 theme: theme,
                 flags: flags
             },
-            el: el,
             engineSettings: engineSettings
         };
 
@@ -493,7 +493,7 @@ Holder.js - client side image placeholders
             if (engineSettings.renderer == 'html') {
                 el.style.backgroundColor = theme.background;
             } else {
-                render(settings);
+                render(renderSettings);
 
                 if (flags.textmode == 'exact') {
                     el.holderData.resizeUpdate = true;
@@ -502,7 +502,7 @@ Holder.js - client side image placeholders
                 }
             }
         } else if (mode == 'background' && engineSettings.renderer != 'html') {
-            render(settings);
+            render(renderSettings);
         } else if (mode == 'fluid') {
             el.holderData.resizeUpdate = true;
 
@@ -541,7 +541,7 @@ Holder.js - client side image placeholders
         var image = null;
         var mode = renderSettings.mode;
         //todo rename params
-        var params = renderSettings.params;
+        var params = renderSettings.holderSettings;
         //todo rename el
         var el = renderSettings.el;
         //todo rename renderSettings!
@@ -815,7 +815,7 @@ Holder.js - client side image placeholders
 
                     var settings = {
                         mode: 'image',
-                        params: {
+                        holderSettings: {
                             dimensions: dimensions,
                             theme: flags.theme,
                             flags: flags
@@ -826,7 +826,7 @@ Holder.js - client side image placeholders
 
                     if (flags.textmode == 'exact') {
                         flags.exactDimensions = dimensions;
-                        settings.params.dimensions = flags.dimensions;
+                        settings.holderSettings.dimensions = flags.dimensions;
                     }
 
                     render(settings);
@@ -1089,7 +1089,7 @@ Holder.js - client side image placeholders
 
         return function(sceneGraph, renderSettings) {
             var root = sceneGraph.root;
-            var holderURL = renderSettings.params.flags.holderURL;
+            var holderURL = renderSettings.holderSettings.flags.holderURL;
             var commentNode = document.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
 
             initSVG(svg, root.properties.width, root.properties.height);
@@ -1364,7 +1364,7 @@ Holder.js - client side image placeholders
     /**
      * Checks if an image exists
      *
-     * @param params Configuration object, must specify at least a src key
+     * @param src URL of image
      * @param callback Callback to call once image status has been found
      */
     function imageExists(src, callback) {
