@@ -275,17 +275,16 @@ if (!window.requestAnimationFrame) {
 	}(this));
   } else if (window.mozRequestAnimationFrame) {
 	  //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
-	  (function (global) {
-		// window.requestAnimationFrame
-		global.requestAnimationFrame = function (callback) {
-			return mozRequestAnimationFrame(function () {
-				callback(performance.now());
-			});
-		};
+	(function (global) {
+	  // window.requestAnimationFrame
+	  global.requestAnimationFrame = function (callback) {
+		  return mozRequestAnimationFrame(function () {
+			  callback(performance.now());
+		  });
+	  };
 
-		// window.cancelAnimationFrame
-		global.cancelAnimationFrame = mozCancelAnimationFrame;
-
-	  }(this));
+	  // window.cancelAnimationFrame
+	  global.cancelAnimationFrame = mozCancelAnimationFrame;
+	}(this));
   }
 }

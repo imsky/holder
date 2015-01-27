@@ -14,6 +14,8 @@ Holder.js - client side image placeholders
         '(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
 
     var Holder = {
+        version: version,
+
         /**
          * Adds a theme to default settings
          *
@@ -44,6 +46,22 @@ Holder.js - client side image placeholders
                 }
             }
             return this;
+        },
+
+        /**
+         * Sets whether or not an image is updated on resize.
+         * If an image is set to be updated, it is immediately rendered.
+         *
+         * @param {Object} el Image DOM element
+         * @param {Boolean} value Resizable update flag value
+         */
+        setResizeUpdate: function(el, value) {
+            if (el.holderData) {
+                el.holderData.resizeUpdate = !!value;
+                if (el.holderData.resizeUpdate) {
+                    updateResizableElements(el);
+                }
+            }
         },
 
         /**
@@ -181,8 +199,7 @@ Holder.js - client side image placeholders
             }
 
             return this;
-        },
-        version: version
+        }
     };
 
     var App = {
@@ -477,6 +494,7 @@ Holder.js - client side image placeholders
                 render(settings);
 
                 if (flags.textmode && flags.textmode == 'exact') {
+                    el.holderData.resizeUpdate = true;
                     App.vars.resizableImages.push(el);
                     updateResizableElements(el);
                 }
@@ -484,6 +502,8 @@ Holder.js - client side image placeholders
         } else if (mode == 'background' && engineSettings.renderer != 'html') {
             render(settings);
         } else if (mode == 'fluid') {
+            el.holderData.resizeUpdate = true;
+
             if (dimensions.height.slice(-1) == '%') {
                 el.style.height = dimensions.height;
             } else if (flags.auto == null || !flags.auto) {
@@ -769,15 +789,16 @@ Holder.js - client side image placeholders
         } else {
             images = [element];
         }
-        for (var i in images) {
-            if (!images.hasOwnProperty(i)) {
-                continue;
-            }
+        for (var i = 0, l = images.length; i < l; i++) {
             var el = images[i];
             if (el.holderData) {
                 var flags = el.holderData.flags;
                 var dimensions = dimensionCheck(el);
                 if (dimensions) {
+                    if (!el.holderData.resizeUpdate) {
+                        return;
+                    }
+
                     if (flags.fluid && flags.auto) {
                         var fluidConfig = el.holderData.fluidConfig;
                         switch (fluidConfig.mode) {
