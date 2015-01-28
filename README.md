@@ -203,6 +203,26 @@ The above will render a placeholder without any embedded CSS for height or width
 
 To show the current size of an automatically sized placeholder, set the ``textmode`` flag to ``exact`` like so: `holder.js/200x200/auto/textmode:exact`.
 
+Preventing updates on window resize
+-----------------------------------
+
+Both fluid placeholders and automatically sized placeholders in exact mode are updated when the window is resized. To set whether or not a particular image is updated on window resize, you can use the `setResizeUpdate` method like so:
+
+```js
+var img = $('#placeholder').get(0);
+Holder.setResizeUpdate(img, false);
+```
+
+The above will pause any render updates on the specified image (which must be a DOM object).
+
+To enable updates again, run the following:
+
+```js
+Holder.setResizeUpdate(img, true);
+```
+
+This will enable updates and immediately render the placeholder.
+
 Background placeholders
 -----------------------
 
