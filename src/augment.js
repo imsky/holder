@@ -1,8 +1,6 @@
 (function (global, factory) {
 	global.augment = factory();
 }(this, function () {
-    "use strict";
-
     var Factory = function () {};
     var slice = Array.prototype.slice;
 
