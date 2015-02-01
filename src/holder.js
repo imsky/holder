@@ -104,6 +104,8 @@ Holder.js - client side image placeholders
             }
 
             for (i = 0; i < bgnodes.length; i++) {
+                //Skip processing background nodes if getComputedStyle is unavailable, since only modern browsers would be able to use canvas or SVG to render to background
+                if (!global.getComputedStyle) continue;
                 var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
                 var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
                 var rawURL = null;
@@ -493,7 +495,7 @@ Holder.js - client side image placeholders
             } else {
                 render(settings);
 
-                if (flags.textmode && flags.textmode == 'exact') {
+                if (flags.textmode == 'exact') {
                     el.holderData.resizeUpdate = true;
                     App.vars.resizableImages.push(el);
                     updateResizableElements(el);
@@ -822,7 +824,7 @@ Holder.js - client side image placeholders
                         engineSettings: el.holderData.engineSettings
                     };
 
-                    if (flags.textmode && flags.textmode == 'exact') {
+                    if (flags.textmode == 'exact') {
                         flags.exactDimensions = dimensions;
                         settings.params.dimensions = flags.dimensions;
                     }
