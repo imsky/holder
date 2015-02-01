@@ -463,6 +463,7 @@ Holder.js - client side image placeholders
 
         flags.theme = theme;
 
+        //todo consider using all renderSettings in holderData
         el.holderData = {
             flags: flags,
             engineSettings: engineSettings
@@ -540,11 +541,8 @@ Holder.js - client side image placeholders
     function render(renderSettings) {
         var image = null;
         var mode = renderSettings.mode;
-        //todo rename params
-        var params = renderSettings.holderSettings;
-        //todo rename el
+        var holderSettings = renderSettings.holderSettings;
         var el = renderSettings.el;
-        //todo rename renderSettings!
         var engineSettings = renderSettings.engineSettings;
 
         switch (engineSettings.renderer) {
@@ -560,10 +558,10 @@ Holder.js - client side image placeholders
 
         //todo: move generation of scene up to flag generation to reduce extra object creation
         var scene = {
-            width: params.dimensions.width,
-            height: params.dimensions.height,
-            theme: params.theme,
-            flags: params.flags
+            width: holderSettings.dimensions.width,
+            height: holderSettings.dimensions.height,
+            theme: holderSettings.theme,
+            flags: holderSettings.flags
         };
 
         var sceneGraph = buildSceneGraph(scene);
