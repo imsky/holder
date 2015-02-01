@@ -298,6 +298,12 @@ Holder.js - client side image placeholders
             },
             random: {
                 regex: /^random$/
+            },
+            size: {
+                regex: /size\:(\d+)/,
+                output: function(val){
+                    return this.regex.exec(val)[1];
+                }
             }
         }
     };
