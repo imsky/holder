@@ -392,6 +392,7 @@ Holder.js - client side image placeholders
                 push = true;
             } else if (App.flags.size.match(flag)) {
                 ret.size = App.flags.size.output(flag);
+                push = true;
             } else if (App.flags.random.match(flag)) {
                 if (App.vars.cache.themeKeys == null) {
                     App.vars.cache.themeKeys = Object.keys(options.themes);

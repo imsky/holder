@@ -1,5 +1,4 @@
-Holder
-======
+# Holder
 
 ![](http://imsky.github.io/holder/images/header.png)
 
@@ -7,8 +6,7 @@ Holder renders image placeholders on the client side using SVG.
 
 Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many other sites](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop).
 
-Installing
-----------
+## Installing
 
 * [Bower](http://bower.io/): `bower install holderjs`
 * [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
@@ -18,8 +16,7 @@ Installing
 * [Composer](https://packagist.org/): `php composer.phar update imsky/holder`
 * [NuGet](http://www.nuget.org/): `Install-Package Holder.js`
 
-Usage
------
+## Usage
 
 Include ``holder.js`` in your HTML:
 
@@ -37,8 +34,7 @@ The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
-Themes
-------
+## Themes
 
 ![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
 
@@ -50,8 +46,11 @@ There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial`
 <img src="holder.js/200x300/sky">
 ```
 
-Custom colors
--------------
+## Customizing appearance
+
+There are several settings that can be used to change the appearance of a placeholder without using a theme.
+
+### Custom colors
 
 Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
 
@@ -61,8 +60,7 @@ Custom colors on a specific image can be specified in the ``background:foregroun
 
 The above will render a placeholder with a black background and white text.
 
-Custom text
------------
+### Custom text
 
 You can specify custom text using the ``text:`` operator:
 
@@ -81,9 +79,15 @@ Holder automatically adds line breaks to text that goes outside of the image bou
 ```html
 <img data-src="holder.js/300x200/text:Add \n line breaks \n anywhere.">
 ```
+### Custom size
 
-Custom fonts, web fonts and icon fonts
---------------------------------------
+Font size for placeholders is set automatically, however you can set a custom font size by using the ``size`` flag:
+
+```html
+<img data-src="holder.js/300x200/size:40">
+```
+
+### Custom fonts, web fonts and icon fonts
 
 You can set a placeholder's font either through a theme or through the `font` flag:
 
@@ -106,8 +110,7 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 `<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified.
 
 
-Customizing themes
-------------------
+## Customizing themes
 
 Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
 
@@ -121,8 +124,7 @@ Holder.addTheme("dark", {
 });
 ```
 
-Using custom themes
--------------------
+## Using custom themes
 
 There are two ways to use custom themes with Holder:
 
@@ -146,8 +148,7 @@ The second approach requires that you call ``run`` after you add the theme, like
 Holder.addTheme("bright", {background: "white", foreground: "gray", size: 12}).run();
 ```
 
-Using custom themes and domain on specific images
--------------------------------------------------
+## Using custom themes and domain on specific images
 
 You can use Holder in different areas on different images with custom themes:
 
@@ -169,16 +170,14 @@ Holder.run({
 });
 ```
 
-Random themes
--------------
+## Random themes
 
 You can render a placeholder with a random theme using the `random` flag:
 ```html
 <img data-src="holder.js/300x200/random">
 ```
 
-Fluid placeholders
-------------------
+## Fluid placeholders
 
 Specifying a dimension in percentages creates a fluid placeholder that responds to media queries.
 
@@ -190,8 +189,7 @@ By default, the fluid placeholder will show its current size in pixels. To displ
 
 Fluid placeholders need to be visible in order to work. In cases when a placeholder is not visible, the `Holder.invisibleErrorFn` function is called, which takes the callee function as an argument and returns a function that takes the placeholder element as an argument. This function by default throws an exception, however its behavior can and should be overridden by the user.
 
-Automatically sized placeholders
---------------------------------
+## Automatically sized placeholders
 
 If you'd like to avoid Holder enforcing an image size, use the ``auto`` flag like so:
 
@@ -203,8 +201,7 @@ The above will render a placeholder without any embedded CSS for height or width
 
 To show the current size of an automatically sized placeholder, set the ``textmode`` flag to ``exact`` like so: `holder.js/200x200/auto/textmode:exact`.
 
-Preventing updates on window resize
------------------------------------
+## Preventing updates on window resize
 
 Both fluid placeholders and automatically sized placeholders in exact mode are updated when the window is resized. To set whether or not a particular image is updated on window resize, you can use the `setResizeUpdate` method like so:
 
@@ -223,8 +220,7 @@ Holder.setResizeUpdate(img, true);
 
 This will enable updates and immediately render the placeholder.
 
-Background placeholders
------------------------
+## Background placeholders
 
 Holder can render placeholders as background images for elements with the `holderjs` class, like this:
 
@@ -246,8 +242,7 @@ The Holder URL in CSS should have a `?` in front. Like in image placeholders, yo
 
 **Important:** Some browsers can't parse URLs like `?holder.js/300x200/#fff:#000` due to the `#` characters. You can use `^` in place of `#` like this: `?holder.js/300x200/^fff:^000`.
 
-Custom settings
----------------
+## Custom settings
 
 Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
 
@@ -255,13 +250,11 @@ Holder extends its default settings with the settings you provide, so you only h
 Holder.run({domain:"example.com"});
 ```
 
-Using custom settings on load
------------------------------
+## Using custom settings on load
 
 You can prevent Holder from running its default configuration by executing ``Holder.run`` with your custom settings right after including ``holder.js``. However, you'll have to execute ``Holder.run`` again to render any placeholders that use the default configuration.
 
-Inserting an image with optional custom theme
----------------------------------------------
+## Inserting an image with optional custom theme
 
 You can add a placeholder programmatically by chaining Holder calls:
 
@@ -275,8 +268,7 @@ Holder.addTheme("new", {
 
 The first argument in ``addImage`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
 
-Using different renderers
--------------------------
+## Using different renderers
 
 Holder has three renderers: canvas, SVG, and HTML. The SVG renderer is used by default, however you can set the renderer using the `renderer` option, with either `svg`, `canvas`, or `html` values.
 
@@ -284,13 +276,12 @@ Holder has three renderers: canvas, SVG, and HTML. The SVG renderer is used by d
 Holder.run({renderer: 'canvas'});
 ```
 
-Using with [lazyload.js](https://github.com/tuupola/jquery_lazyload)
-------------------------
+## Using with [lazyload.js](https://github.com/tuupola/jquery_lazyload)
+
 
 Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
 
-Using with Angular.js
----------------------
+## Using with Angular.js
 
 You can use Holder in Angular projects with the following JS and HTML code (by [Nick Clark](https://github.com/NickClark)):
 
@@ -309,8 +300,7 @@ angular.module('MyModule').directive('myHolder', function() {
 <img my-holder="holder.js/200x300">
 ```
 
-Browser support
----------------
+## Browser support
 
 * Chrome
 * Firefox 3+
@@ -319,12 +309,10 @@ Browser support
 * Opera 15+ (with partial support for 12)
 * Android (with fallback)
 
-License
--------
+## License
 
 Holder is provided under the [MIT License](http://opensource.org/licenses/MIT).
 
-Credits
--------
+## Credits
 
 Holder is a project by [Ivan Malopinsky](http://imsky.co).
