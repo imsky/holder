@@ -390,6 +390,8 @@ Holder.js - client side image placeholders
             } else if (App.flags.text.match(flag)) {
                 ret.text = App.flags.text.output(flag);
                 push = true;
+            } else if (App.flags.size.match(flag)) {
+                ret.size = App.flags.size.output(flag);
             } else if (App.flags.random.match(flag)) {
                 if (App.vars.cache.themeKeys == null) {
                     App.vars.cache.themeKeys = Object.keys(options.themes);
@@ -643,9 +645,16 @@ Holder.js - client side image placeholders
      * @param scene Holder scene object
      */
     function buildSceneGraph(scene) {
+        var fontSize = App.defaults.size;
+        if (parseFloat(scene.theme.size)) {
+            fontSize = scene.theme.size;
+        } else if (parseFloat(scene.flags.size)) {
+            fontSize = scene.flags.size;
+        }
+
         scene.font = {
             family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-            size: textSize(scene.width, scene.height, scene.theme.size ? scene.theme.size : App.defaults.size),
+            size: textSize(scene.width, scene.height, fontSize),
             units: scene.theme.units ? scene.theme.units : App.defaults.units,
             weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
         };
@@ -779,7 +788,7 @@ Holder.js - client side image placeholders
         var smallSide = Math.min(height, width);
         var scale = App.defaults.scale;
         var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-        return Math.round(Math.max(fontSize, newHeight));
+        return Math.abs(Math.round(Math.max(fontSize, newHeight)));
     }
 
     /**

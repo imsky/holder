@@ -1,4 +1,3 @@
-performance.html
 benchmark.js
 lodash.js
 require.js
@@ -7,3 +6,5 @@ ua-parser.js
 *.svg
 *.woff
 *.ttf
+*.html
+!index.html
