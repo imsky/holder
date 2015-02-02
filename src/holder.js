@@ -782,13 +782,14 @@ Holder.js - client side image placeholders
      * @param fontSize Requested text size
      */
     function textSize(width, height, fontSize) {
-        height = parseInt(height, 10);
-        width = parseInt(width, 10);
-        var bigSide = Math.max(height, width);
-        var smallSide = Math.min(height, width);
-        var scale = App.defaults.scale;
-        var newHeight = Math.min(smallSide * 0.75, 0.75 * bigSide * scale);
-        return Math.abs(Math.round(Math.max(fontSize, newHeight)));
+        var stageWidth = parseInt(width, 10);
+        var stageHeight = parseInt(height, 10);
+
+        var bigSide = Math.max(stageWidth, stageHeight);
+        var smallSide = Math.min(stageWidth, stageHeight);
+
+        var newHeight = 0.8 * Math.min(smallSide, bigSide * App.defaults.scale);
+        return Math.round(Math.max(fontSize, newHeight));
     }
 
     /**
