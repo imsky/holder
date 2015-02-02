@@ -887,11 +887,10 @@ Holder.js - client side image placeholders
     }
 
     /**
-     * Checks if an element is visible
+     * Returns an element's dimensions if it's visible, `false` otherwise.
      *
      * @private
      * @param el DOM element
-     * @param callback Callback function executed if the element is invisible
      */
     function dimensionCheck(el) {
         var dimensions = {
@@ -929,6 +928,7 @@ Holder.js - client side image placeholders
                 images: renderableImages
             });
         }
+
         global.requestAnimationFrame(visibilityCheck);
     }
 
