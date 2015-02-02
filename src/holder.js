@@ -813,7 +813,7 @@ Holder.js - client side image placeholders
                 var dimensions = dimensionCheck(el);
                 if (dimensions) {
                     if (!el.holderData.resizeUpdate) {
-                        return;
+                        continue;
                     }
 
                     if (flags.fluid && flags.auto) {

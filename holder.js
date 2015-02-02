@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.5.0-pre+1ors3
+Version 2.5.0-pre+1oxd2
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://imsky.github.io/holder
@@ -765,6 +765,7 @@ Holder.js - client side image placeholders
                 push = true;
             } else if (App.flags.size.match(flag)) {
                 ret.size = App.flags.size.output(flag);
+                push = true;
             } else if (App.flags.random.match(flag)) {
                 if (App.vars.cache.themeKeys == null) {
                     App.vars.cache.themeKeys = Object.keys(options.themes);
@@ -1148,7 +1149,7 @@ Holder.js - client side image placeholders
 
     /**
      * Adaptive text sizing function
-     * 
+     *
      * @private
      * @param width Parent width
      * @param height Parent height
@@ -1185,7 +1186,7 @@ Holder.js - client side image placeholders
                 var dimensions = dimensionCheck(el);
                 if (dimensions) {
                     if (!el.holderData.resizeUpdate) {
-                        return;
+                        continue;
                     }
 
                     if (flags.fluid && flags.auto) {
@@ -1259,11 +1260,10 @@ Holder.js - client side image placeholders
     }
 
     /**
-     * Checks if an element is visible
+     * Returns an element's dimensions if it's visible, `false` otherwise.
      *
      * @private
      * @param el DOM element
-     * @param callback Callback function executed if the element is invisible
      */
     function dimensionCheck(el) {
         var dimensions = {
@@ -1301,6 +1301,7 @@ Holder.js - client side image placeholders
                 images: renderableImages
             });
         }
+
         global.requestAnimationFrame(visibilityCheck);
     }
 
