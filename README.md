@@ -12,7 +12,7 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 * [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
 * [jsDelivr](http://www.jsdelivr.com): <http://www.jsdelivr.com/#!holder>
 * [Rails Assets](https://rails-assets.org): `gem 'rails-assets-holderjs'`
-* [Meteor](http://atmospherejs.com/): `mrt add holder`
+* [Meteor](http://atmospherejs.com/): `meteor add holder`
 * [Composer](https://packagist.org/): `php composer.phar update imsky/holder`
 * [NuGet](http://www.nuget.org/): `Install-Package Holder.js`
 
