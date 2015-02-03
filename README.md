@@ -187,8 +187,6 @@ Specifying a dimension in percentages creates a fluid placeholder that responds 
 
 By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, set the ``textmode`` flag to ``literal`` like so: `holder.js/100%x75/textmode:literal`.
 
-Fluid placeholders need to be visible in order to work. In cases when a placeholder is not visible, the `Holder.invisibleErrorFn` function is called, which takes the callee function as an argument and returns a function that takes the placeholder element as an argument. This function by default throws an exception, however its behavior can and should be overridden by the user.
-
 ## Automatically sized placeholders
 
 If you'd like to avoid Holder enforcing an image size, use the ``auto`` flag like so:
