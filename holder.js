@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.5.0-pre+1oxd2
+Version 2.5.0+1qnmg
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://imsky.github.io/holder
@@ -380,7 +380,7 @@ Holder.js - client side image placeholders
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var NODE_TYPE_COMMENT = 8;
     var document = global.document;
-    var version = '2.5.0-pre';
+    var version = '2.5.0';
     var generatorComment = '\n' +
         'Created with Holder.js ' + version + '.\n' +
         'Learn more at http://holderjs.com\n' +
