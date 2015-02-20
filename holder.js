@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.5.1+2mdfl
+Version 2.5.2+2mg3u
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -388,7 +388,7 @@ Holder.js - client side image placeholders
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var NODE_TYPE_COMMENT = 8;
     var document = global.document;
-    var version = '2.5.1';
+    var version = '2.5.2';
     var generatorComment = '\n' +
         'Created with Holder.js ' + version + '.\n' +
         'Learn more at http://holderjs.com\n' +
@@ -1132,7 +1132,8 @@ Holder.js - client side image placeholders
             }
 
             holderTextGroup.moveTo(
-                (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
+                (scene.width - holderTextGroup.width) / 2,
+                (scene.height - holderTextGroup.height) / 2,
                 null);
 
             //If the text exceeds vertical space, move it down so the first line is visible
@@ -1146,7 +1147,8 @@ Holder.js - client side image placeholders
             holderTextGroup.add(line);
 
             holderTextGroup.moveTo(
-                (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
+                (scene.width - tpdata.boundingBox.width) / 2,
+                (scene.height - tpdata.boundingBox.height) / 2,
                 null);
         }
 
@@ -1384,8 +1386,7 @@ Holder.js - client side image placeholders
                     'style': cssProps({
                         'font-weight': htgProps.font.weight,
                         'font-size': htgProps.font.size + htgProps.font.units,
-                        'font-family': htgProps.font.family,
-                        'dominant-baseline': 'middle'
+                        'font-family': htgProps.font.family
                     })
                 });
 
@@ -1485,6 +1486,7 @@ Holder.js - client side image placeholders
 
         return function(sceneGraph, renderSettings) {
             var root = sceneGraph.root;
+
             var holderURL = renderSettings.holderSettings.flags.holderURL;
             var commentNode = document.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
 
@@ -1506,14 +1508,17 @@ Holder.js - client side image placeholders
             var textGroup = root.children.holderTextGroup;
             var tgProps = textGroup.properties;
             var textGroupEl = newEl('g', SVG_NS);
+            var tpdata = textGroup.textPositionData;
             svg.appendChild(textGroupEl);
+
+            textGroup.y += tpdata.boundingBox.height * 0.8;
 
             for (var lineKey in textGroup.children) {
                 var line = textGroup.children[lineKey];
                 for (var wordKey in line.children) {
                     var word = line.children[wordKey];
                     var x = textGroup.x + line.x + word.x;
-                    var y = textGroup.y + line.y + word.y + (textGroup.properties.leading / 2);
+                    var y = textGroup.y + line.y + word.y;
 
                     var textEl = newEl('text', SVG_NS);
                     var textNode = document.createTextNode(null);
@@ -1525,8 +1530,7 @@ Holder.js - client side image placeholders
                             'fill': tgProps.fill,
                             'font-weight': tgProps.font.weight,
                             'font-family': tgProps.font.family + ', monospace',
-                            'font-size': tgProps.font.size + tgProps.font.units,
-                            'dominant-baseline': 'central'
+                            'font-size': tgProps.font.size + tgProps.font.units
                         })
                     });
 
