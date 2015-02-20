@@ -1,10 +1,10 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.5.0+1qnmg
+Version 2.5.1+2mdfl
 © 2015 Ivan Malopinsky - http://imsky.co
 
-Site:     http://imsky.github.io/holder
+Site:     http://holderjs.com
 Issues:   https://github.com/imsky/holder/issues
 License:  http://opensource.org/licenses/MIT
 
@@ -317,10 +317,10 @@ if (!window.requestAnimationFrame) {
 	  // window.requestAnimationFrame
 	  global.requestAnimationFrame = function (callback) {
 		  return webkitRequestAnimationFrame(function () {
-			  callback(performance.now());
+			  callback(global.performance.now());
 		  });
 	  };
-	  
+
 	  // window.cancelAnimationFrame
 	  global.cancelAnimationFrame = webkitCancelAnimationFrame;
 	}(this));
@@ -330,13 +330,21 @@ if (!window.requestAnimationFrame) {
 	  // window.requestAnimationFrame
 	  global.requestAnimationFrame = function (callback) {
 		  return mozRequestAnimationFrame(function () {
-			  callback(performance.now());
+			  callback(global.performance.now());
 		  });
 	  };
 
 	  // window.cancelAnimationFrame
 	  global.cancelAnimationFrame = mozCancelAnimationFrame;
 	}(this));
+  } else {
+	(function (global) {
+	  global.requestAnimationFrame = function (callback) {
+		return global.setTimeout(callback, 1000 / 60);
+	  }
+
+	  global.cancelAnimationFrame = global.clearTimeout;
+	})(this);
   }
 }
 (function (global, factory) {
@@ -380,7 +388,7 @@ Holder.js - client side image placeholders
     var SVG_NS = 'http://www.w3.org/2000/svg';
     var NODE_TYPE_COMMENT = 8;
     var document = global.document;
-    var version = '2.5.0';
+    var version = '2.5.1';
     var generatorComment = '\n' +
         'Created with Holder.js ' + version + '.\n' +
         'Learn more at http://holderjs.com\n' +

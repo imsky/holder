@@ -145,10 +145,10 @@ if (!window.requestAnimationFrame) {
 	  // window.requestAnimationFrame
 	  global.requestAnimationFrame = function (callback) {
 		  return webkitRequestAnimationFrame(function () {
-			  callback(performance.now());
+			  callback(global.performance.now());
 		  });
 	  };
-	  
+
 	  // window.cancelAnimationFrame
 	  global.cancelAnimationFrame = webkitCancelAnimationFrame;
 	}(this));
@@ -158,12 +158,20 @@ if (!window.requestAnimationFrame) {
 	  // window.requestAnimationFrame
 	  global.requestAnimationFrame = function (callback) {
 		  return mozRequestAnimationFrame(function () {
-			  callback(performance.now());
+			  callback(global.performance.now());
 		  });
 	  };
 
 	  // window.cancelAnimationFrame
 	  global.cancelAnimationFrame = mozCancelAnimationFrame;
 	}(this));
+  } else {
+	(function (global) {
+	  global.requestAnimationFrame = function (callback) {
+		return global.setTimeout(callback, 1000 / 60);
+	  }
+
+	  global.cancelAnimationFrame = global.clearTimeout;
+	})(this);
   }
 }

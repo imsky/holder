@@ -5,6 +5,7 @@ var header = require('gulp-header');
 var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
 var gulputil = require('gulp-util');
+var replace = require('gulp-replace');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -44,6 +45,7 @@ gulp.task('todo', function(){
 gulp.task('scripts', ['jshint'], function () {
 	return gulp.src(paths.scripts)
 		.pipe(concat("holder.js"))
+		.pipe(replace('%version%', pkg.version))
 		.pipe(gulp.dest("./"));
 });
 
