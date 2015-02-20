@@ -102,12 +102,12 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 <link href="http://.../font-awesome.css" rel="stylesheet" class="holderjs">
 </head>
 <body>
-<object data="holder.js/300x200/font:FontAwesome"></object>
+<object data-src="holder.js/300x200/font:FontAwesome"></object>
 ```
 
 **Important:** When testing locally, font URLs must have a `http` or `https` protocol defined.
 
-`<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified.
+`<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified. As with `<img>` placeholders, the `data-src` attribute is more reliable than the `data` attribute.
 
 
 ## Customizing themes
