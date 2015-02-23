@@ -281,22 +281,7 @@ Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-wi
 
 ## Using with Angular.js
 
-You can use Holder in Angular projects with the following JS and HTML code (by [Nick Clark](https://github.com/NickClark)):
-
-```js
-angular.module('MyModule').directive('myHolder', function() {
-  return {
-    link: function(scope, element, attrs) {
-      attrs.$set('data-src', attrs.myHolder);
-      Holder.run({images:element[0]});
-    }
-  };
-});
-```
-
-```html
-<img my-holder="holder.js/200x300">
-```
+You can use Holder in Angular projects with [ng-holder](https://github.com/joshvillbrandt/ng-holder).
 
 ## Browser support
 
