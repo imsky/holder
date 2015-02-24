@@ -619,6 +619,7 @@ Holder.js - client side image placeholders
                     if (image == null) {
                         throw 'Holder: couldn\'t render placeholder';
                     }
+                    //todo: refactor this code into a function
                     if (el.nodeName.toLowerCase() === 'img') {
                         setAttr(el, {
                             'src': image
@@ -634,6 +635,7 @@ Holder.js - client side image placeholders
                 }, 100);
             }
         }
+        //todo: account for re-rendering
         setAttr(el, {
             'data-holder-rendered': true
         });
@@ -1259,37 +1261,6 @@ Holder.js - client side image placeholders
             svgCSS = serializer.serializeToString(xml);
         }
 
-        /*
-
-		//External stylesheets: <link> method
-		if (renderSettings.svgLinkStylesheet) {
-
-			defs.removeChild(defs.firstChild);
-			for (i = 0; i < stylesheets.length; i++) {
-				var link = document.createElementNS('http://www.w3.org/1999/xhtml', 'link');
-				link.setAttribute('href', stylesheets[i]);
-				link.setAttribute('rel', 'stylesheet');
-				link.setAttribute('type', 'text/css');
-				defs.appendChild(link);
-			}
-		}
-
-		//External stylesheets: <style> and @import method
-		if (renderSettings.svgImportStylesheet) {
-			var style = document.createElementNS(SVG_NS, 'style');
-			var styleText = [];
-
-			for (i = 0; i < stylesheets.length; i++) {
-				styleText.push('@import url(' + stylesheets[i] + ');');
-			}
-
-			var styleTextNode = document.createTextNode(styleText.join('\n'));
-			style.appendChild(styleTextNode);
-			defs.appendChild(style);
-		}
-
-		*/
-
         var svgText = serializer.serializeToString(svg);
         svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
         return svgCSS + svgText;
@@ -1478,21 +1449,6 @@ Holder.js - client side image placeholders
                         throw 'SceneGraph: child with that name already exists: ' + name;
                     }
                 }
-                /*,	// probably unnecessary in Holder
-				remove: function(name){
-					if(this.children[name] == null){
-						throw 'SceneGraph: child with that name doesn\'t exist: '+name;
-					}
-					else{
-						child.parent = null;
-						delete this.children[name];
-					}
-				},
-				removeAll: function(){
-					for(var child in this.children){
-						this.remove(child);
-					}
-				}*/
         });
 
         var RootNode = augment(SceneNode, function(uber) {
