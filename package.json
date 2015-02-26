@@ -1,6 +1,6 @@
 {
   "name": "Holder",
-  "version": "2.5.2",
+  "version": "2.6.0-pre",
   "summary": "client side image placeholders",
   "description": "Holder uses SVG to render image placeholders entirely in browser.",
   "author": {
@@ -38,6 +38,7 @@
     "gulp-todo": "^0.3.8",
     "gulp-uglifyjs": "^0.4.4",
     "gulp-util": "~3",
+    "gulp-webpack": "^1.3.0",
     "moment": "^2.6.0"
   }
 }

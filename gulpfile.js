@@ -6,6 +6,7 @@ var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
 var gulputil = require('gulp-util');
 var replace = require('gulp-replace');
+var webpack = require('gulp-webpack');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -26,30 +27,39 @@ function generateBuild(){
 
 var build = generateBuild();
 
-var paths = {
-	scripts: ["src/ondomready.js", "src/polyfills.js", "src/augment.js", "src/holder.js"]
-}
-
 gulp.task('jshint', function () {
-	return gulp.src(paths.scripts[paths.scripts.length - 1])
+	return gulp.src('src/**/*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
 });
 
 gulp.task('todo', function(){
-	return gulp.src(paths.scripts)
+	return gulp.src('src/holder.js')
 		.pipe(todo())
 		.pipe(gulp.dest('./'));
 });
 
-gulp.task('scripts', ['jshint'], function () {
-	return gulp.src(paths.scripts)
-		.pipe(concat("holder.js"))
+gulp.task('build', ['jshint'], function () {
+	return gulp.src('src/holder.js')
 		.pipe(replace('%version%', pkg.version))
-		.pipe(gulp.dest("./"));
+		.pipe(webpack({
+			output: {
+				library: 'Holder',
+				filename: 'holder.js',
+				libraryTarget: 'umd'
+			}
+		}))
+		.pipe(gulp.dest('./'));
 });
 
-gulp.task('minify', ['scripts'], function () {
+gulp.task('bundle', ['build'], function () {
+	return gulp.src(['src/polyfills.js', 'holder.js'])
+		.pipe(concat('holder.js'))
+		.pipe(gulp.dest('./'));
+		
+});
+
+gulp.task('minify', ['bundle'], function () {
 	return gulp.src("holder.js")
 		.pipe(uglify("holder.min.js"))
 		.pipe(gulp.dest("./"));
@@ -66,10 +76,10 @@ gulp.task('banner', ['minify'], function () {
 });
 
 gulp.task('watch', function(){
-	gulp.watch(paths.scripts, ['default']);
+	gulp.watch('src/*.js', ['default']);
 });
 
-gulp.task('default', ['todo', 'jshint', 'scripts', 'minify', 'banner'], function(){
+gulp.task('default', ['todo', 'bundle', 'minify', 'banner'], function(){
 	gulputil.log("Finished build "+build);
 	build = generateBuild();
 });
