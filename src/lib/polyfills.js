@@ -51,7 +51,7 @@ if (!Object.keys) {
 
 //https://github.com/inexorabletash/polyfill/blob/master/web.js
 (function (global) {
-  var B64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   global.atob = global.atob || function (input) {
     input = String(input);
     var position = 0,
@@ -60,8 +60,8 @@ if (!Object.keys) {
 
     input = input.replace(/\s/g, '');
     if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
-    if ((input.length % 4) === 1) { throw Error("InvalidCharacterError"); }
-    if (/[^+/0-9A-Za-z]/.test(input)) { throw Error("InvalidCharacterError"); }
+    if ((input.length % 4) === 1) { throw Error('InvalidCharacterError'); }
+    if (/[^+/0-9A-Za-z]/.test(input)) { throw Error('InvalidCharacterError'); }
 
     while (position < input.length) {
       n = B64_ALPHABET.indexOf(input.charAt(position));
@@ -97,7 +97,7 @@ if (!Object.keys) {
         o1, o2, o3,
         e1, e2, e3, e4;
 
-    if (/[^\x00-\xFF]/.test(input)) { throw Error("InvalidCharacterError"); }
+    if (/[^\x00-\xFF]/.test(input)) { throw Error('InvalidCharacterError'); }
 
     while (position < input.length) {
       o1 = input.charCodeAt(position++);
@@ -133,7 +133,7 @@ if (!Object.prototype.hasOwnProperty){
     Object.prototype.hasOwnProperty = function(prop) {
 		var proto = this.__proto__ || this.constructor.prototype;
 		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
-	}
+	};
     /*jshint +W001, +W103 */
 }
 
@@ -169,7 +169,7 @@ if (!window.requestAnimationFrame) {
 	(function (global) {
 	  global.requestAnimationFrame = function (callback) {
 		return global.setTimeout(callback, 1000 / 60);
-	  }
+	  };
 
 	  global.cancelAnimationFrame = global.clearTimeout;
 	})(this);
