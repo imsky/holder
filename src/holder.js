@@ -3,13 +3,20 @@ Holder.js - client side image placeholders
 © 2012-2015 Ivan Malopinsky - http://imsky.co
 */
 
+//Libraries and functions
+
 var onDomReady = require('./lib/ondomready');
-var augment = require('./lib/augment');
+
+var SceneGraph = require('./scenegraph');
+var utils = require('./utils');
+
+var extend = utils.extend;
+var cssProps = utils.cssProps;
+var encodeHtmlEntity = utils.encodeHtmlEntity;
 
 //Constants and definitions
 var SVG_NS = 'http://www.w3.org/2000/svg';
 var NODE_TYPE_COMMENT = 8;
-var document = global.document;
 var version = '%version%';
 var generatorComment = '\n' +
     'Created with Holder.js ' + version + '.\n' +
@@ -1270,45 +1277,6 @@ function serializeSVG(svg, engineSettings) {
 }
 
 /**
- * Shallow object clone and merge
- *
- * @param a Object A
- * @param b Object B
- * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
- */
-function extend(a, b) {
-    var c = {};
-    for (var x in a) {
-        if (a.hasOwnProperty(x)) {
-            c[x] = a[x];
-        }
-    }
-    if (b != null) {
-        for (var y in b) {
-            if (b.hasOwnProperty(y)) {
-                c[y] = b[y];
-            }
-        }
-    }
-    return c;
-}
-
-/**
- * Takes a k/v list of CSS properties and returns a rule
- *
- * @param props CSS properties object
- */
-function cssProps(props) {
-    var ret = [];
-    for (var p in props) {
-        if (props.hasOwnProperty(p)) {
-            ret.push(p + ':' + props[p]);
-        }
-    }
-    return ret.join(';');
-}
-
-/**
  * Prevents a function from being called too often, waits until a timer elapses to call it again
  *
  * @param fn Function to call
@@ -1372,25 +1340,6 @@ function imageExists(src, callback) {
 }
 
 /**
- * Encodes HTML entities in a string
- *
- * @param str Input string
- */
-function encodeHtmlEntity(str) {
-    var buf = [];
-    var charCode = 0;
-    for (var i = str.length - 1; i >= 0; i--) {
-        charCode = str.charCodeAt(i);
-        if (charCode > 128) {
-            buf.unshift(['&#', charCode, ';'].join(''));
-        } else {
-            buf.unshift(str[i]);
-        }
-    }
-    return buf.join('');
-}
-
-/**
  * Decodes HTML entities in a stirng
  *
  * @param str Input string
@@ -1400,106 +1349,6 @@ function decodeHtmlEntity(str) {
         return String.fromCharCode(dec);
     });
 }
-
-// Scene graph
-
-var SceneGraph = function(sceneProperties) {
-    var nodeCount = 1;
-
-    //todo: move merge to helpers section
-    function merge(parent, child) {
-        for (var prop in child) {
-            parent[prop] = child[prop];
-        }
-        return parent;
-    }
-
-    var SceneNode = augment.defclass({
-        constructor: function(name) {
-            nodeCount++;
-            this.parent = null;
-            this.children = {};
-            this.id = nodeCount;
-            this.name = 'n' + nodeCount;
-            if (name != null) {
-                this.name = name;
-            }
-            this.x = 0;
-            this.y = 0;
-            this.z = 0;
-            this.width = 0;
-            this.height = 0;
-        },
-        resize: function(width, height) {
-            if (width != null) {
-                this.width = width;
-            }
-            if (height != null) {
-                this.height = height;
-            }
-        },
-        moveTo: function(x, y, z) {
-            this.x = x != null ? x : this.x;
-            this.y = y != null ? y : this.y;
-            this.z = z != null ? z : this.z;
-        },
-        add: function(child) {
-                var name = child.name;
-                if (this.children[name] == null) {
-                    this.children[name] = child;
-                    child.parent = this;
-                } else {
-                    throw 'SceneGraph: child with that name already exists: ' + name;
-                }
-            }
-    });
-
-    var RootNode = augment(SceneNode, function(uber) {
-        this.constructor = function() {
-            uber.constructor.call(this, 'root');
-            this.properties = sceneProperties;
-        };
-    });
-
-    var Shape = augment(SceneNode, function(uber) {
-        function constructor(name, props) {
-            uber.constructor.call(this, name);
-            this.properties = {
-                fill: '#000'
-            };
-            if (props != null) {
-                merge(this.properties, props);
-            } else if (name != null && typeof name !== 'string') {
-                throw 'SceneGraph: invalid node name';
-            }
-        }
-
-        this.Group = augment.extend(this, {
-            constructor: constructor,
-            type: 'group'
-        });
-
-        this.Rect = augment.extend(this, {
-            constructor: constructor,
-            type: 'rect'
-        });
-
-        this.Text = augment.extend(this, {
-            constructor: function(text) {
-                constructor.call(this);
-                this.properties.text = text;
-            },
-            type: 'text'
-        });
-    });
-
-    var root = new RootNode();
-
-    this.Shape = Shape;
-    this.root = root;
-
-    return this;
-};
 
 //Set up flags
 

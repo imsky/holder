@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+3ftg1
+Version 2.6.0-pre+3fu8n
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -70,13 +70,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	© 2012-2015 Ivan Malopinsky - http://imsky.co
 	*/
 
+	//Libraries and functions
+
 	var onDomReady = __webpack_require__(1);
-	var augment = __webpack_require__(2);
+
+	var SceneGraph = __webpack_require__(2);
+	var utils = __webpack_require__(3);
+
+	var extend = utils.extend;
+	var cssProps = utils.cssProps;
+	var encodeHtmlEntity = utils.encodeHtmlEntity;
 
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
-	var document = global.document;
 	var version = '%version%';
 	var generatorComment = '\n' +
 	    'Created with Holder.js ' + version + '.\n' +
@@ -1337,45 +1344,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Shallow object clone and merge
-	 *
-	 * @param a Object A
-	 * @param b Object B
-	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
-	 */
-	function extend(a, b) {
-	    var c = {};
-	    for (var x in a) {
-	        if (a.hasOwnProperty(x)) {
-	            c[x] = a[x];
-	        }
-	    }
-	    if (b != null) {
-	        for (var y in b) {
-	            if (b.hasOwnProperty(y)) {
-	                c[y] = b[y];
-	            }
-	        }
-	    }
-	    return c;
-	}
-
-	/**
-	 * Takes a k/v list of CSS properties and returns a rule
-	 *
-	 * @param props CSS properties object
-	 */
-	function cssProps(props) {
-	    var ret = [];
-	    for (var p in props) {
-	        if (props.hasOwnProperty(p)) {
-	            ret.push(p + ':' + props[p]);
-	        }
-	    }
-	    return ret.join(';');
-	}
-
-	/**
 	 * Prevents a function from being called too often, waits until a timer elapses to call it again
 	 *
 	 * @param fn Function to call
@@ -1439,25 +1407,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Encodes HTML entities in a string
-	 *
-	 * @param str Input string
-	 */
-	function encodeHtmlEntity(str) {
-	    var buf = [];
-	    var charCode = 0;
-	    for (var i = str.length - 1; i >= 0; i--) {
-	        charCode = str.charCodeAt(i);
-	        if (charCode > 128) {
-	            buf.unshift(['&#', charCode, ';'].join(''));
-	        } else {
-	            buf.unshift(str[i]);
-	        }
-	    }
-	    return buf.join('');
-	}
-
-	/**
 	 * Decodes HTML entities in a stirng
 	 *
 	 * @param str Input string
@@ -1467,106 +1416,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return String.fromCharCode(dec);
 	    });
 	}
-
-	// Scene graph
-
-	var SceneGraph = function(sceneProperties) {
-	    var nodeCount = 1;
-
-	    //todo: move merge to helpers section
-	    function merge(parent, child) {
-	        for (var prop in child) {
-	            parent[prop] = child[prop];
-	        }
-	        return parent;
-	    }
-
-	    var SceneNode = augment.defclass({
-	        constructor: function(name) {
-	            nodeCount++;
-	            this.parent = null;
-	            this.children = {};
-	            this.id = nodeCount;
-	            this.name = 'n' + nodeCount;
-	            if (name != null) {
-	                this.name = name;
-	            }
-	            this.x = 0;
-	            this.y = 0;
-	            this.z = 0;
-	            this.width = 0;
-	            this.height = 0;
-	        },
-	        resize: function(width, height) {
-	            if (width != null) {
-	                this.width = width;
-	            }
-	            if (height != null) {
-	                this.height = height;
-	            }
-	        },
-	        moveTo: function(x, y, z) {
-	            this.x = x != null ? x : this.x;
-	            this.y = y != null ? y : this.y;
-	            this.z = z != null ? z : this.z;
-	        },
-	        add: function(child) {
-	                var name = child.name;
-	                if (this.children[name] == null) {
-	                    this.children[name] = child;
-	                    child.parent = this;
-	                } else {
-	                    throw 'SceneGraph: child with that name already exists: ' + name;
-	                }
-	            }
-	    });
-
-	    var RootNode = augment(SceneNode, function(uber) {
-	        this.constructor = function() {
-	            uber.constructor.call(this, 'root');
-	            this.properties = sceneProperties;
-	        };
-	    });
-
-	    var Shape = augment(SceneNode, function(uber) {
-	        function constructor(name, props) {
-	            uber.constructor.call(this, name);
-	            this.properties = {
-	                fill: '#000'
-	            };
-	            if (props != null) {
-	                merge(this.properties, props);
-	            } else if (name != null && typeof name !== 'string') {
-	                throw 'SceneGraph: invalid node name';
-	            }
-	        }
-
-	        this.Group = augment.extend(this, {
-	            constructor: constructor,
-	            type: 'group'
-	        });
-
-	        this.Rect = augment.extend(this, {
-	            constructor: constructor,
-	            type: 'rect'
-	        });
-
-	        this.Text = augment.extend(this, {
-	            constructor: function(text) {
-	                constructor.call(this);
-	                this.properties.text = text;
-	            },
-	            type: 'text'
-	        });
-	    });
-
-	    var root = new RootNode();
-
-	    this.Shape = Shape;
-	    this.root = root;
-
-	    return this;
-	};
 
 	//Set up flags
 
@@ -1673,152 +1522,320 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	//Lazy loading fix for Firefox < 3.6
 	//http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
-	    if (document.readyState == null && document.addEventListener) {
-	        document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
-	            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
-	            document.readyState = "complete";
-	        }, false);
-	        document.readyState = "loading";
-	    }
+	if (document.readyState == null && document.addEventListener) {
+	    document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
+	        document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+	        document.readyState = "complete";
+	    }, false);
+	    document.readyState = "loading";
+	}
 
-	    var doc = win.document,
-	        docElem = doc.documentElement,
+	var doc = win.document,
+	    docElem = doc.documentElement,
 
-	        LOAD = "load",
-	        FALSE = false,
-	        ONLOAD = "on"+LOAD,
-	        COMPLETE = "complete",
-	        READYSTATE = "readyState",
-	        ATTACHEVENT = "attachEvent",
-	        DETACHEVENT = "detachEvent",
-	        ADDEVENTLISTENER = "addEventListener",
-	        DOMCONTENTLOADED = "DOMContentLoaded",
-	        ONREADYSTATECHANGE = "onreadystatechange",
-	        REMOVEEVENTLISTENER = "removeEventListener",
+	    LOAD = "load",
+	    FALSE = false,
+	    ONLOAD = "on"+LOAD,
+	    COMPLETE = "complete",
+	    READYSTATE = "readyState",
+	    ATTACHEVENT = "attachEvent",
+	    DETACHEVENT = "detachEvent",
+	    ADDEVENTLISTENER = "addEventListener",
+	    DOMCONTENTLOADED = "DOMContentLoaded",
+	    ONREADYSTATECHANGE = "onreadystatechange",
+	    REMOVEEVENTLISTENER = "removeEventListener",
 
-	        // W3C Event model
-	        w3c = ADDEVENTLISTENER in doc,
-	        top = FALSE,
+	    // W3C Event model
+	    w3c = ADDEVENTLISTENER in doc,
+	    _top = FALSE,
 
-	        // isReady: Is the DOM ready to be used? Set to true once it occurs.
-	        isReady = FALSE,
+	    // isReady: Is the DOM ready to be used? Set to true once it occurs.
+	    isReady = FALSE,
 
-	        // Callbacks pending execution until DOM is ready
-	        callbacks = [];
+	    // Callbacks pending execution until DOM is ready
+	    callbacks = [];
 
-	    // Handle when the DOM is ready
-	    function ready( fn ) {
-	        if ( !isReady ) {
+	// Handle when the DOM is ready
+	function ready( fn ) {
+	    if ( !isReady ) {
 
-	            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-	            if ( !doc.body ) {
-	                return defer( ready );
-	            }
+	        // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+	        if ( !doc.body ) {
+	            return defer( ready );
+	        }
 
-	            // Remember that the DOM is ready
-	            isReady = true;
+	        // Remember that the DOM is ready
+	        isReady = true;
 
-	            // Execute all callbacks
-	            while ( fn = callbacks.shift() ) {
-	                defer( fn );
-	            }
+	        // Execute all callbacks
+	        while ( fn = callbacks.shift() ) {
+	            defer( fn );
 	        }
 	    }
+	}
 
-	    // The ready event handler
-	    function completed( event ) {
-	        // readyState === "complete" is good enough for us to call the dom ready in oldIE
-	        if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
-	            detach();
-	            ready();
-	        }
+	// The ready event handler
+	function completed( event ) {
+	    // readyState === "complete" is good enough for us to call the dom ready in oldIE
+	    if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
+	        detach();
+	        ready();
 	    }
+	}
 
-	    // Clean-up method for dom ready events
-	    function detach() {
-	        if ( w3c ) {
-	            doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-	            win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
-	        } else {
-	            doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
-	            win[DETACHEVENT]( ONLOAD, completed );
-	        }
-	    }
-
-	    // Defers a function, scheduling it to run after the current call stack has cleared.
-	    function defer( fn, wait ) {
-	        // Allow 0 to be passed
-	        setTimeout( fn, +wait >= 0 ? wait : 1 );
-	    }
-
-	    // Attach the listeners:
-
-	    // Catch cases where onDomReady is called after the browser event has already occurred.
-	    // we once tried to use readyState "interactive" here, but it caused issues like the one
-	    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
-	    if ( doc[READYSTATE] === COMPLETE ) {
-	        // Handle it asynchronously to allow scripts the opportunity to delay ready
-	        defer( ready );
-
-	    // Standards-based browsers support DOMContentLoaded
-	    } else if ( w3c ) {
-	        // Use the handy event callback
-	        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-
-	        // A fallback to window.onload, that will always work
-	        win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
-
-	    // If IE event model is used
+	// Clean-up method for dom ready events
+	function detach() {
+	    if ( w3c ) {
+	        doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+	        win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
 	    } else {
-	        // Ensure firing before onload, maybe late but safe also for iframes
-	        doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
+	        doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
+	        win[DETACHEVENT]( ONLOAD, completed );
+	    }
+	}
 
-	        // A fallback to window.onload, that will always work
-	        win[ATTACHEVENT]( ONLOAD, completed );
+	// Defers a function, scheduling it to run after the current call stack has cleared.
+	function defer( fn, wait ) {
+	    // Allow 0 to be passed
+	    setTimeout( fn, +wait >= 0 ? wait : 1 );
+	}
 
-	        // If IE and not a frame
-	        // continually check to see if the document is ready
-	        try {
-	            top = win.frameElement == null && docElem;
-	        } catch(e) {}
+	// Attach the listeners:
 
-	        if ( top && top.doScroll ) {
-	            (function doScrollCheck() {
-	                if ( !isReady ) {
-	                    try {
-	                        // Use the trick by Diego Perini
-	                        // http://javascript.nwbox.com/IEContentLoaded/
-	                        top.doScroll("left");
-	                    } catch(e) {
-	                        return defer( doScrollCheck, 50 );
-	                    }
+	// Catch cases where onDomReady is called after the browser event has already occurred.
+	// we once tried to use readyState "interactive" here, but it caused issues like the one
+	// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+	if ( doc[READYSTATE] === COMPLETE ) {
+	    // Handle it asynchronously to allow scripts the opportunity to delay ready
+	    defer( ready );
 
-	                    // detach all dom ready events
-	                    detach();
+	// Standards-based browsers support DOMContentLoaded
+	} else if ( w3c ) {
+	    // Use the handy event callback
+	    doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
 
-	                    // and execute any waiting functions
-	                    ready();
+	    // A fallback to window.onload, that will always work
+	    win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
+
+	// If IE event model is used
+	} else {
+	    // Ensure firing before onload, maybe late but safe also for iframes
+	    doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
+
+	    // A fallback to window.onload, that will always work
+	    win[ATTACHEVENT]( ONLOAD, completed );
+
+	    // If IE and not a frame
+	    // continually check to see if the document is ready
+	    try {
+	        _top = win.frameElement == null && docElem;
+	    } catch(e) {}
+
+	    if ( _top && _top.doScroll ) {
+	        (function doScrollCheck() {
+	            if ( !isReady ) {
+	                try {
+	                    // Use the trick by Diego Perini
+	                    // http://javascript.nwbox.com/IEContentLoaded/
+	                    _top.doScroll("left");
+	                } catch(e) {
+	                    return defer( doScrollCheck, 50 );
 	                }
-	            })();
-	        }
-	    }
 
-	    function onDomReady( fn ) {
-	        // If DOM is ready, execute the function (async), otherwise wait
-	        isReady ? defer( fn ) : callbacks.push( fn );
-	    }
+	                // detach all dom ready events
+	                detach();
 
-	    // Add version
-	    onDomReady.version = "1.4.0";
-	    // Add method to check if DOM is ready
-	    onDomReady.isReady = function(){
-	        return isReady;
-	    };
+	                // and execute any waiting functions
+	                ready();
+	            }
+	        })();
+	    }
+	}
+
+	function onDomReady( fn ) {
+	    // If DOM is ready, execute the function (async), otherwise wait
+	    isReady ? defer( fn ) : callbacks.push( fn );
+	}
+
+	// Add version
+	onDomReady.version = "1.4.0";
+	// Add method to check if DOM is ready
+	onDomReady.isReady = function(){
+	    return isReady;
+	};
 
 	module.exports = onDomReady;
 
 /***/ },
 /* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var augment = __webpack_require__(4);
+
+	var SceneGraph = function(sceneProperties) {
+	    var nodeCount = 1;
+
+	    //todo: move merge to helpers section
+	    function merge(parent, child) {
+	        for (var prop in child) {
+	            parent[prop] = child[prop];
+	        }
+	        return parent;
+	    }
+
+	    var SceneNode = augment.defclass({
+	        constructor: function(name) {
+	            nodeCount++;
+	            this.parent = null;
+	            this.children = {};
+	            this.id = nodeCount;
+	            this.name = 'n' + nodeCount;
+	            if (name != null) {
+	                this.name = name;
+	            }
+	            this.x = 0;
+	            this.y = 0;
+	            this.z = 0;
+	            this.width = 0;
+	            this.height = 0;
+	        },
+	        resize: function(width, height) {
+	            if (width != null) {
+	                this.width = width;
+	            }
+	            if (height != null) {
+	                this.height = height;
+	            }
+	        },
+	        moveTo: function(x, y, z) {
+	            this.x = x != null ? x : this.x;
+	            this.y = y != null ? y : this.y;
+	            this.z = z != null ? z : this.z;
+	        },
+	        add: function(child) {
+	                var name = child.name;
+	                if (this.children[name] == null) {
+	                    this.children[name] = child;
+	                    child.parent = this;
+	                } else {
+	                    throw 'SceneGraph: child with that name already exists: ' + name;
+	                }
+	            }
+	    });
+
+	    var RootNode = augment(SceneNode, function(uber) {
+	        this.constructor = function() {
+	            uber.constructor.call(this, 'root');
+	            this.properties = sceneProperties;
+	        };
+	    });
+
+	    var Shape = augment(SceneNode, function(uber) {
+	        function constructor(name, props) {
+	            uber.constructor.call(this, name);
+	            this.properties = {
+	                fill: '#000'
+	            };
+	            if (props != null) {
+	                merge(this.properties, props);
+	            } else if (name != null && typeof name !== 'string') {
+	                throw 'SceneGraph: invalid node name';
+	            }
+	        }
+
+	        this.Group = augment.extend(this, {
+	            constructor: constructor,
+	            type: 'group'
+	        });
+
+	        this.Rect = augment.extend(this, {
+	            constructor: constructor,
+	            type: 'rect'
+	        });
+
+	        this.Text = augment.extend(this, {
+	            constructor: function(text) {
+	                constructor.call(this);
+	                this.properties.text = text;
+	            },
+	            type: 'text'
+	        });
+	    });
+
+	    var root = new RootNode();
+
+	    this.Shape = Shape;
+	    this.root = root;
+
+	    return this;
+	};
+
+	module.exports = SceneGraph;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Shallow object clone and merge
+	 *
+	 * @param a Object A
+	 * @param b Object B
+	 * @returns {Object} New object with all of A's properties, and all of B's properties, overwriting A's properties
+	 */
+	exports.extend = function(a, b) {
+	    var c = {};
+	    for (var x in a) {
+	        if (a.hasOwnProperty(x)) {
+	            c[x] = a[x];
+	        }
+	    }
+	    if (b != null) {
+	        for (var y in b) {
+	            if (b.hasOwnProperty(y)) {
+	                c[y] = b[y];
+	            }
+	        }
+	    }
+	    return c;
+	};
+
+	/**
+	 * Takes a k/v list of CSS properties and returns a rule
+	 *
+	 * @param props CSS properties object
+	 */
+	exports.cssProps = function(props) {
+	    var ret = [];
+	    for (var p in props) {
+	        if (props.hasOwnProperty(p)) {
+	            ret.push(p + ':' + props[p]);
+	        }
+	    }
+	    return ret.join(';');
+	};
+
+	/**
+	 * Encodes HTML entities in a string
+	 *
+	 * @param str Input string
+	 */
+	exports.encodeHtmlEntity = function(str) {
+	    var buf = [];
+	    var charCode = 0;
+	    for (var i = str.length - 1; i >= 0; i--) {
+	        charCode = str.charCodeAt(i);
+	        if (charCode > 128) {
+	            buf.unshift(['&#', charCode, ';'].join(''));
+	        } else {
+	            buf.unshift(str[i]);
+	        }
+	    }
+	    return buf.join('');
+	};
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Factory = function () {};
