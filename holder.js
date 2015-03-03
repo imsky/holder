@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+3fu8n
+Version 2.6.0-pre+3fwlb
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -71,15 +71,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	//Libraries and functions
-
 	var onDomReady = __webpack_require__(1);
-
 	var SceneGraph = __webpack_require__(2);
 	var utils = __webpack_require__(3);
 
 	var extend = utils.extend;
 	var cssProps = utils.cssProps;
 	var encodeHtmlEntity = utils.encodeHtmlEntity;
+	var decodeHtmlEntity = utils.decodeHtmlEntity;
+	var imageExists = utils.imageExists;
+	var getNodeArray = utils.getNodeArray;
+	var dimensionCheck = utils.dimensionCheck;
 
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -968,26 +970,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Returns an element's dimensions if it's visible, `false` otherwise.
-	 *
-	 * @private
-	 * @param el DOM element
-	 */
-	function dimensionCheck(el) {
-	    var dimensions = {
-	        height: el.clientHeight,
-	        width: el.clientWidth
-	    };
-
-	    if (dimensions.height && dimensions.width) {
-	        return dimensions;
-	    }
-	    else{
-	        return false;
-	    }
-	}
-
-	/**
 	 * Iterates through all current invisible images, and if they're visible, renders them and removes them from further checks. Runs every animation frame.
 	 *
 	 * @private
@@ -1366,57 +1348,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 
-	/**
-	 * Converts a value into an array of DOM nodes
-	 *
-	 * @param val A string, a NodeList, a Node, or an HTMLCollection
-	 */
-	function getNodeArray(val) {
-	    var retval = null;
-	    if (typeof(val) == 'string') {
-	        retval = document.querySelectorAll(val);
-	    } else if (global.NodeList && val instanceof global.NodeList) {
-	        retval = val;
-	    } else if (global.Node && val instanceof global.Node) {
-	        retval = [val];
-	    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
-	        retval = val;
-	    } else if (val instanceof Array) {
-	        retval = val;
-	    } else if (val === null) {
-	        retval = [];
-	    }
-	    return retval;
-	}
-
-	/**
-	 * Checks if an image exists
-	 *
-	 * @param src URL of image
-	 * @param callback Callback to call once image status has been found
-	 */
-	function imageExists(src, callback) {
-	    var image = new Image();
-	    image.onerror = function() {
-	        callback.call(this, false);
-	    };
-	    image.onload = function() {
-	        callback.call(this, true);
-	    };
-	    image.src = src;
-	}
-
-	/**
-	 * Decodes HTML entities in a stirng
-	 *
-	 * @param str Input string
-	 */
-	function decodeHtmlEntity(str) {
-	    return str.replace(/&#(\d+);/g, function(match, dec) {
-	        return String.fromCharCode(dec);
-	    });
-	}
-
 	//Set up flags
 
 	for (var flag in App.flags) {
@@ -1487,23 +1418,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	//Starts checking for invisible placeholders
 	startVisibilityCheck();
 
-	onDomReady(function() {
-	    if (!App.vars.preempted) {
-	        Holder.run();
-	    }
-	    if (global.addEventListener) {
-	        global.addEventListener('resize', resizeEvent, false);
-	        global.addEventListener('orientationchange', resizeEvent, false);
-	    } else {
-	        global.attachEvent('onresize', resizeEvent);
-	    }
-
-	    if (typeof global.Turbolinks == 'object') {
-	        global.document.addEventListener('page:change', function() {
+	if(onDomReady){
+	    onDomReady(function() {
+	        if (!App.vars.preempted) {
 	            Holder.run();
-	        });
-	    }
-	});
+	        }
+	        if (global.addEventListener) {
+	            global.addEventListener('resize', resizeEvent, false);
+	            global.addEventListener('orientationchange', resizeEvent, false);
+	        } else {
+	            global.attachEvent('onresize', resizeEvent);
+	        }
+	    
+	        if (typeof global.Turbolinks == 'object') {
+	            global.document.addEventListener('page:change', function() {
+	                Holder.run();
+	            });
+	        }
+	    });
+	}
 
 	module.exports = Holder;
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
@@ -1518,153 +1451,155 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Specially modified to work with Holder.js
 	 */
 
-	var win = window;
-
-	//Lazy loading fix for Firefox < 3.6
-	//http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
-	if (document.readyState == null && document.addEventListener) {
-	    document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
-	        document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
-	        document.readyState = "complete";
-	    }, false);
-	    document.readyState = "loading";
-	}
-
-	var doc = win.document,
-	    docElem = doc.documentElement,
-
-	    LOAD = "load",
-	    FALSE = false,
-	    ONLOAD = "on"+LOAD,
-	    COMPLETE = "complete",
-	    READYSTATE = "readyState",
-	    ATTACHEVENT = "attachEvent",
-	    DETACHEVENT = "detachEvent",
-	    ADDEVENTLISTENER = "addEventListener",
-	    DOMCONTENTLOADED = "DOMContentLoaded",
-	    ONREADYSTATECHANGE = "onreadystatechange",
-	    REMOVEEVENTLISTENER = "removeEventListener",
-
-	    // W3C Event model
-	    w3c = ADDEVENTLISTENER in doc,
-	    _top = FALSE,
-
-	    // isReady: Is the DOM ready to be used? Set to true once it occurs.
-	    isReady = FALSE,
-
-	    // Callbacks pending execution until DOM is ready
-	    callbacks = [];
-
-	// Handle when the DOM is ready
-	function ready( fn ) {
-	    if ( !isReady ) {
-
-	        // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
-	        if ( !doc.body ) {
-	            return defer( ready );
-	        }
-
-	        // Remember that the DOM is ready
-	        isReady = true;
-
-	        // Execute all callbacks
-	        while ( fn = callbacks.shift() ) {
-	            defer( fn );
-	        }
+	function _onDomReady(win) {
+	    //Lazy loading fix for Firefox < 3.6
+	    //http://webreflection.blogspot.com/2009/11/195-chars-to-help-lazy-loading.html
+	    if (document.readyState == null && document.addEventListener) {
+	        document.addEventListener("DOMContentLoaded", function DOMContentLoaded() {
+	            document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+	            document.readyState = "complete";
+	        }, false);
+	        document.readyState = "loading";
 	    }
-	}
-
-	// The ready event handler
-	function completed( event ) {
-	    // readyState === "complete" is good enough for us to call the dom ready in oldIE
-	    if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
-	        detach();
-	        ready();
-	    }
-	}
-
-	// Clean-up method for dom ready events
-	function detach() {
-	    if ( w3c ) {
-	        doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-	        win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
-	    } else {
-	        doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
-	        win[DETACHEVENT]( ONLOAD, completed );
-	    }
-	}
-
-	// Defers a function, scheduling it to run after the current call stack has cleared.
-	function defer( fn, wait ) {
-	    // Allow 0 to be passed
-	    setTimeout( fn, +wait >= 0 ? wait : 1 );
-	}
-
-	// Attach the listeners:
-
-	// Catch cases where onDomReady is called after the browser event has already occurred.
-	// we once tried to use readyState "interactive" here, but it caused issues like the one
-	// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
-	if ( doc[READYSTATE] === COMPLETE ) {
-	    // Handle it asynchronously to allow scripts the opportunity to delay ready
-	    defer( ready );
-
-	// Standards-based browsers support DOMContentLoaded
-	} else if ( w3c ) {
-	    // Use the handy event callback
-	    doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
-
-	    // A fallback to window.onload, that will always work
-	    win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
-
-	// If IE event model is used
-	} else {
-	    // Ensure firing before onload, maybe late but safe also for iframes
-	    doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
-
-	    // A fallback to window.onload, that will always work
-	    win[ATTACHEVENT]( ONLOAD, completed );
-
-	    // If IE and not a frame
-	    // continually check to see if the document is ready
-	    try {
-	        _top = win.frameElement == null && docElem;
-	    } catch(e) {}
-
-	    if ( _top && _top.doScroll ) {
-	        (function doScrollCheck() {
-	            if ( !isReady ) {
-	                try {
-	                    // Use the trick by Diego Perini
-	                    // http://javascript.nwbox.com/IEContentLoaded/
-	                    _top.doScroll("left");
-	                } catch(e) {
-	                    return defer( doScrollCheck, 50 );
-	                }
-
-	                // detach all dom ready events
-	                detach();
-
-	                // and execute any waiting functions
-	                ready();
+	    
+	    var doc = win.document,
+	        docElem = doc.documentElement,
+	    
+	        LOAD = "load",
+	        FALSE = false,
+	        ONLOAD = "on"+LOAD,
+	        COMPLETE = "complete",
+	        READYSTATE = "readyState",
+	        ATTACHEVENT = "attachEvent",
+	        DETACHEVENT = "detachEvent",
+	        ADDEVENTLISTENER = "addEventListener",
+	        DOMCONTENTLOADED = "DOMContentLoaded",
+	        ONREADYSTATECHANGE = "onreadystatechange",
+	        REMOVEEVENTLISTENER = "removeEventListener",
+	    
+	        // W3C Event model
+	        w3c = ADDEVENTLISTENER in doc,
+	        _top = FALSE,
+	    
+	        // isReady: Is the DOM ready to be used? Set to true once it occurs.
+	        isReady = FALSE,
+	    
+	        // Callbacks pending execution until DOM is ready
+	        callbacks = [];
+	    
+	    // Handle when the DOM is ready
+	    function ready( fn ) {
+	        if ( !isReady ) {
+	    
+	            // Make sure body exists, at least, in case IE gets a little overzealous (ticket #5443).
+	            if ( !doc.body ) {
+	                return defer( ready );
 	            }
-	        })();
+	    
+	            // Remember that the DOM is ready
+	            isReady = true;
+	    
+	            // Execute all callbacks
+	            while ( fn = callbacks.shift() ) {
+	                defer( fn );
+	            }
+	        }
 	    }
+	    
+	    // The ready event handler
+	    function completed( event ) {
+	        // readyState === "complete" is good enough for us to call the dom ready in oldIE
+	        if ( w3c || event.type === LOAD || doc[READYSTATE] === COMPLETE ) {
+	            detach();
+	            ready();
+	        }
+	    }
+	    
+	    // Clean-up method for dom ready events
+	    function detach() {
+	        if ( w3c ) {
+	            doc[REMOVEEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+	            win[REMOVEEVENTLISTENER]( LOAD, completed, FALSE );
+	        } else {
+	            doc[DETACHEVENT]( ONREADYSTATECHANGE, completed );
+	            win[DETACHEVENT]( ONLOAD, completed );
+	        }
+	    }
+	    
+	    // Defers a function, scheduling it to run after the current call stack has cleared.
+	    function defer( fn, wait ) {
+	        // Allow 0 to be passed
+	        setTimeout( fn, +wait >= 0 ? wait : 1 );
+	    }
+	    
+	    // Attach the listeners:
+	    
+	    // Catch cases where onDomReady is called after the browser event has already occurred.
+	    // we once tried to use readyState "interactive" here, but it caused issues like the one
+	    // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
+	    if ( doc[READYSTATE] === COMPLETE ) {
+	        // Handle it asynchronously to allow scripts the opportunity to delay ready
+	        defer( ready );
+	    
+	    // Standards-based browsers support DOMContentLoaded
+	    } else if ( w3c ) {
+	        // Use the handy event callback
+	        doc[ADDEVENTLISTENER]( DOMCONTENTLOADED, completed, FALSE );
+	    
+	        // A fallback to window.onload, that will always work
+	        win[ADDEVENTLISTENER]( LOAD, completed, FALSE );
+	    
+	    // If IE event model is used
+	    } else {
+	        // Ensure firing before onload, maybe late but safe also for iframes
+	        doc[ATTACHEVENT]( ONREADYSTATECHANGE, completed );
+	    
+	        // A fallback to window.onload, that will always work
+	        win[ATTACHEVENT]( ONLOAD, completed );
+	    
+	        // If IE and not a frame
+	        // continually check to see if the document is ready
+	        try {
+	            _top = win.frameElement == null && docElem;
+	        } catch(e) {}
+	    
+	        if ( _top && _top.doScroll ) {
+	            (function doScrollCheck() {
+	                if ( !isReady ) {
+	                    try {
+	                        // Use the trick by Diego Perini
+	                        // http://javascript.nwbox.com/IEContentLoaded/
+	                        _top.doScroll("left");
+	                    } catch(e) {
+	                        return defer( doScrollCheck, 50 );
+	                    }
+	    
+	                    // detach all dom ready events
+	                    detach();
+	    
+	                    // and execute any waiting functions
+	                    ready();
+	                }
+	            })();
+	        }
+	    }
+	    
+	    function onDomReady( fn ) {
+	        // If DOM is ready, execute the function (async), otherwise wait
+	        isReady ? defer( fn ) : callbacks.push( fn );
+	    }
+	    
+	    // Add version
+	    onDomReady.version = "1.4.0";
+	    // Add method to check if DOM is ready
+	    onDomReady.isReady = function(){
+	        return isReady;
+	    };
+
+	    return onDomReady;
 	}
 
-	function onDomReady( fn ) {
-	    // If DOM is ready, execute the function (async), otherwise wait
-	    isReady ? defer( fn ) : callbacks.push( fn );
-	}
-
-	// Add version
-	onDomReady.version = "1.4.0";
-	// Add method to check if DOM is ready
-	onDomReady.isReady = function(){
-	    return isReady;
-	};
-
-	module.exports = onDomReady;
+	module.exports = typeof window !== "undefined" && _onDomReady(window);
 
 /***/ },
 /* 2 */
@@ -1776,7 +1711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/**
+	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Shallow object clone and merge
 	 *
 	 * @param a Object A
@@ -1833,6 +1768,80 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return buf.join('');
 	};
+
+
+	/**
+	 * Converts a value into an array of DOM nodes
+	 *
+	 * @param val A string, a NodeList, a Node, or an HTMLCollection
+	 */
+	exports.getNodeArray = function(val) {
+	    var retval = null;
+	    if (typeof(val) == 'string') {
+	        retval = document.querySelectorAll(val);
+	    } else if (global.NodeList && val instanceof global.NodeList) {
+	        retval = val;
+	    } else if (global.Node && val instanceof global.Node) {
+	        retval = [val];
+	    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+	        retval = val;
+	    } else if (val instanceof Array) {
+	        retval = val;
+	    } else if (val === null) {
+	        retval = [];
+	    }
+	    return retval;
+	};
+
+	/**
+	 * Checks if an image exists
+	 *
+	 * @param src URL of image
+	 * @param callback Callback to call once image status has been found
+	 */
+	exports.imageExists = function(src, callback) {
+	    var image = new Image();
+	    image.onerror = function() {
+	        callback.call(this, false);
+	    };
+	    image.onload = function() {
+	        callback.call(this, true);
+	    };
+	    image.src = src;
+	};
+
+	/**
+	 * Decodes HTML entities in a stirng
+	 *
+	 * @param str Input string
+	 */
+	exports.decodeHtmlEntity = function(str) {
+	    return str.replace(/&#(\d+);/g, function(match, dec) {
+	        return String.fromCharCode(dec);
+	    });
+	};
+
+
+	/**
+	 * Returns an element's dimensions if it's visible, `false` otherwise.
+	 *
+	 * @private
+	 * @param el DOM element
+	 */
+	exports.dimensionCheck = function(el) {
+	    var dimensions = {
+	        height: el.clientHeight,
+	        width: el.clientWidth
+	    };
+
+	    if (dimensions.height && dimensions.width) {
+	        return dimensions;
+	    }
+	    else{
+	        return false;
+	    }
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 4 */

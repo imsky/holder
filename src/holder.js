@@ -4,15 +4,17 @@ Holder.js - client side image placeholders
 */
 
 //Libraries and functions
-
 var onDomReady = require('./lib/ondomready');
-
 var SceneGraph = require('./scenegraph');
 var utils = require('./utils');
 
 var extend = utils.extend;
 var cssProps = utils.cssProps;
 var encodeHtmlEntity = utils.encodeHtmlEntity;
+var decodeHtmlEntity = utils.decodeHtmlEntity;
+var imageExists = utils.imageExists;
+var getNodeArray = utils.getNodeArray;
+var dimensionCheck = utils.dimensionCheck;
 
 //Constants and definitions
 var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -901,26 +903,6 @@ function setInitialDimensions(el) {
 }
 
 /**
- * Returns an element's dimensions if it's visible, `false` otherwise.
- *
- * @private
- * @param el DOM element
- */
-function dimensionCheck(el) {
-    var dimensions = {
-        height: el.clientHeight,
-        width: el.clientWidth
-    };
-
-    if (dimensions.height && dimensions.width) {
-        return dimensions;
-    }
-    else{
-        return false;
-    }
-}
-
-/**
  * Iterates through all current invisible images, and if they're visible, renders them and removes them from further checks. Runs every animation frame.
  *
  * @private
@@ -1299,57 +1281,6 @@ function resizeEvent() {
     });
 }
 
-/**
- * Converts a value into an array of DOM nodes
- *
- * @param val A string, a NodeList, a Node, or an HTMLCollection
- */
-function getNodeArray(val) {
-    var retval = null;
-    if (typeof(val) == 'string') {
-        retval = document.querySelectorAll(val);
-    } else if (global.NodeList && val instanceof global.NodeList) {
-        retval = val;
-    } else if (global.Node && val instanceof global.Node) {
-        retval = [val];
-    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
-        retval = val;
-    } else if (val instanceof Array) {
-        retval = val;
-    } else if (val === null) {
-        retval = [];
-    }
-    return retval;
-}
-
-/**
- * Checks if an image exists
- *
- * @param src URL of image
- * @param callback Callback to call once image status has been found
- */
-function imageExists(src, callback) {
-    var image = new Image();
-    image.onerror = function() {
-        callback.call(this, false);
-    };
-    image.onload = function() {
-        callback.call(this, true);
-    };
-    image.src = src;
-}
-
-/**
- * Decodes HTML entities in a stirng
- *
- * @param str Input string
- */
-function decodeHtmlEntity(str) {
-    return str.replace(/&#(\d+);/g, function(match, dec) {
-        return String.fromCharCode(dec);
-    });
-}
-
 //Set up flags
 
 for (var flag in App.flags) {
@@ -1420,22 +1351,24 @@ App.vars = {
 //Starts checking for invisible placeholders
 startVisibilityCheck();
 
-onDomReady(function() {
-    if (!App.vars.preempted) {
-        Holder.run();
-    }
-    if (global.addEventListener) {
-        global.addEventListener('resize', resizeEvent, false);
-        global.addEventListener('orientationchange', resizeEvent, false);
-    } else {
-        global.attachEvent('onresize', resizeEvent);
-    }
-
-    if (typeof global.Turbolinks == 'object') {
-        global.document.addEventListener('page:change', function() {
+if(onDomReady){
+    onDomReady(function() {
+        if (!App.vars.preempted) {
             Holder.run();
-        });
-    }
-});
+        }
+        if (global.addEventListener) {
+            global.addEventListener('resize', resizeEvent, false);
+            global.addEventListener('orientationchange', resizeEvent, false);
+        } else {
+            global.attachEvent('onresize', resizeEvent);
+        }
+    
+        if (typeof global.Turbolinks == 'object') {
+            global.document.addEventListener('page:change', function() {
+                Holder.run();
+            });
+        }
+    });
+}
 
 module.exports = Holder;

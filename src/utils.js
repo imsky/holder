@@ -55,3 +55,76 @@ exports.encodeHtmlEntity = function(str) {
     }
     return buf.join('');
 };
+
+
+/**
+ * Converts a value into an array of DOM nodes
+ *
+ * @param val A string, a NodeList, a Node, or an HTMLCollection
+ */
+exports.getNodeArray = function(val) {
+    var retval = null;
+    if (typeof(val) == 'string') {
+        retval = document.querySelectorAll(val);
+    } else if (global.NodeList && val instanceof global.NodeList) {
+        retval = val;
+    } else if (global.Node && val instanceof global.Node) {
+        retval = [val];
+    } else if (global.HTMLCollection && val instanceof global.HTMLCollection) {
+        retval = val;
+    } else if (val instanceof Array) {
+        retval = val;
+    } else if (val === null) {
+        retval = [];
+    }
+    return retval;
+};
+
+/**
+ * Checks if an image exists
+ *
+ * @param src URL of image
+ * @param callback Callback to call once image status has been found
+ */
+exports.imageExists = function(src, callback) {
+    var image = new Image();
+    image.onerror = function() {
+        callback.call(this, false);
+    };
+    image.onload = function() {
+        callback.call(this, true);
+    };
+    image.src = src;
+};
+
+/**
+ * Decodes HTML entities in a stirng
+ *
+ * @param str Input string
+ */
+exports.decodeHtmlEntity = function(str) {
+    return str.replace(/&#(\d+);/g, function(match, dec) {
+        return String.fromCharCode(dec);
+    });
+};
+
+
+/**
+ * Returns an element's dimensions if it's visible, `false` otherwise.
+ *
+ * @private
+ * @param el DOM element
+ */
+exports.dimensionCheck = function(el) {
+    var dimensions = {
+        height: el.clientHeight,
+        width: el.clientWidth
+    };
+
+    if (dimensions.height && dimensions.width) {
+        return dimensions;
+    }
+    else{
+        return false;
+    }
+};
