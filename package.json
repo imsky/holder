@@ -1,5 +1,5 @@
 {
-  "name": "Holder",
+  "name": "holderjs",
   "version": "2.6.0-pre",
   "summary": "client side image placeholders",
   "description": "Holder uses SVG to render image placeholders entirely in browser.",
