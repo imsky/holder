@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+3fwlb
+Version 2.6.0-pre+3fxop
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -380,7 +380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        size: {
 	            regex: /size\:(\d+)/,
-	            output: function(val){
+	            output: function(val) {
 	                return this.regex.exec(val)[1];
 	            }
 	        }
@@ -832,8 +832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        holderTextGroup.moveTo(
-	            (scene.width - holderTextGroup.width) / 2,
-	            (scene.height - holderTextGroup.height) / 2,
+	            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
 	            null);
 
 	        //If the text exceeds vertical space, move it down so the first line is visible
@@ -847,8 +846,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        holderTextGroup.add(line);
 
 	        holderTextGroup.moveTo(
-	            (scene.width - tpdata.boundingBox.width) / 2,
-	            (scene.height - tpdata.boundingBox.height) / 2,
+	            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
 	            null);
 	    }
 
@@ -1418,7 +1416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//Starts checking for invisible placeholders
 	startVisibilityCheck();
 
-	if(onDomReady){
+	if (onDomReady) {
 	    onDomReady(function() {
 	        if (!App.vars.preempted) {
 	            Holder.run();
@@ -1429,7 +1427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else {
 	            global.attachEvent('onresize', resizeEvent);
 	        }
-	    
+
 	        if (typeof global.Turbolinks == 'object') {
 	            global.document.addEventListener('page:change', function() {
 	                Holder.run();
@@ -1439,6 +1437,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = Holder;
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },

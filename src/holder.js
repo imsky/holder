@@ -313,7 +313,7 @@ var App = {
         },
         size: {
             regex: /size\:(\d+)/,
-            output: function(val){
+            output: function(val) {
                 return this.regex.exec(val)[1];
             }
         }
@@ -765,8 +765,7 @@ function buildSceneGraph(scene) {
         }
 
         holderTextGroup.moveTo(
-            (scene.width - holderTextGroup.width) / 2,
-            (scene.height - holderTextGroup.height) / 2,
+            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
             null);
 
         //If the text exceeds vertical space, move it down so the first line is visible
@@ -780,8 +779,7 @@ function buildSceneGraph(scene) {
         holderTextGroup.add(line);
 
         holderTextGroup.moveTo(
-            (scene.width - tpdata.boundingBox.width) / 2,
-            (scene.height - tpdata.boundingBox.height) / 2,
+            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
             null);
     }
 
@@ -1351,7 +1349,7 @@ App.vars = {
 //Starts checking for invisible placeholders
 startVisibilityCheck();
 
-if(onDomReady){
+if (onDomReady) {
     onDomReady(function() {
         if (!App.vars.preempted) {
             Holder.run();
@@ -1362,7 +1360,7 @@ if(onDomReady){
         } else {
             global.attachEvent('onresize', resizeEvent);
         }
-    
+
         if (typeof global.Turbolinks == 'object') {
             global.document.addEventListener('page:change', function() {
                 Holder.run();

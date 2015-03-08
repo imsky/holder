@@ -7,13 +7,14 @@ var todo = require('gulp-todo');
 var gulputil = require('gulp-util');
 var replace = require('gulp-replace');
 var webpack = require('gulp-webpack');
+var beautify = require('gulp-jsbeautifier');
 
 var moment = require('moment');
 var pkg = require('./package.json');
 
 var banner =
 	'/*!\n\n' +
-	'<%= pkg.name %> - <%= pkg.summary %>\nVersion <%= pkg.version %>+<%= build %>\n' +
+	'<%= pkg.officialName %> - <%= pkg.summary %>\nVersion <%= pkg.version %>+<%= build %>\n' +
 	'\u00A9 <%= year %> <%= pkg.author.name %> - <%= pkg.author.url %>\n\n' +
 	'Site:     <%= pkg.homepage %>\n'+
 	'Issues:   <%= pkg.bugs.url %>\n' +
@@ -27,7 +28,7 @@ function generateBuild(){
 
 var build = generateBuild();
 
-gulp.task('jshint', function () {
+gulp.task('jshint', ['beautify'], function () {
 	return gulp.src('src/**/*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
@@ -73,6 +74,12 @@ gulp.task('banner', ['minify'], function () {
 			build: build
 		}))
 		.pipe(gulp.dest("./"));
+});
+
+gulp.task('beautify', function () {
+	return gulp.src(['src/holder.js'])
+		.pipe(beautify())
+		.pipe(gulp.dest('src/'));
 });
 
 gulp.task('watch', function(){
