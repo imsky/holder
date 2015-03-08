@@ -8,6 +8,7 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 
 ## Installing
 
+* [npm](http://npmjs.com/): `npm install holderjs`
 * [Bower](http://bower.io/): `bower install holderjs`
 * [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
 * [jsDelivr](http://www.jsdelivr.com): <http://www.jsdelivr.com/#!holder>
