@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+3fxop
+Version 2.6.0-pre+3hl5m
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -1647,14 +1647,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.z = z != null ? z : this.z;
 	        },
 	        add: function(child) {
-	                var name = child.name;
-	                if (this.children[name] == null) {
-	                    this.children[name] = child;
-	                    child.parent = this;
-	                } else {
-	                    throw 'SceneGraph: child with that name already exists: ' + name;
-	                }
+	            var name = child.name;
+	            if (this.children[name] == null) {
+	                this.children[name] = child;
+	                child.parent = this;
+	            } else {
+	                throw 'SceneGraph: child with that name already exists: ' + name;
 	            }
+	        }
 	    });
 
 	    var RootNode = augment(SceneNode, function(uber) {
@@ -1705,6 +1705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = SceneGraph;
+
 
 /***/ },
 /* 3 */
@@ -1810,7 +1811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Decodes HTML entities in a stirng
+	 * Decodes HTML entities in a string
 	 *
 	 * @param str Input string
 	 */
@@ -1835,11 +1836,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (dimensions.height && dimensions.width) {
 	        return dimensions;
-	    }
-	    else{
+	    } else {
 	        return false;
 	    }
 	};
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },

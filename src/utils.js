@@ -98,7 +98,7 @@ exports.imageExists = function(src, callback) {
 };
 
 /**
- * Decodes HTML entities in a stirng
+ * Decodes HTML entities in a string
  *
  * @param str Input string
  */
@@ -123,8 +123,7 @@ exports.dimensionCheck = function(el) {
 
     if (dimensions.height && dimensions.width) {
         return dimensions;
-    }
-    else{
+    } else {
         return false;
     }
 };

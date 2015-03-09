@@ -77,7 +77,7 @@ gulp.task('banner', ['minify'], function () {
 });
 
 gulp.task('beautify', function () {
-	return gulp.src(['src/holder.js'])
+	return gulp.src(['src/*.js'])
 		.pipe(beautify())
 		.pipe(gulp.dest('src/'));
 });

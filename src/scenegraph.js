@@ -41,14 +41,14 @@ var SceneGraph = function(sceneProperties) {
             this.z = z != null ? z : this.z;
         },
         add: function(child) {
-                var name = child.name;
-                if (this.children[name] == null) {
-                    this.children[name] = child;
-                    child.parent = this;
-                } else {
-                    throw 'SceneGraph: child with that name already exists: ' + name;
-                }
+            var name = child.name;
+            if (this.children[name] == null) {
+                this.children[name] = child;
+                child.parent = this;
+            } else {
+                throw 'SceneGraph: child with that name already exists: ' + name;
             }
+        }
     });
 
     var RootNode = augment(SceneNode, function(uber) {
