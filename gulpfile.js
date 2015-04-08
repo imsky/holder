@@ -42,7 +42,6 @@ gulp.task('todo', function(){
 
 gulp.task('build', ['jshint'], function () {
 	return gulp.src('src/holder.js')
-		.pipe(replace('%version%', pkg.version))
 		.pipe(webpack({
 			output: {
 				library: 'Holder',
@@ -68,6 +67,7 @@ gulp.task('minify', ['bundle'], function () {
 
 gulp.task('banner', ['minify'], function () {
 	return gulp.src(["holder*.js"])
+                .pipe(replace('%version%', pkg.version))
 		.pipe(header(banner, {
 			pkg: pkg,
 			year: moment().format("YYYY"),

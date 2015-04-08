@@ -1089,6 +1089,7 @@ var sgCanvasRenderer = (function() {
 var sgSVGRenderer = (function() {
     //Prevent IE <9 from initializing SVG renderer
     if (!global.XMLSerializer) return;
+    var xml = createXML();
     var svg = initSVG(null, 0, 0);
     var bgEl = newEl('rect', SVG_NS);
     svg.appendChild(bgEl);
@@ -1098,11 +1099,7 @@ var sgSVGRenderer = (function() {
     return function(sceneGraph, renderSettings) {
         var root = sceneGraph.root;
 
-        var holderURL = renderSettings.holderSettings.flags.holderURL;
-        var commentNode = document.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
-
         initSVG(svg, root.properties.width, root.properties.height);
-        svg.insertBefore(commentNode, svg.firstChild);
 
         var groups = svg.querySelectorAll('g');
 
@@ -1110,17 +1107,40 @@ var sgSVGRenderer = (function() {
             groups[i].parentNode.removeChild(groups[i]);
         }
 
+        var holderURL = renderSettings.holderSettings.flags.holderURL;
+        var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
+        var sceneGroupEl = newEl('g', SVG_NS);
+        var textGroup = root.children.holderTextGroup;
+        var tgProps = textGroup.properties;
+        var textGroupEl = newEl('g', SVG_NS);
+        var tpdata = textGroup.textPositionData;
+        var textCSSRule = '#' + holderId + ' text { ' +
+            cssProps({
+                'fill': tgProps.fill,
+                'font-weight': tgProps.font.weight,
+                'font-family': tgProps.font.family + ', monospace',
+                'font-size': tgProps.font.size + tgProps.font.units
+            }) + ' } ';
+        var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
+        var holderCSS = xml.createCDATASection(textCSSRule);
+        var styleEl = svg.querySelector('style');
+
+        setAttr(sceneGroupEl, {
+            id: holderId
+        });
+
+        svg.insertBefore(commentNode, svg.firstChild);
+        styleEl.appendChild(holderCSS);
+
+        sceneGroupEl.appendChild(bgEl);
+        sceneGroupEl.appendChild(textGroupEl);
+        svg.appendChild(sceneGroupEl);
+
         setAttr(bgEl, {
             'width': root.children.holderBg.width,
             'height': root.children.holderBg.height,
             'fill': root.children.holderBg.properties.fill
         });
-
-        var textGroup = root.children.holderTextGroup;
-        var tgProps = textGroup.properties;
-        var textGroupEl = newEl('g', SVG_NS);
-        var tpdata = textGroup.textPositionData;
-        svg.appendChild(textGroupEl);
 
         textGroup.y += tpdata.boundingBox.height * 0.8;
 
@@ -1136,13 +1156,7 @@ var sgSVGRenderer = (function() {
 
                 setAttr(textEl, {
                     'x': x,
-                    'y': y,
-                    'style': cssProps({
-                        'fill': tgProps.fill,
-                        'font-weight': tgProps.font.weight,
-                        'font-family': tgProps.font.family + ', monospace',
-                        'font-size': tgProps.font.size + tgProps.font.units
-                    })
+                    'y': y
                 });
 
                 textNode.nodeValue = word.properties.text;
@@ -1196,11 +1210,21 @@ function setAttr(el, attrs) {
  * @param height Document height
  */
 function initSVG(svg, width, height) {
+    var defs, style;
+
     if (svg == null) {
         svg = newEl('svg', SVG_NS);
-        var defs = newEl('defs', SVG_NS);
+        defs = newEl('defs', SVG_NS);
+        style = newEl('style', SVG_NS);
+        setAttr(style, {
+            'type': 'text/css'
+        });
+        defs.appendChild(style);
         svg.appendChild(defs);
+    } else {
+        style = svg.querySelector('style');
     }
+
     //IE throws an exception if this is set and Chrome requires it to be set
     if (svg.webkitMatchesSelector) {
         svg.setAttribute('xmlns', SVG_NS);
@@ -1212,17 +1236,23 @@ function initSVG(svg, width, height) {
         }
     }
 
+    //Remove CSS
+    while (style.childNodes.length) {
+        style.removeChild(style.childNodes[0]);
+    }
+
     setAttr(svg, {
         'width': width,
         'height': height,
         'viewBox': '0 0 ' + width + ' ' + height,
         'preserveAspectRatio': 'none'
     });
+
     return svg;
 }
 
 /**
- * Generic SVG serialization function
+ * Returns XML processing instructions
  *
  * @private
  * @param svg SVG context
@@ -1233,11 +1263,10 @@ function serializeSVG(svg, engineSettings) {
     var serializer = new XMLSerializer();
     var svgCSS = '';
     var stylesheets = engineSettings.stylesheets;
-    var defs = svg.querySelector('defs');
 
     //External stylesheets: Processing Instruction method
     if (engineSettings.svgXMLStylesheet) {
-        var xml = new DOMParser().parseFromString('<xml />', 'application/xml');
+        var xml = createXML();
         //Add <?xml-stylesheet ?> directives
         for (var i = stylesheets.length - 1; i >= 0; i--) {
             var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
@@ -1254,6 +1283,15 @@ function serializeSVG(svg, engineSettings) {
     var svgText = serializer.serializeToString(svg);
     svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
     return svgCSS + svgText;
+}
+
+/**
+ * Creates a XML document
+ * @private
+ */
+function createXML() {
+    if (!global.DOMParser) return;
+    return new DOMParser().parseFromString('<xml />', 'application/xml');
 }
 
 /**
