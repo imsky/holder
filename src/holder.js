@@ -51,9 +51,9 @@ var Holder = {
         if (node.length) {
             for (var i = 0, l = node.length; i < l; i++) {
                 var img = newEl('img');
-                setAttr(img, {
-                    'data-src': src
-                });
+                var domProps = {};
+                domProps[App.vars.dataAttr] = src;
+                setAttr(img, domProps);
                 node[i].appendChild(img);
             }
         }
@@ -84,10 +84,10 @@ var Holder = {
     run: function(userOptions) {
         userOptions = userOptions || {};
         var engineSettings = {};
+        var options = extend(App.settings, userOptions);
 
         App.vars.preempted = true;
-
-        var options = extend(App.settings, userOptions);
+        App.vars.dataAttr = options.dataAttr || App.vars.dataAttr;
 
         engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
         if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
@@ -161,7 +161,7 @@ var Holder = {
 
             try {
                 objectAttr.data = object.getAttribute('data');
-                objectAttr.dataSrc = object.getAttribute('data-src');
+                objectAttr.dataSrc = object.getAttribute(App.vars.dataAttr);
             } catch (e) {}
 
             var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
@@ -180,7 +180,7 @@ var Holder = {
 
             try {
                 imageAttr.src = image.getAttribute('src');
-                imageAttr.dataSrc = image.getAttribute('data-src');
+                imageAttr.dataSrc = image.getAttribute(App.vars.dataAttr);
                 imageAttr.rendered = image.getAttribute('data-holder-rendered');
             } catch (e) {}
 
@@ -477,9 +477,9 @@ function prepareDOMElement(prepSettings) {
             });
         }
     } else {
-        setAttr(el, {
-            'data-src': holderURL
-        });
+        var domProps = {};
+        domProps[App.vars.dataAttr] = holderURL;
+        setAttr(el, domProps);
     }
 
     flags.theme = theme;
@@ -1313,7 +1313,8 @@ App.vars = {
     invisibleId: 0,
     visibilityCheckStarted: false,
     debounceTimer: null,
-    cache: {}
+    cache: {},
+    dataAttr: 'data-src'
 };
 
 //Pre-flight

@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+3hl5m
+Version 2.6.0-pre+51b90
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -118,9 +118,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (node.length) {
 	            for (var i = 0, l = node.length; i < l; i++) {
 	                var img = newEl('img');
-	                setAttr(img, {
-	                    'data-src': src
-	                });
+	                var domProps = {};
+	                domProps[App.vars.dataAttr] = src;
+	                setAttr(img, domProps);
 	                node[i].appendChild(img);
 	            }
 	        }
@@ -151,10 +151,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    run: function(userOptions) {
 	        userOptions = userOptions || {};
 	        var engineSettings = {};
+	        var options = extend(App.settings, userOptions);
 
 	        App.vars.preempted = true;
-
-	        var options = extend(App.settings, userOptions);
+	        App.vars.dataAttr = options.dataAttr || App.vars.dataAttr;
 
 	        engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
 	        if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
@@ -228,7 +228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            try {
 	                objectAttr.data = object.getAttribute('data');
-	                objectAttr.dataSrc = object.getAttribute('data-src');
+	                objectAttr.dataSrc = object.getAttribute(App.vars.dataAttr);
 	            } catch (e) {}
 
 	            var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
@@ -247,7 +247,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            try {
 	                imageAttr.src = image.getAttribute('src');
-	                imageAttr.dataSrc = image.getAttribute('data-src');
+	                imageAttr.dataSrc = image.getAttribute(App.vars.dataAttr);
 	                imageAttr.rendered = image.getAttribute('data-holder-rendered');
 	            } catch (e) {}
 
@@ -544,9 +544,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    } else {
-	        setAttr(el, {
-	            'data-src': holderURL
-	        });
+	        var domProps = {};
+	        domProps[App.vars.dataAttr] = holderURL;
+	        setAttr(el, domProps);
 	    }
 
 	    flags.theme = theme;
@@ -1380,7 +1380,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    invisibleId: 0,
 	    visibilityCheckStarted: false,
 	    debounceTimer: null,
-	    cache: {}
+	    cache: {},
+	    dataAttr: 'data-src'
 	};
 
 	//Pre-flight
