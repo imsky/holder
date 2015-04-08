@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0-pre+51e75
+Version 2.6.0+51ebp
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -86,7 +86,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
-	var version = '2.6.0-pre';
+	var version = '2.6.0';
 	var generatorComment = '\n' +
 	    'Created with Holder.js ' + version + '.\n' +
 	    'Learn more at http://holderjs.com\n' +
