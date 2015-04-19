@@ -7,6 +7,7 @@ Holder.js - client side image placeholders
 var onDomReady = require('./lib/ondomready');
 var SceneGraph = require('./scenegraph');
 var utils = require('./utils');
+var querystring = require('./lib/querystring');
 
 var extend = utils.extend;
 var cssProps = utils.cssProps;
