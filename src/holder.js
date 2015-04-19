@@ -352,10 +352,10 @@ function parseURL(url, options) {
         instanceOptions: options
     };
 
-    if (!url.match(/([\d]+p?)x([\d]+p?)\?/)) {
-        return parseFlags(url, holder);
-    } else {
+    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
         return parseQueryString(url, holder);
+    } else {
+        return parseFlags(url, holder);
     }
 }
 

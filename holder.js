@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5n1b0
+Version 2.7.0-pre+5n1rl
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -634,10 +634,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        instanceOptions: options
 	    };
 
-	    if (!url.match(/([\d]+p?)x([\d]+p?)\?/)) {
-	        return parseFlags(url, holder);
-	    } else {
+	    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
 	        return parseQueryString(url, holder);
+	    } else {
+	        return parseFlags(url, holder);
 	    }
 	}
 
