@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5n105
+Version 2.7.0-pre+5n1b0
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
