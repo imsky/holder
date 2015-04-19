@@ -10,6 +10,7 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 
 * [npm](http://npmjs.com/): `npm install holderjs`
 * [Bower](http://bower.io/): `bower install holderjs`
+* [RawGit](http://rawgit.com): <https://cdn.rawgit.com/imsky/holder/master/holder.js>
 * [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
 * [jsDelivr](http://www.jsdelivr.com): <http://www.jsdelivr.com/#!holder>
 * [Rails Assets](https://rails-assets.org): `gem 'rails-assets-holderjs'`
