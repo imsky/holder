@@ -133,8 +133,8 @@ exports.dimensionCheck = function(el) {
  * @param val
  */
 exports.truthy = function(val) {
-    if (!!val && typeof val === 'string' && (val === 'yes' || val === '1' || val === 'on' || val === '✓')) {
-        return true;
+    if (typeof val === 'string') {
+        return (val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓');
     }
-    return false;
-}
+    return !!val;
+};
