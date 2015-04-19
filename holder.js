@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5n0n0
+Version 2.7.0-pre+5n105
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -705,6 +705,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (utils.truthy(options.auto)) {
 	            holder.auto = true;
+	        }
+
+	        if (utils.truthy(options.random)) {
+	            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
+	            var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
+	            holder.theme = extend(holder.instanceOptions.themes[_theme], null);
 	        }
 	    }
 
