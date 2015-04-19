@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5mya8
+Version 2.7.0-pre+5mzg9
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -631,20 +631,62 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var holder = {
 	        theme: extend(App.settings.themes.gray, null),
 	        stylesheets: options.stylesheets,
-	        holderURL: [],
 	        instanceOptions: options
 	    };
 
-	    var qsRegex = /([\d+]p?)x([\d+]p?)\?.*/;
-	    if (!url.match(qsRegex)) {
+	    if (!url.match(/([\d]+p?)x([\d]+p?)\?/)) {
 	        return parseFlags(url, holder);
+	    } else {
+	        console.log(arguments);
+	        return parseQueryString(url, holder);
 	    }
+	}
+
+	/**
+	 * Processes a Holder URL and extracts configuration from query string
+	 *
+	 * @private
+	 * @param url URL
+	 * @param holder Staging Holder object
+	 */
+	function parseQueryString(url, holder) {
+	    var parts = url.split('?');
+	    var basics = parts[0].split('/');
+
+	    holder.holderURL = url;
+
+	    var dimensions = basics[1];
+	    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
+
+	    if (!dimensionData) return false;
+
+	    holder.fluid = dimensions.indexOf('p') !== -1;
+
+	    holder.dimensions = {
+	        width: dimensionData[1].replace('p', '%'),
+	        height: dimensionData[2].replace('p', '%')
+	    };
+
+	    if (parts.length === 2) {
+	        var options = querystring.parse(parts[1]);
+
+	        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
+	        }
+
+	        if (options.text) {
+	            holder.text = options.text;
+	        }
+	    }
+
+	    return holder;
 	}
 
 	/**
 	 * Processes a Holder URL and extracts flags
 	 *
 	 * @private
+	 * @deprecated
 	 * @param url URL
 	 * @param holder Staging Holder object
 	 */
@@ -654,6 +696,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
 	    var uriRegex = /%[0-9a-f]{2}/gi;
 	    var options = holder.instanceOptions;
+
+	    holder.holderURL = [];
 
 	    for (var fl = flags.length, j = 0; j < fl; j++) {
 	        var flag = flags[j];

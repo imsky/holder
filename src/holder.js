@@ -352,7 +352,7 @@ function parseURL(url, options) {
         instanceOptions: options
     };
 
-    if (!url.match(/([\d+]p?)x([\d+]p?)\?.*/)) {
+    if (!url.match(/([\d]+p?)x([\d]+p?)\?/)) {
         return parseFlags(url, holder);
     } else {
         return parseQueryString(url, holder);
@@ -367,7 +367,36 @@ function parseURL(url, options) {
  * @param holder Staging Holder object
  */
 function parseQueryString(url, holder) {
-    return false;
+    var parts = url.split('?');
+    var basics = parts[0].split('/');
+
+    holder.holderURL = url;
+
+    var dimensions = basics[1];
+    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
+
+    if (!dimensionData) return false;
+
+    holder.fluid = dimensions.indexOf('p') !== -1;
+
+    holder.dimensions = {
+        width: dimensionData[1].replace('p', '%'),
+        height: dimensionData[2].replace('p', '%')
+    };
+
+    if (parts.length === 2) {
+        var options = querystring.parse(parts[1]);
+
+        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
+        }
+
+        if (options.text) {
+            holder.text = options.text;
+        }
+    }
+
+    return holder;
 }
 
 /**
