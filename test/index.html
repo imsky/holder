@@ -13,7 +13,7 @@
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
 	.thumb.fullpage {float:none;clear:both;width:auto;height:100px;margin:25px}
 	.autosize img {width:100%}
-	#holder1 {background:url('?holder.js/300x200/text:Background%20placeholder/^eee:^222');width:300px;height:200px}
+	#holder1 {background:url('?holder.js/300x200?text=Background%20placeholder&bg=000&fg=fff');width:300px;height:200px}
 </style>
 </head>
 <body>
@@ -110,7 +110,7 @@
 	</div>
 </div>
 <div class="thumb">
-	<div class="holderjs" style="width:300px;height:200px" data-background-src="?holder.js/300x200/#ff8362:#5e422e"></div>
+	<div class="holderjs" style="width:300px;height:200px" data-background-src="?holder.js/300x200?bg=ff8362&fg=5e422e"></div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with <code>data-background-src</code> placeholder
 	</div>
@@ -124,37 +124,38 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="custom.holder/150x100/custom/auto" style="width:300px;height:200px">
+	<img data-src="custom.holder/150x100?theme=custom&auto=yes" style="width:300px;height:200px">
 	<div class="caption">
 		Auto-sized <code>canvas</code> placeholder with custom domain and theme
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/font:Pacifico/#4466ff:#fff/text:Pacifico">
+	<img data-src="holder.js/300x200?font=Pacifico&bg=4466ff&fg=fff&text=Pacifico">
 	<div class="caption">
 		 Placeholder using <span style="font-family:Pacifico">Pacifico</span> font</span>
 	</div>
 </div>
 <div class="thumb">
-	<object data-src="holder.js/300x200/font:Pacifico/#4466ff:#fff/text:Pacifico"></object>
+	<object data-src="holder.js/300x200?font=Pacifico&bg=4466ff&fg=fff&text=Pacifico"></object>
 	<div class="caption">
 		<code>object</code> placeholder using <span style="font-family:Pacifico">Pacifico</span> font</span>
 	</div>
 </div>
 <div class="thumb">
 	<div style="overflow:hidden">
-	<img data-src="holder.js/50x75/sky" style="float:left">
-	<img data-src="holder.js/100x75/vine" style="float:left">
-	<img data-src="holder.js/150x75/lava" style="float:left">
+	<img data-src="holder.js/50x75?theme=sky" style="float:left">
+	<img data-src="holder.js/100x75?theme=vine" style="float:left">
+	<img data-src="holder.js/150x75?theme=lava" style="float:left">
 	</div>
 	<div style="overflow:hidden">
-	<img data-src="holder.js/300x125/industrial" style="float:left">
+	<img data-src="holder.js/300x125?theme=industrial" style="float:left">
 	</div>
 <div class="caption">
 		 Placeholders demonstrating adaptive text size
 	</div>
 </div>
 <div class="thumb">
+        <!-- deprecated -->
 	<div style="height:200px">
 <img data-src="holder.js/100%25x50%25/sky">
 <img data-src="holder.js/100%25x50%25/lava">
@@ -162,7 +163,7 @@
 <div class="caption">Two fluid placeholders in one parent using URI encoding</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/size:40">
+	<img data-src="holder.js/300x200?size=40">
 	<div class="caption">
 		Placeholder with custom font size
 	</div>
@@ -217,7 +218,7 @@ $(function () {
 	});
 });
 
-Holder.addImage("holder.js/300x200/sky", "#thumb1").run();
+Holder.addImage("holder.js/300x200?theme=sky", "#thumb1").run();
 
 Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",

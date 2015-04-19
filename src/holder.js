@@ -416,7 +416,7 @@ function parseQueryString(url, holder) {
         }
 
         if (options.font) {
-            holder.font = options.size;
+            holder.font = options.font;
         }
 
         // Miscellaneous
