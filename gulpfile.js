@@ -28,7 +28,7 @@ function generateBuild(){
 
 var build = generateBuild();
 
-gulp.task('jshint', ['beautify'], function () {
+gulp.task('jshint', function () {
 	return gulp.src('src/**/*.js')
 		.pipe(jshint())
 		.pipe(jshint.reporter('default'));
@@ -40,7 +40,7 @@ gulp.task('todo', function(){
 		.pipe(gulp.dest('./'));
 });
 
-gulp.task('build', ['jshint'], function () {
+gulp.task('build', ['beautify'], function () {
 	return gulp.src('src/holder.js')
 		.pipe(webpack({
 			output: {
@@ -75,7 +75,7 @@ gulp.task('banner', ['minify'], function () {
 		.pipe(gulp.dest("./"));
 });
 
-gulp.task('beautify', function () {
+gulp.task('beautify', ['jshint'], function () {
 	return gulp.src(['src/*.js'])
 		.pipe(beautify())
 		.pipe(gulp.dest('src/'));
