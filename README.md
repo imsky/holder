@@ -36,66 +36,37 @@ The above tag will render as a placeholder 200 pixels wide and 300 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
+## Options
+
+**Note:** URL flags have been deprecated. For flag usage see the [2.6 documentation](https://github.com/imsky/holder/blob/v2.6.0/README.md).
+
+Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
+
+| Option                       | Property | Example                            |
+|------------------------------|----------|------------------------------------|
+| Theme                        | theme    | `holder.js/300x200?theme=sky`      |
+| Random theme                 | random   | `holder.js/300x200?random=yes`     |
+| Background color             | bg       | `holder.js/300x200?bg=2a2025`      |
+| Text                         | text     | `holder.js/300x200?text=Hello`     |
+| Text color                   | fg       | `holder.js/300x200?fg=ffffff`      |
+| Text size                    | size     | `holder.js/300x200?size=50`        |
+| Text font                    | font     | `holder.js/300x200?font=Helvetica` |
+
 ## Themes
 
 ![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
 
 Holder includes support for themes, to help placeholders blend in with your layout.
 
-There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``. Use them like so:
+There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``.
 
-```html
-<img src="holder.js/200x300/sky">
-```
-
-## Customizing appearance
-
-There are several settings that can be used to change the appearance of a placeholder without using a theme.
-
-### Custom colors
-
-Custom colors on a specific image can be specified in the ``background:foreground`` format using hex notation, like this:
-
-```html
-<img data-src="holder.js/100x200/#000:#fff">
-```
-
-The above will render a placeholder with a black background and white text.
-
-### Custom text
-
-You can specify custom text using the ``text:`` operator:
-
-```html
-<img data-src="holder.js/200x200/text:hello world">
-```
-
-If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
-
-```js
-Holder.addTheme("thumbnail", { background: "#fff", text: "Thumbnail" });
-```
+## Custom text
 
 Holder automatically adds line breaks to text that goes outside of the image boundaries. If the text is so long it goes out of both horizontal and vertical boundaries, the text is moved to the top. If you prefer to control the line breaks, you can add `\n` to the `text` property:
 
 ```html
-<img data-src="holder.js/300x200/text:Add \n line breaks \n anywhere.">
-```
-### Custom size
-
-Font size for placeholders is set automatically, however you can set a custom font size by using the ``size`` flag:
-
-```html
-<img data-src="holder.js/300x200/size:40">
-```
-
-### Custom fonts, web fonts and icon fonts
-
-You can set a placeholder's font either through a theme or through the `font` flag:
-
-```html
-<img data-src="holder.js/300x200/font:Helvetica">
-```
+<img data-src="holder.js/300x200?text=Add \n line breaks \n anywhere.">
+``````
 
 Placeholders using a custom font are rendered using canvas by default, due to SVG's constraints on cross-domain resource linking. If you're using only locally available fonts, you can disable this behavior by setting `noFontFallback` to `true` in `Holder.run` options. However, if you need to render a SVG placeholder using an externally loaded font, you have to use the `object` tag instead of the `img` tag and add a `holderjs` class to the appropriate `link` tags. Here's an example:
 
@@ -104,13 +75,12 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 <link href="http://.../font-awesome.css" rel="stylesheet" class="holderjs">
 </head>
 <body>
-<object data-src="holder.js/300x200/font:FontAwesome"></object>
+<object data-src="holder.js/300x200?font=FontAwesome"></object>
 ```
 
 **Important:** When testing locally, font URLs must have a `http` or `https` protocol defined.
 
 `<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified. As with `<img>` placeholders, the `data-src` attribute is more reliable than the `data` attribute.
-
 
 ## Customizing themes
 
@@ -124,6 +94,12 @@ Holder.addTheme("dark", {
   font: "Monaco",
   fontweight: "normal"
 });
+```
+
+If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
+
+```js
+Holder.addTheme("thumbnail", { background: "#fff", text: "Thumbnail" });
 ```
 
 ## Using custom themes
@@ -155,7 +131,7 @@ Holder.addTheme("bright", {background: "white", foreground: "gray", size: 12}).r
 You can use Holder in different areas on different images with custom themes:
 
 ```html
-<img data-src="example.com/100x100/simple" id="new">
+<img data-src="example.com/100x100?theme=simple" id="new">
 ```
 
 ```js
@@ -172,34 +148,27 @@ Holder.run({
 });
 ```
 
-## Random themes
-
-You can render a placeholder with a random theme using the `random` flag:
-```html
-<img data-src="holder.js/300x200/random">
-```
-
 ## Fluid placeholders
 
 Specifying a dimension in percentages creates a fluid placeholder that responds to media queries.
 
 ```html
-<img data-src="holder.js/100%x75/social">
+<img data-src="holder.js/100px75?theme=social">
 ```
 
-By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, set the ``textmode`` flag to ``literal`` like so: `holder.js/100%x75/textmode:literal`.
+By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, set the ``textmode`` flag to ``literal`` like so: `holder.js/100px75?textmode=literal`.
 
 ## Automatically sized placeholders
 
 If you'd like to avoid Holder enforcing an image size, use the ``auto`` flag like so:
 
 ```html
-<img data-src="holder.js/200x200/auto">
+<img data-src="holder.js/200x200?auto=yes">
 ```
 
 The above will render a placeholder without any embedded CSS for height or width.
 
-To show the current size of an automatically sized placeholder, set the ``textmode`` flag to ``exact`` like so: `holder.js/200x200/auto/textmode:exact`.
+To show the current size of an automatically sized placeholder, set the ``textmode`` flag to ``exact`` like so: `holder.js/200x200?auto=yes&textmode=exact`.
 
 ## Preventing updates on window resize
 
@@ -225,7 +194,7 @@ This will enable updates and immediately render the placeholder.
 Holder can render placeholders as background images for elements with the `holderjs` class, like this:
 
 ```css
-#sample {background:url(?holder.js/200x200/social) no-repeat}
+#sample {background:url(?holder.js/200x200?theme=social) no-repeat}
 ```
 
 ```html
@@ -239,8 +208,6 @@ The Holder URL in CSS should have a `?` in front. Like in image placeholders, yo
 ```
 
 **Important:** Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
-
-**Important:** Some browsers can't parse URLs like `?holder.js/300x200/#fff:#000` due to the `#` characters. You can use `^` in place of `#` like this: `?holder.js/300x200/^fff:^000`.
 
 ## Custom settings
 
@@ -263,7 +230,7 @@ Holder.addTheme("new", {
   foreground: "#ccc",
   background: "#000",
   size: 10
-}).addImage("holder.js/200x100/new", "body").run();
+}).addImage("holder.js/200x100?theme=new", "body").run();
 ```
 
 The first argument in ``addImage`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
