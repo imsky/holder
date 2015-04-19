@@ -10,10 +10,6 @@ var utils = require('./utils');
 var querystring = require('./lib/querystring');
 
 var extend = utils.extend;
-var cssProps = utils.cssProps;
-var encodeHtmlEntity = utils.encodeHtmlEntity;
-var decodeHtmlEntity = utils.decodeHtmlEntity;
-var imageExists = utils.imageExists;
 var getNodeArray = utils.getNodeArray;
 var dimensionCheck = utils.dimensionCheck;
 
@@ -200,7 +196,7 @@ var Holder = {
                     } else {
                         //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
                         (function(src, options, engineSettings, dataSrc, image) {
-                            imageExists(src, function(exists) {
+                            utils.imageExists(src, function(exists) {
                                 if (!exists) {
                                     prepareImageElement(options, engineSettings, dataSrc, image);
                                 }
@@ -447,7 +443,7 @@ function prepareDOMElement(prepSettings) {
         if (el.nodeName.toLowerCase() === 'object') {
             var textLines = theme.text.split('\\n');
             for (var k = 0; k < textLines.length; k++) {
-                textLines[k] = encodeHtmlEntity(textLines[k]);
+                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
             }
             theme.text = textLines.join('\\n');
         }
@@ -996,7 +992,7 @@ var stagingRenderer = (function() {
             var htgProps = holderTextGroup.properties;
             setAttr(stagingText, {
                 'y': htgProps.font.size,
-                'style': cssProps({
+                'style': utils.cssProps({
                     'font-weight': htgProps.font.weight,
                     'font-size': htgProps.font.size + htgProps.font.units,
                     'font-family': htgProps.font.family
@@ -1027,7 +1023,7 @@ var stagingRenderer = (function() {
                 stagingTextNode.nodeValue = '';
                 for (var i = 0; i < words.length; i++) {
                     if (words[i].length === 0) continue;
-                    stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
+                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
                     var bbox = stagingText.getBBox();
                     wordWidths.push({
                         text: words[i],
@@ -1117,7 +1113,7 @@ var sgSVGRenderer = (function() {
         var textGroupEl = newEl('g', SVG_NS);
         var tpdata = textGroup.textPositionData;
         var textCSSRule = '#' + holderId + ' text { ' +
-            cssProps({
+            utils.cssProps({
                 'fill': tgProps.fill,
                 'font-weight': tgProps.font.weight,
                 'font-family': tgProps.font.family + ', monospace',
