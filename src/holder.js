@@ -339,22 +339,54 @@ function prepareImageElement(options, engineSettings, src, el) {
 }
 
 /**
- * Processes a Holder URL and extracts flags
+ * Processes a Holder URL
  *
  * @private
  * @param url URL
  * @param options Instance options from Holder.run
  */
 function parseURL(url, options) {
-    var ret = {
+    var holder = {
         theme: extend(App.settings.themes.gray, null),
         stylesheets: options.stylesheets,
-        holderURL: []
+        instanceOptions: options
     };
+
+    if (!url.match(/([\d+]p?)x([\d+]p?)\?.*/)) {
+        return parseFlags(url, holder);
+    } else {
+        return parseQueryString(url, holder);
+    }
+}
+
+/**
+ * Processes a Holder URL and extracts configuration from query string
+ *
+ * @private
+ * @param url URL
+ * @param holder Staging Holder object
+ */
+function parseQueryString(url, holder) {
+    return false;
+}
+
+/**
+ * Processes a Holder URL and extracts flags
+ *
+ * @private
+ * @deprecated
+ * @param url URL
+ * @param holder Staging Holder object
+ */
+function parseFlags(url, holder) {
     var render = false;
     var vtab = String.fromCharCode(11);
     var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
     var uriRegex = /%[0-9a-f]{2}/gi;
+    var options = holder.instanceOptions;
+
+    holder.holderURL = [];
+
     for (var fl = flags.length, j = 0; j < fl; j++) {
         var flag = flags[j];
         if (flag.match(uriRegex)) {
@@ -369,55 +401,55 @@ function parseURL(url, options) {
 
         if (App.flags.dimensions.match(flag)) {
             render = true;
-            ret.dimensions = App.flags.dimensions.output(flag);
+            holder.dimensions = App.flags.dimensions.output(flag);
             push = true;
         } else if (App.flags.fluid.match(flag)) {
             render = true;
-            ret.dimensions = App.flags.fluid.output(flag);
-            ret.fluid = true;
+            holder.dimensions = App.flags.fluid.output(flag);
+            holder.fluid = true;
             push = true;
         } else if (App.flags.textmode.match(flag)) {
-            ret.textmode = App.flags.textmode.output(flag);
+            holder.textmode = App.flags.textmode.output(flag);
             push = true;
         } else if (App.flags.colors.match(flag)) {
             var colors = App.flags.colors.output(flag);
-            ret.theme = extend(ret.theme, colors);
+            holder.theme = extend(holder.theme, colors);
             //todo: convert implicit theme use to a theme: flag
             push = true;
         } else if (options.themes[flag]) {
             //If a theme is specified, it will override custom colors
             if (options.themes.hasOwnProperty(flag)) {
-                ret.theme = extend(options.themes[flag], null);
+                holder.theme = extend(options.themes[flag], null);
             }
             push = true;
         } else if (App.flags.font.match(flag)) {
-            ret.font = App.flags.font.output(flag);
+            holder.font = App.flags.font.output(flag);
             push = true;
         } else if (App.flags.auto.match(flag)) {
-            ret.auto = true;
+            holder.auto = true;
             push = true;
         } else if (App.flags.text.match(flag)) {
-            ret.text = App.flags.text.output(flag);
+            holder.text = App.flags.text.output(flag);
             push = true;
         } else if (App.flags.size.match(flag)) {
-            ret.size = App.flags.size.output(flag);
+            holder.size = App.flags.size.output(flag);
             push = true;
         } else if (App.flags.random.match(flag)) {
             if (App.vars.cache.themeKeys == null) {
                 App.vars.cache.themeKeys = Object.keys(options.themes);
             }
             var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-            ret.theme = extend(options.themes[theme], null);
+            holder.theme = extend(options.themes[theme], null);
             push = true;
         }
 
         if (push) {
-            ret.holderURL.push(flag);
+            holder.holderURL.push(flag);
         }
     }
-    ret.holderURL.unshift(options.domain);
-    ret.holderURL = ret.holderURL.join('/');
-    return render ? ret : false;
+    holder.holderURL.unshift(options.domain);
+    holder.holderURL = holder.holderURL.join('/');
+    return render ? holder : false;
 }
 
 /**

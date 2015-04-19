@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.1+6bti3
+Version 2.7.0-pre+5mya8
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -292,17 +292,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var querystring = __webpack_require__(4);
 
 	var extend = utils.extend;
-	var cssProps = utils.cssProps;
-	var encodeHtmlEntity = utils.encodeHtmlEntity;
-	var decodeHtmlEntity = utils.decodeHtmlEntity;
-	var imageExists = utils.imageExists;
 	var getNodeArray = utils.getNodeArray;
 	var dimensionCheck = utils.dimensionCheck;
 
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
-	var version = '2.6.1';
+	var version = '2.7.0-pre';
 	var generatorComment = '\n' +
 	    'Created with Holder.js ' + version + '.\n' +
 	    'Learn more at http://holderjs.com\n' +
@@ -482,7 +478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    } else {
 	                        //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
 	                        (function(src, options, engineSettings, dataSrc, image) {
-	                            imageExists(src, function(exists) {
+	                            utils.imageExists(src, function(exists) {
 	                                if (!exists) {
 	                                    prepareImageElement(options, engineSettings, dataSrc, image);
 	                                }
@@ -625,22 +621,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Processes a Holder URL and extracts flags
+	 * Processes a Holder URL
 	 *
 	 * @private
 	 * @param url URL
 	 * @param options Instance options from Holder.run
 	 */
 	function parseURL(url, options) {
-	    var ret = {
+	    var holder = {
 	        theme: extend(App.settings.themes.gray, null),
 	        stylesheets: options.stylesheets,
-	        holderURL: []
+	        holderURL: [],
+	        instanceOptions: options
 	    };
+
+	    var qsRegex = /([\d+]p?)x([\d+]p?)\?.*/;
+	    if (!url.match(qsRegex)) {
+	        return parseFlags(url, holder);
+	    }
+	}
+
+	/**
+	 * Processes a Holder URL and extracts flags
+	 *
+	 * @private
+	 * @param url URL
+	 * @param holder Staging Holder object
+	 */
+	function parseFlags(url, holder) {
 	    var render = false;
 	    var vtab = String.fromCharCode(11);
 	    var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
 	    var uriRegex = /%[0-9a-f]{2}/gi;
+	    var options = holder.instanceOptions;
+
 	    for (var fl = flags.length, j = 0; j < fl; j++) {
 	        var flag = flags[j];
 	        if (flag.match(uriRegex)) {
@@ -655,55 +669,55 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (App.flags.dimensions.match(flag)) {
 	            render = true;
-	            ret.dimensions = App.flags.dimensions.output(flag);
+	            holder.dimensions = App.flags.dimensions.output(flag);
 	            push = true;
 	        } else if (App.flags.fluid.match(flag)) {
 	            render = true;
-	            ret.dimensions = App.flags.fluid.output(flag);
-	            ret.fluid = true;
+	            holder.dimensions = App.flags.fluid.output(flag);
+	            holder.fluid = true;
 	            push = true;
 	        } else if (App.flags.textmode.match(flag)) {
-	            ret.textmode = App.flags.textmode.output(flag);
+	            holder.textmode = App.flags.textmode.output(flag);
 	            push = true;
 	        } else if (App.flags.colors.match(flag)) {
 	            var colors = App.flags.colors.output(flag);
-	            ret.theme = extend(ret.theme, colors);
+	            holder.theme = extend(holder.theme, colors);
 	            //todo: convert implicit theme use to a theme: flag
 	            push = true;
 	        } else if (options.themes[flag]) {
 	            //If a theme is specified, it will override custom colors
 	            if (options.themes.hasOwnProperty(flag)) {
-	                ret.theme = extend(options.themes[flag], null);
+	                holder.theme = extend(options.themes[flag], null);
 	            }
 	            push = true;
 	        } else if (App.flags.font.match(flag)) {
-	            ret.font = App.flags.font.output(flag);
+	            holder.font = App.flags.font.output(flag);
 	            push = true;
 	        } else if (App.flags.auto.match(flag)) {
-	            ret.auto = true;
+	            holder.auto = true;
 	            push = true;
 	        } else if (App.flags.text.match(flag)) {
-	            ret.text = App.flags.text.output(flag);
+	            holder.text = App.flags.text.output(flag);
 	            push = true;
 	        } else if (App.flags.size.match(flag)) {
-	            ret.size = App.flags.size.output(flag);
+	            holder.size = App.flags.size.output(flag);
 	            push = true;
 	        } else if (App.flags.random.match(flag)) {
 	            if (App.vars.cache.themeKeys == null) {
 	                App.vars.cache.themeKeys = Object.keys(options.themes);
 	            }
 	            var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-	            ret.theme = extend(options.themes[theme], null);
+	            holder.theme = extend(options.themes[theme], null);
 	            push = true;
 	        }
 
 	        if (push) {
-	            ret.holderURL.push(flag);
+	            holder.holderURL.push(flag);
 	        }
 	    }
-	    ret.holderURL.unshift(options.domain);
-	    ret.holderURL = ret.holderURL.join('/');
-	    return render ? ret : false;
+	    holder.holderURL.unshift(options.domain);
+	    holder.holderURL = holder.holderURL.join('/');
+	    return render ? holder : false;
 	}
 
 	/**
@@ -729,7 +743,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (el.nodeName.toLowerCase() === 'object') {
 	            var textLines = theme.text.split('\\n');
 	            for (var k = 0; k < textLines.length; k++) {
-	                textLines[k] = encodeHtmlEntity(textLines[k]);
+	                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
 	            }
 	            theme.text = textLines.join('\\n');
 	        }
@@ -1277,7 +1291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var htgProps = holderTextGroup.properties;
 	            setAttr(stagingText, {
 	                'y': htgProps.font.size,
-	                'style': cssProps({
+	                'style': utils.cssProps({
 	                    'font-weight': htgProps.font.weight,
 	                    'font-size': htgProps.font.size + htgProps.font.units,
 	                    'font-family': htgProps.font.family
@@ -1308,7 +1322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                stagingTextNode.nodeValue = '';
 	                for (var i = 0; i < words.length; i++) {
 	                    if (words[i].length === 0) continue;
-	                    stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
+	                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
 	                    var bbox = stagingText.getBBox();
 	                    wordWidths.push({
 	                        text: words[i],
@@ -1398,7 +1412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var textGroupEl = newEl('g', SVG_NS);
 	        var tpdata = textGroup.textPositionData;
 	        var textCSSRule = '#' + holderId + ' text { ' +
-	            cssProps({
+	            utils.cssProps({
 	                'fill': tgProps.fill,
 	                'font-weight': tgProps.font.weight,
 	                'font-family': tgProps.font.family + ', monospace',
@@ -2084,7 +2098,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Returns an element's dimensions if it's visible, `false` otherwise.
 	 *
-	 * @private
 	 * @param el DOM element
 	 */
 	exports.dimensionCheck = function(el) {
@@ -2098,6 +2111,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else {
 	        return false;
 	    }
+	};
+
+
+	/**
+	 * Returns true if value is truthy or if it is "semantically truthy"
+	 * @param val
+	 */
+	exports.truthy = function(val) {
+	    if (typeof val === 'string') {
+	        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
+	    }
+	    return !!val;
 	};
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))

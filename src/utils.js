@@ -134,7 +134,7 @@ exports.dimensionCheck = function(el) {
  */
 exports.truthy = function(val) {
     if (typeof val === 'string') {
-        return (val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓');
+        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
     }
     return !!val;
 };
