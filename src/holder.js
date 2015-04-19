@@ -387,6 +387,14 @@ function parseQueryString(url, holder) {
     if (parts.length === 2) {
         var options = querystring.parse(parts[1]);
 
+        if (options.bg) {
+            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+        }
+
+        if (options.fg) {
+            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+        }
+
         if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
             holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
         }
@@ -443,7 +451,6 @@ function parseFlags(url, holder) {
         } else if (App.flags.colors.match(flag)) {
             var colors = App.flags.colors.output(flag);
             holder.theme = extend(holder.theme, colors);
-            //todo: convert implicit theme use to a theme: flag
             push = true;
         } else if (options.themes[flag]) {
             //If a theme is specified, it will override custom colors

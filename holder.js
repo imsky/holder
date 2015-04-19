@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5mzg9
+Version 2.7.0-pre+5mzus
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -637,7 +637,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!url.match(/([\d]+p?)x([\d]+p?)\?/)) {
 	        return parseFlags(url, holder);
 	    } else {
-	        console.log(arguments);
 	        return parseQueryString(url, holder);
 	    }
 	}
@@ -669,6 +668,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (parts.length === 2) {
 	        var options = querystring.parse(parts[1]);
+
+	        if (options.bg) {
+	            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+	        }
+
+	        if (options.fg) {
+	            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+	        }
 
 	        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
 	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
@@ -726,7 +733,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else if (App.flags.colors.match(flag)) {
 	            var colors = App.flags.colors.output(flag);
 	            holder.theme = extend(holder.theme, colors);
-	            //todo: convert implicit theme use to a theme: flag
 	            push = true;
 	        } else if (options.themes[flag]) {
 	            //If a theme is specified, it will override custom colors
