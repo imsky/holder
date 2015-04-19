@@ -387,6 +387,8 @@ function parseQueryString(url, holder) {
     if (parts.length === 2) {
         var options = querystring.parse(parts[1]);
 
+        // Colors
+
         if (options.bg) {
             holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
         }
@@ -399,8 +401,28 @@ function parseQueryString(url, holder) {
             holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
         }
 
+        // Text
+
         if (options.text) {
             holder.text = options.text;
+        }
+
+        if (options.textmode) {
+            holder.textmode = options.textmode;
+        }
+
+        if (options.size) {
+            holder.size = options.size;
+        }
+
+        if (options.font) {
+            holder.font = options.size;
+        }
+
+        // Miscellaneous
+
+        if (utils.truthy(options.auto)) {
+            holder.auto = true;
         }
     }
 

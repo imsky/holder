@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5mzus
+Version 2.7.0-pre+5n0in
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -669,6 +669,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (parts.length === 2) {
 	        var options = querystring.parse(parts[1]);
 
+	        // Colors
+
 	        if (options.bg) {
 	            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
 	        }
@@ -681,8 +683,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
 	        }
 
+	        // Text
+
 	        if (options.text) {
 	            holder.text = options.text;
+	        }
+
+	        if (options.textmode) {
+	            holder.textmode = options.textmode;
+	        }
+
+	        if (options.size) {
+	            holder.size = options.size;
+	        }
+
+	        if (options.font) {
+	            holder.font = options.size;
+	        }
+
+	        // Miscellaneous
+
+	        if (utils.truthy(options.auto)) {
+	            holder.auto = true;
 	        }
 	    }
 
@@ -2191,8 +2213,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var encode = encodeURIComponent;
 	var decode = decodeURIComponent;
-	var trim = __webpack_require__(6);
-	var type = __webpack_require__(7);
+	var trim = __webpack_require__(7);
+	var type = __webpack_require__(6);
 
 	var arrayRegex = /(\w+)\[(\d+)\]/;
 	var objectRegex = /\w+\.\w+/;
@@ -2321,26 +2343,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
-	};
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
 	/**
 	 * toString ref.
 	 */
@@ -2374,6 +2376,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    : Object.prototype.valueOf.apply(val)
 
 	  return typeof val;
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
 	};
 
 
