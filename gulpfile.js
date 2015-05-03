@@ -53,10 +53,9 @@ gulp.task('build', ['jshint'], function () {
 });
 
 gulp.task('bundle', ['build'], function () {
-	return gulp.src(['src/polyfills.js', 'holder.js'])
+	return gulp.src(['src/lib/polyfills.js', 'holder.js'])
 		.pipe(concat('holder.js'))
 		.pipe(gulp.dest('./'));
-		
 });
 
 gulp.task('minify', ['bundle'], function () {
