@@ -599,6 +599,7 @@ function render(renderSettings) {
             default:
                 throw 'Holder: invalid renderer: ' + engineSettings.renderer;
         }
+
         return image;
     }
 
@@ -1165,13 +1166,31 @@ var sgSVGRenderer = (function() {
             }
         }
 
-        var svgString = 'data:image/svg+xml;base64,' +
-            btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.engineSettings))));
+        //todo: factor the background check up the chain, perhaps only return reference
+        var svgString = svgStringToDataURI(serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
         return svgString;
     };
 })();
 
 //Helpers
+
+/**
+ * Converts serialized SVG to a string suitable for data URI use
+ * @param svgString Serialized SVG string
+ * @param [base64] Use base64 encoding for data URI
+ */
+var svgStringToDataURI = function() {
+    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
+    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+
+    return function(svgString, base64) {
+        if (base64) {
+            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+        } else {
+            return rawPrefix + encodeURIComponent(svgString);
+        }
+    };
+}();
 
 /**
  * Generic new DOM element function
