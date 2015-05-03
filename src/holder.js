@@ -1275,8 +1275,11 @@ function serializeSVG(svg, engineSettings) {
         }
 
         //Add <?xml ... ?> UTF-8 directive
-        var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-        xml.insertBefore(xmlpi, xml.firstChild);
+        //todo: remove in 2.7
+        /*
+            var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+            xml.insertBefore(xmlpi, xml.firstChild);
+        */
         xml.removeChild(xml.documentElement);
         svgCSS = serializer.serializeToString(xml);
     }

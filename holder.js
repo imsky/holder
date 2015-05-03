@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.0+6bkp3
+Version 2.6.0+6blt2
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -223,7 +223,6 @@ if (!window.requestAnimationFrame) {
 	})(this);
   }
 }
-console.log(window.requestAnimationFrame);
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -1558,8 +1557,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        //Add <?xml ... ?> UTF-8 directive
-	        var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-	        xml.insertBefore(xmlpi, xml.firstChild);
+	        /*
+	                var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
+	                xml.insertBefore(xmlpi, xml.firstChild);
+	        */
 	        xml.removeChild(xml.documentElement);
 	        svgCSS = serializer.serializeToString(xml);
 	    }
