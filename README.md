@@ -60,7 +60,7 @@ Holder includes support for themes, to help placeholders blend in with your layo
 
 There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``.
 
-## Custom text
+## Text
 
 Holder automatically adds line breaks to text that goes outside of the image boundaries. If the text is so long it goes out of both horizontal and vertical boundaries, the text is moved to the top. If you prefer to control the line breaks, you can add `\n` to the `text` property:
 
