@@ -51,6 +51,7 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 | Text color                   | fg       | `holder.js/300x200?fg=ffffff`      |
 | Text size                    | size     | `holder.js/300x200?size=50`        |
 | Text font                    | font     | `holder.js/300x200?font=Helvetica` |
+| Text alignment               | align    | `holder.js/300x200?align=left`     |
 
 ## Themes
 
@@ -67,6 +68,12 @@ Holder automatically adds line breaks to text that goes outside of the image bou
 ```html
 <img data-src="holder.js/300x200?text=Add \n line breaks \n anywhere.">
 ``````
+
+If you would like to disable line wrapping, set the `nowrap` option to `true`:
+
+```html
+<img data-src="holder.js/300x200?text=Add \n line breaks \n anywhere.&nowrap=true">
+```
 
 Placeholders using a custom font are rendered using canvas by default, due to SVG's constraints on cross-domain resource linking. If you're using only locally available fonts, you can disable this behavior by setting `noFontFallback` to `true` in `Holder.run` options. However, if you need to render a SVG placeholder using an externally loaded font, you have to use the `object` tag instead of the `img` tag and add a `holderjs` class to the appropriate `link` tags. Here's an example:
 

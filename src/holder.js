@@ -420,6 +420,10 @@ function parseQueryString(url, holder) {
             holder.font = options.font;
         }
 
+        if (options.align) {
+            holder.align = options.align;
+        }
+
         holder.nowrap = utils.truthy(options.nowrap);
 
         // Miscellaneous
@@ -755,6 +759,8 @@ function render(renderSettings) {
  * @private
  * @param scene Holder scene object
  */
+//todo: make this function reusable
+//todo: merge app defaults and setup properties into the scene argument
 function buildSceneGraph(scene) {
     var fontSize = App.defaults.size;
     if (parseFloat(scene.theme.size)) {
@@ -773,6 +779,8 @@ function buildSceneGraph(scene) {
     scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
 
     scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
+
+    scene.align = scene.theme.align || scene.flags.align || 'center';
 
     switch (scene.flags.textmode) {
         case 'literal':
@@ -800,7 +808,7 @@ function buildSceneGraph(scene) {
 
     var holderTextGroup = new Shape.Group('holderTextGroup', {
         text: scene.text,
-        align: 'center',
+        align: scene.align,
         font: scene.font,
         fill: scene.theme.foreground
     });
@@ -814,7 +822,6 @@ function buildSceneGraph(scene) {
     }
     holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
-    //todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
     var textNode = null;
     var line = null;
 
@@ -823,15 +830,22 @@ function buildSceneGraph(scene) {
         line.height = height;
         parent.width = Math.max(parent.width, line.width);
         parent.height += line.height;
-        parent.add(line);
     }
+
+    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+    var maxLineWidth = sceneMargin;
 
     if (tpdata.lineCount > 1) {
         var offsetX = 0;
         var offsetY = 0;
-        var maxLineWidth = scene.width * App.setup.lineWrapRatio;
         var lineIndex = 0;
+        var lineKey;
         line = new Shape.Group('line' + lineIndex);
+
+        //Double margin so that left/right-aligned next is not flush with edge of image
+        if (scene.align === 'left' || scene.align === 'right') {
+            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+        }
 
         for (var i = 0; i < tpdata.words.length; i++) {
             var word = tpdata.words[i];
@@ -839,6 +853,7 @@ function buildSceneGraph(scene) {
             var newline = word.text == '\\n';
             if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
                 finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+                holderTextGroup.add(line);
                 offsetX = 0;
                 offsetY += holderTextGroup.properties.leading;
                 lineIndex += 1;
@@ -854,18 +869,27 @@ function buildSceneGraph(scene) {
         }
 
         finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+        holderTextGroup.add(line);
 
-        for (var lineKey in holderTextGroup.children) {
-            line = holderTextGroup.children[lineKey];
-            line.moveTo(
-                (holderTextGroup.width - line.width) / 2,
-                null,
-                null);
+        if (scene.align === 'left') {
+            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+        } else if (scene.align === 'right') {
+            for (lineKey in holderTextGroup.children) {
+                line = holderTextGroup.children[lineKey];
+                line.moveTo(scene.width - line.width, null, null);
+            }
+
+            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+        } else {
+            for (lineKey in holderTextGroup.children) {
+                line = holderTextGroup.children[lineKey];
+                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
+            }
+
+            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
         }
 
-        holderTextGroup.moveTo(
-            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
-            null);
+        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
 
         //If the text exceeds vertical space, move it down so the first line is visible
         if ((scene.height - holderTextGroup.height) / 2 < 0) {
@@ -877,9 +901,15 @@ function buildSceneGraph(scene) {
         line.add(textNode);
         holderTextGroup.add(line);
 
-        holderTextGroup.moveTo(
-            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
-            null);
+        if (scene.align === 'left') {
+            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+        } else if (scene.align === 'right') {
+            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+        } else {
+            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
+        }
+
+        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
     }
 
     //todo: renderlist
@@ -1271,6 +1301,8 @@ var sgSVGRenderer = (function() {
 })();
 
 //Helpers
+
+//todo: move svg-related helpers to a dedicated file
 
 /**
  * Converts serialized SVG to a string suitable for data URI use
