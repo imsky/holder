@@ -7,4 +7,5 @@ ua-parser.js
 *.woff
 *.ttf
 *.html
+*.png
 !index.html
