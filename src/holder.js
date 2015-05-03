@@ -253,6 +253,7 @@ var App = {
         units: 'pt',
         scale: 1 / 16
     },
+    //todo: remove in 2.8
     flags: {
         dimensions: {
             regex: /^(\d+)x(\d+)$/,
@@ -419,11 +420,11 @@ function parseQueryString(url, holder) {
             holder.font = options.font;
         }
 
+        holder.nowrap = utils.truthy(options.nowrap);
+
         // Miscellaneous
 
-        if (utils.truthy(options.auto)) {
-            holder.auto = true;
-        }
+        holder.auto = utils.truthy(options.auto);
 
         if (utils.truthy(options.random)) {
             App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
@@ -435,6 +436,7 @@ function parseQueryString(url, holder) {
     return holder;
 }
 
+//todo: remove in 2.8
 /**
  * Processes a Holder URL and extracts flags
  *
@@ -767,7 +769,10 @@ function buildSceneGraph(scene) {
         units: scene.theme.units ? scene.theme.units : App.defaults.units,
         weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
     };
-    scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
 
     switch (scene.flags.textmode) {
         case 'literal':
@@ -832,7 +837,7 @@ function buildSceneGraph(scene) {
             var word = tpdata.words[i];
             textNode = new Shape.Text(word.text);
             var newline = word.text == '\\n';
-            if (offsetX + word.width >= maxLineWidth || newline === true) {
+            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
                 finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
                 offsetX = 0;
                 offsetY += holderTextGroup.properties.leading;
@@ -1386,12 +1391,6 @@ function serializeSVG(svg, engineSettings) {
             xml.insertBefore(csspi, xml.firstChild);
         }
 
-        //Add <?xml ... ?> UTF-8 directive
-        //todo: remove in 2.7
-        /*
-            var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-            xml.insertBefore(xmlpi, xml.firstChild);
-        */
         xml.removeChild(xml.documentElement);
         svgCSS = serializer.serializeToString(xml);
     }
