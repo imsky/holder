@@ -235,7 +235,7 @@ Holder can render placeholders as background images for elements with the `holde
 The Holder URL in CSS should have a `?` in front. Like in image placeholders, you can specify the Holder URL in a `data-background-src` attribute:
 
 ```html
-<div data-background-src="?holder.js/300x200"></div>
+<div class="holderjs" data-background-src="?holder.js/300x200"></div>
 ```
 
 **Important:** Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
