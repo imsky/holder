@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0-pre+5n1rl
+Version 2.7.0-pre+6bt0d
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -535,6 +535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        units: 'pt',
 	        scale: 1 / 16
 	    },
+	    //todo: remove in 2.8
 	    flags: {
 	        dimensions: {
 	            regex: /^(\d+)x(\d+)$/,
@@ -701,11 +702,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            holder.font = options.font;
 	        }
 
+	        if (options.align) {
+	            holder.align = options.align;
+	        }
+
+	        holder.nowrap = utils.truthy(options.nowrap);
+
 	        // Miscellaneous
 
-	        if (utils.truthy(options.auto)) {
-	            holder.auto = true;
-	        }
+	        holder.auto = utils.truthy(options.auto);
 
 	        if (utils.truthy(options.random)) {
 	            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
@@ -717,6 +722,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return holder;
 	}
 
+	//todo: remove in 2.8
 	/**
 	 * Processes a Holder URL and extracts flags
 	 *
@@ -974,6 +980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default:
 	                throw 'Holder: invalid renderer: ' + engineSettings.renderer;
 	        }
+
 	        return image;
 	    }
 
@@ -1034,6 +1041,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 * @param scene Holder scene object
 	 */
+	//todo: make this function reusable
+	//todo: merge app defaults and setup properties into the scene argument
 	function buildSceneGraph(scene) {
 	    var fontSize = App.defaults.size;
 	    if (parseFloat(scene.theme.size)) {
@@ -1048,7 +1057,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
 	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 	    };
-	    scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+	    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+	    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
+
+	    scene.align = scene.theme.align || scene.flags.align || 'center';
 
 	    switch (scene.flags.textmode) {
 	        case 'literal':
@@ -1076,7 +1090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var holderTextGroup = new Shape.Group('holderTextGroup', {
 	        text: scene.text,
-	        align: 'center',
+	        align: scene.align,
 	        font: scene.font,
 	        fill: scene.theme.foreground
 	    });
@@ -1090,7 +1104,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
-	    //todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
 	    var textNode = null;
 	    var line = null;
 
@@ -1099,22 +1112,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	        line.height = height;
 	        parent.width = Math.max(parent.width, line.width);
 	        parent.height += line.height;
-	        parent.add(line);
 	    }
+
+	    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+	    var maxLineWidth = sceneMargin;
 
 	    if (tpdata.lineCount > 1) {
 	        var offsetX = 0;
 	        var offsetY = 0;
-	        var maxLineWidth = scene.width * App.setup.lineWrapRatio;
 	        var lineIndex = 0;
+	        var lineKey;
 	        line = new Shape.Group('line' + lineIndex);
+
+	        //Double margin so that left/right-aligned next is not flush with edge of image
+	        if (scene.align === 'left' || scene.align === 'right') {
+	            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+	        }
 
 	        for (var i = 0; i < tpdata.words.length; i++) {
 	            var word = tpdata.words[i];
 	            textNode = new Shape.Text(word.text);
 	            var newline = word.text == '\\n';
-	            if (offsetX + word.width >= maxLineWidth || newline === true) {
+	            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
 	                finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	                holderTextGroup.add(line);
 	                offsetX = 0;
 	                offsetY += holderTextGroup.properties.leading;
 	                lineIndex += 1;
@@ -1130,18 +1151,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	        holderTextGroup.add(line);
 
-	        for (var lineKey in holderTextGroup.children) {
-	            line = holderTextGroup.children[lineKey];
-	            line.moveTo(
-	                (holderTextGroup.width - line.width) / 2,
-	                null,
-	                null);
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo(scene.width - line.width, null, null);
+	            }
+
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
+	            }
+
+	            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
 	        }
 
-	        holderTextGroup.moveTo(
-	            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
-	            null);
+	        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
 
 	        //If the text exceeds vertical space, move it down so the first line is visible
 	        if ((scene.height - holderTextGroup.height) / 2 < 0) {
@@ -1153,9 +1183,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        line.add(textNode);
 	        holderTextGroup.add(line);
 
-	        holderTextGroup.moveTo(
-	            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
-	            null);
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
+	        }
+
+	        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
 	    }
 
 	    //todo: renderlist
@@ -1540,13 +1576,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        var svgString = 'data:image/svg+xml;base64,' +
-	            btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.engineSettings))));
+	        //todo: factor the background check up the chain, perhaps only return reference
+	        var svgString = svgStringToDataURI(serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
 	        return svgString;
 	    };
 	})();
 
 	//Helpers
+
+	//todo: move svg-related helpers to a dedicated file
+
+	/**
+	 * Converts serialized SVG to a string suitable for data URI use
+	 * @param svgString Serialized SVG string
+	 * @param [base64] Use base64 encoding for data URI
+	 */
+	var svgStringToDataURI = function() {
+	    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
+	    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+
+	    return function(svgString, base64) {
+	        if (base64) {
+	            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+	        } else {
+	            return rawPrefix + encodeURIComponent(svgString);
+	        }
+	    };
+	}();
 
 	/**
 	 * Generic new DOM element function
@@ -1649,12 +1705,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            xml.insertBefore(csspi, xml.firstChild);
 	        }
 
-	        //Add <?xml ... ?> UTF-8 directive
-	        //todo: remove in 2.7
-	        /*
-	            var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-	            xml.insertBefore(xmlpi, xml.firstChild);
-	        */
 	        xml.removeChild(xml.documentElement);
 	        svgCSS = serializer.serializeToString(xml);
 	    }
@@ -2219,8 +2269,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var encode = encodeURIComponent;
 	var decode = decodeURIComponent;
-	var trim = __webpack_require__(6);
-	var type = __webpack_require__(7);
+	var trim = __webpack_require__(7);
+	var type = __webpack_require__(6);
 
 	var arrayRegex = /(\w+)\[(\d+)\]/;
 	var objectRegex = /\w+\.\w+/;
@@ -2349,26 +2399,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
-	};
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
 	/**
 	 * toString ref.
 	 */
@@ -2402,6 +2432,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    : Object.prototype.valueOf.apply(val)
 
 	  return typeof val;
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
 	};
 
 
