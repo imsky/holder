@@ -2,4 +2,4 @@
     if (isMeteorPackage) {
         Holder = ctx.Holder;
     }
-})(this, Meteor && Package);
+})(this, typeof Meteor !== 'undefined' && typeof Package !== 'undefined');
