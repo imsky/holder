@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.6.1+6bti3
+Version 2.7.0+6h7nj
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -9,220 +9,225 @@ Issues:   https://github.com/imsky/holder/issues
 License:  http://opensource.org/licenses/MIT
 
 */
-//https://github.com/inexorabletash/polyfill/blob/master/web.js
-  if (!document.querySelectorAll) {
-    document.querySelectorAll = function (selectors) {
-      var style = document.createElement('style'), elements = [], element;
-      document.documentElement.firstChild.appendChild(style);
-      document._qsa = [];
+(function (window) {
+  if (!window.document) return;
+  var document = window.document;
 
-      style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
-      window.scrollBy(0, 0);
-      style.parentNode.removeChild(style);
+  //https://github.com/inexorabletash/polyfill/blob/master/web.js
+    if (!document.querySelectorAll) {
+      document.querySelectorAll = function (selectors) {
+        var style = document.createElement('style'), elements = [], element;
+        document.documentElement.firstChild.appendChild(style);
+        document._qsa = [];
 
-      while (document._qsa.length) {
-        element = document._qsa.shift();
-        element.style.removeAttribute('x-qsa');
-        elements.push(element);
-      }
-      document._qsa = null;
-      return elements;
-    };
-  }
+        style.styleSheet.cssText = selectors + '{x-qsa:expression(document._qsa && document._qsa.push(this))}';
+        window.scrollBy(0, 0);
+        style.parentNode.removeChild(style);
 
-  if (!document.querySelector) {
-    document.querySelector = function (selectors) {
-      var elements = document.querySelectorAll(selectors);
-      return (elements.length) ? elements[0] : null;
-    };
-  }
-
-  if (!document.getElementsByClassName) {
-    document.getElementsByClassName = function (classNames) {
-      classNames = String(classNames).replace(/^|\s+/g, '.');
-      return document.querySelectorAll(classNames);
-    };
-  }
-
-//https://github.com/inexorabletash/polyfill
-// ES5 15.2.3.14 Object.keys ( O )
-// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
-if (!Object.keys) {
-  Object.keys = function (o) {
-    if (o !== Object(o)) { throw TypeError('Object.keys called on non-object'); }
-    var ret = [], p;
-    for (p in o) {
-      if (Object.prototype.hasOwnProperty.call(o, p)) {
-        ret.push(p);
-      }
+        while (document._qsa.length) {
+          element = document._qsa.shift();
+          element.style.removeAttribute('x-qsa');
+          elements.push(element);
+        }
+        document._qsa = null;
+        return elements;
+      };
     }
-    return ret;
-  };
-}
 
-//https://github.com/inexorabletash/polyfill/blob/master/web.js
-(function (global) {
-  var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  global.atob = global.atob || function (input) {
-    input = String(input);
-    var position = 0,
-        output = [],
-        buffer = 0, bits = 0, n;
+    if (!document.querySelector) {
+      document.querySelector = function (selectors) {
+        var elements = document.querySelectorAll(selectors);
+        return (elements.length) ? elements[0] : null;
+      };
+    }
 
-    input = input.replace(/\s/g, '');
-    if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
-    if ((input.length % 4) === 1) { throw Error('InvalidCharacterError'); }
-    if (/[^+/0-9A-Za-z]/.test(input)) { throw Error('InvalidCharacterError'); }
+    if (!document.getElementsByClassName) {
+      document.getElementsByClassName = function (classNames) {
+        classNames = String(classNames).replace(/^|\s+/g, '.');
+        return document.querySelectorAll(classNames);
+      };
+    }
 
-    while (position < input.length) {
-      n = B64_ALPHABET.indexOf(input.charAt(position));
-      buffer = (buffer << 6) | n;
-      bits += 6;
+  //https://github.com/inexorabletash/polyfill
+  // ES5 15.2.3.14 Object.keys ( O )
+  // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
+  if (!Object.keys) {
+    Object.keys = function (o) {
+      if (o !== Object(o)) { throw TypeError('Object.keys called on non-object'); }
+      var ret = [], p;
+      for (p in o) {
+        if (Object.prototype.hasOwnProperty.call(o, p)) {
+          ret.push(p);
+        }
+      }
+      return ret;
+    };
+  }
 
-      if (bits === 24) {
-        output.push(String.fromCharCode((buffer >> 16) & 0xFF));
-        output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+  //https://github.com/inexorabletash/polyfill/blob/master/web.js
+  (function (global) {
+    var B64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    global.atob = global.atob || function (input) {
+      input = String(input);
+      var position = 0,
+          output = [],
+          buffer = 0, bits = 0, n;
+
+      input = input.replace(/\s/g, '');
+      if ((input.length % 4) === 0) { input = input.replace(/=+$/, ''); }
+      if ((input.length % 4) === 1) { throw Error('InvalidCharacterError'); }
+      if (/[^+/0-9A-Za-z]/.test(input)) { throw Error('InvalidCharacterError'); }
+
+      while (position < input.length) {
+        n = B64_ALPHABET.indexOf(input.charAt(position));
+        buffer = (buffer << 6) | n;
+        bits += 6;
+
+        if (bits === 24) {
+          output.push(String.fromCharCode((buffer >> 16) & 0xFF));
+          output.push(String.fromCharCode((buffer >>  8) & 0xFF));
+          output.push(String.fromCharCode(buffer & 0xFF));
+          bits = 0;
+          buffer = 0;
+        }
+        position += 1;
+      }
+
+      if (bits === 12) {
+        buffer = buffer >> 4;
         output.push(String.fromCharCode(buffer & 0xFF));
-        bits = 0;
-        buffer = 0;
-      }
-      position += 1;
-    }
-
-    if (bits === 12) {
-      buffer = buffer >> 4;
-      output.push(String.fromCharCode(buffer & 0xFF));
-    } else if (bits === 18) {
-      buffer = buffer >> 2;
-      output.push(String.fromCharCode((buffer >> 8) & 0xFF));
-      output.push(String.fromCharCode(buffer & 0xFF));
-    }
-
-    return output.join('');
-  };
-
-  global.btoa = global.btoa || function (input) {
-    input = String(input);
-    var position = 0,
-        out = [],
-        o1, o2, o3,
-        e1, e2, e3, e4;
-
-    if (/[^\x00-\xFF]/.test(input)) { throw Error('InvalidCharacterError'); }
-
-    while (position < input.length) {
-      o1 = input.charCodeAt(position++);
-      o2 = input.charCodeAt(position++);
-      o3 = input.charCodeAt(position++);
-
-      // 111111 112222 222233 333333
-      e1 = o1 >> 2;
-      e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
-      e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
-      e4 = o3 & 0x3f;
-
-      if (position === input.length + 2) {
-        e3 = 64; e4 = 64;
-      }
-      else if (position === input.length + 1) {
-        e4 = 64;
+      } else if (bits === 18) {
+        buffer = buffer >> 2;
+        output.push(String.fromCharCode((buffer >> 8) & 0xFF));
+        output.push(String.fromCharCode(buffer & 0xFF));
       }
 
-      out.push(B64_ALPHABET.charAt(e1),
-               B64_ALPHABET.charAt(e2),
-               B64_ALPHABET.charAt(e3),
-               B64_ALPHABET.charAt(e4));
-    }
-
-    return out.join('');
-  };
-}(this));
-
-//https://gist.github.com/jimeh/332357
-if (!Object.prototype.hasOwnProperty){
-    /*jshint -W001, -W103 */
-    Object.prototype.hasOwnProperty = function(prop) {
-		var proto = this.__proto__ || this.constructor.prototype;
-		return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
-	};
-    /*jshint +W001, +W103 */
-}
-
-// @license http://opensource.org/licenses/MIT
-// copyright Paul Irish 2015
-
-
-// Date.now() is supported everywhere except IE8. For IE8 we use the Date.now polyfill
-//   github.com/Financial-Times/polyfill-service/blob/master/polyfills/Date.now/polyfill.js
-// as Safari 6 doesn't have support for NavigationTiming, we use a Date.now() timestamp for relative values
-
-// if you want values similar to what you'd get with real perf.now, place this towards the head of the page
-// but in reality, you're just getting the delta between now() calls, so it's not terribly important where it's placed
-
-
-(function(){
-
-  if ('performance' in window === false) {
-      window.performance = {};
-  }
-  
-  Date.now = (Date.now || function () {  // thanks IE8
-	  return new Date().getTime();
-  });
-
-  if ('now' in window.performance === false){
-    
-    var nowOffset = Date.now();
-    
-    if (performance.timing && performance.timing.navigationStart){
-      nowOffset = performance.timing.navigationStart;
-    }
-
-    window.performance.now = function now(){
-      return Date.now() - nowOffset;
+      return output.join('');
     };
+
+    global.btoa = global.btoa || function (input) {
+      input = String(input);
+      var position = 0,
+          out = [],
+          o1, o2, o3,
+          e1, e2, e3, e4;
+
+      if (/[^\x00-\xFF]/.test(input)) { throw Error('InvalidCharacterError'); }
+
+      while (position < input.length) {
+        o1 = input.charCodeAt(position++);
+        o2 = input.charCodeAt(position++);
+        o3 = input.charCodeAt(position++);
+
+        // 111111 112222 222233 333333
+        e1 = o1 >> 2;
+        e2 = ((o1 & 0x3) << 4) | (o2 >> 4);
+        e3 = ((o2 & 0xf) << 2) | (o3 >> 6);
+        e4 = o3 & 0x3f;
+
+        if (position === input.length + 2) {
+          e3 = 64; e4 = 64;
+        }
+        else if (position === input.length + 1) {
+          e4 = 64;
+        }
+
+        out.push(B64_ALPHABET.charAt(e1),
+                 B64_ALPHABET.charAt(e2),
+                 B64_ALPHABET.charAt(e3),
+                 B64_ALPHABET.charAt(e4));
+      }
+
+      return out.join('');
+    };
+  }(window));
+
+  //https://gist.github.com/jimeh/332357
+  if (!Object.prototype.hasOwnProperty){
+      /*jshint -W001, -W103 */
+      Object.prototype.hasOwnProperty = function(prop) {
+      var proto = this.__proto__ || this.constructor.prototype;
+      return (prop in this) && (!(prop in proto) || proto[prop] !== this[prop]);
+    };
+      /*jshint +W001, +W103 */
   }
 
-})();
+  // @license http://opensource.org/licenses/MIT
+  // copyright Paul Irish 2015
 
-//requestAnimationFrame polyfill for older Firefox/Chrome versions
-if (!window.requestAnimationFrame) {
-  if (window.webkitRequestAnimationFrame) {
-	//https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
-	(function (global) {
-	  // window.requestAnimationFrame
-	  global.requestAnimationFrame = function (callback) {
-		  return webkitRequestAnimationFrame(function () {
-			  callback(global.performance.now());
-		  });
-	  };
 
-	  // window.cancelAnimationFrame
-	  global.cancelAnimationFrame = webkitCancelAnimationFrame;
-	}(this));
-  } else if (window.mozRequestAnimationFrame) {
-	  //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
-	(function (global) {
-	  // window.requestAnimationFrame
-	  global.requestAnimationFrame = function (callback) {
-		  return mozRequestAnimationFrame(function () {
-			  callback(global.performance.now());
-		  });
-	  };
+  // Date.now() is supported everywhere except IE8. For IE8 we use the Date.now polyfill
+  //   github.com/Financial-Times/polyfill-service/blob/master/polyfills/Date.now/polyfill.js
+  // as Safari 6 doesn't have support for NavigationTiming, we use a Date.now() timestamp for relative values
 
-	  // window.cancelAnimationFrame
-	  global.cancelAnimationFrame = mozCancelAnimationFrame;
-	}(this));
-  } else {
-	(function (global) {
-	  global.requestAnimationFrame = function (callback) {
-		return global.setTimeout(callback, 1000 / 60);
-	  };
+  // if you want values similar to what you'd get with real perf.now, place this towards the head of the page
+  // but in reality, you're just getting the delta between now() calls, so it's not terribly important where it's placed
 
-	  global.cancelAnimationFrame = global.clearTimeout;
-	})(this);
+
+  (function(){
+
+    if ('performance' in window === false) {
+        window.performance = {};
+    }
+    
+    Date.now = (Date.now || function () {  // thanks IE8
+      return new Date().getTime();
+    });
+
+    if ('now' in window.performance === false){
+      
+      var nowOffset = Date.now();
+      
+      if (performance.timing && performance.timing.navigationStart){
+        nowOffset = performance.timing.navigationStart;
+      }
+
+      window.performance.now = function now(){
+        return Date.now() - nowOffset;
+      };
+    }
+
+  })();
+
+  //requestAnimationFrame polyfill for older Firefox/Chrome versions
+  if (!window.requestAnimationFrame) {
+    if (window.webkitRequestAnimationFrame) {
+    //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
+    (function (global) {
+      // window.requestAnimationFrame
+      global.requestAnimationFrame = function (callback) {
+        return webkitRequestAnimationFrame(function () {
+          callback(global.performance.now());
+        });
+      };
+
+      // window.cancelAnimationFrame
+      global.cancelAnimationFrame = webkitCancelAnimationFrame;
+    }(window));
+    } else if (window.mozRequestAnimationFrame) {
+      //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
+    (function (global) {
+      // window.requestAnimationFrame
+      global.requestAnimationFrame = function (callback) {
+        return mozRequestAnimationFrame(function () {
+          callback(global.performance.now());
+        });
+      };
+
+      // window.cancelAnimationFrame
+      global.cancelAnimationFrame = mozCancelAnimationFrame;
+    }(window));
+    } else {
+    (function (global) {
+      global.requestAnimationFrame = function (callback) {
+      return global.setTimeout(callback, 1000 / 60);
+      };
+
+      global.cancelAnimationFrame = global.clearTimeout;
+    })(window);
+    }
   }
-}
+})(this);
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -289,19 +294,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var onDomReady = __webpack_require__(1);
 	var SceneGraph = __webpack_require__(2);
 	var utils = __webpack_require__(3);
+	var querystring = __webpack_require__(4);
 
 	var extend = utils.extend;
-	var cssProps = utils.cssProps;
-	var encodeHtmlEntity = utils.encodeHtmlEntity;
-	var decodeHtmlEntity = utils.decodeHtmlEntity;
-	var imageExists = utils.imageExists;
 	var getNodeArray = utils.getNodeArray;
 	var dimensionCheck = utils.dimensionCheck;
 
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
-	var version = '2.6.1';
+	var version = '2.7.0';
 	var generatorComment = '\n' +
 	    'Created with Holder.js ' + version + '.\n' +
 	    'Learn more at http://holderjs.com\n' +
@@ -481,7 +483,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    } else {
 	                        //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
 	                        (function(src, options, engineSettings, dataSrc, image) {
-	                            imageExists(src, function(exists) {
+	                            utils.imageExists(src, function(exists) {
 	                                if (!exists) {
 	                                    prepareImageElement(options, engineSettings, dataSrc, image);
 	                                }
@@ -538,6 +540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        units: 'pt',
 	        scale: 1 / 16
 	    },
+	    //todo: remove in 2.8
 	    flags: {
 	        dimensions: {
 	            regex: /^(\d+)x(\d+)$/,
@@ -624,22 +627,124 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Processes a Holder URL and extracts flags
+	 * Processes a Holder URL
 	 *
 	 * @private
 	 * @param url URL
 	 * @param options Instance options from Holder.run
 	 */
 	function parseURL(url, options) {
-	    var ret = {
+	    var holder = {
 	        theme: extend(App.settings.themes.gray, null),
 	        stylesheets: options.stylesheets,
-	        holderURL: []
+	        instanceOptions: options
 	    };
+
+	    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
+	        return parseQueryString(url, holder);
+	    } else {
+	        return parseFlags(url, holder);
+	    }
+	}
+
+	/**
+	 * Processes a Holder URL and extracts configuration from query string
+	 *
+	 * @private
+	 * @param url URL
+	 * @param holder Staging Holder object
+	 */
+	function parseQueryString(url, holder) {
+	    var parts = url.split('?');
+	    var basics = parts[0].split('/');
+
+	    holder.holderURL = url;
+
+	    var dimensions = basics[1];
+	    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
+
+	    if (!dimensionData) return false;
+
+	    holder.fluid = dimensions.indexOf('p') !== -1;
+
+	    holder.dimensions = {
+	        width: dimensionData[1].replace('p', '%'),
+	        height: dimensionData[2].replace('p', '%')
+	    };
+
+	    if (parts.length === 2) {
+	        var options = querystring.parse(parts[1]);
+
+	        // Colors
+
+	        if (options.bg) {
+	            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+	        }
+
+	        if (options.fg) {
+	            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+	        }
+
+	        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+	            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
+	        }
+
+	        // Text
+
+	        if (options.text) {
+	            holder.text = options.text;
+	        }
+
+	        if (options.textmode) {
+	            holder.textmode = options.textmode;
+	        }
+
+	        if (options.size) {
+	            holder.size = options.size;
+	        }
+
+	        if (options.font) {
+	            holder.font = options.font;
+	        }
+
+	        if (options.align) {
+	            holder.align = options.align;
+	        }
+
+	        holder.nowrap = utils.truthy(options.nowrap);
+
+	        // Miscellaneous
+
+	        holder.auto = utils.truthy(options.auto);
+
+	        if (utils.truthy(options.random)) {
+	            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
+	            var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
+	            holder.theme = extend(holder.instanceOptions.themes[_theme], null);
+	        }
+	    }
+
+	    return holder;
+	}
+
+	//todo: remove in 2.8
+	/**
+	 * Processes a Holder URL and extracts flags
+	 *
+	 * @private
+	 * @deprecated
+	 * @param url URL
+	 * @param holder Staging Holder object
+	 */
+	function parseFlags(url, holder) {
 	    var render = false;
 	    var vtab = String.fromCharCode(11);
 	    var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
 	    var uriRegex = /%[0-9a-f]{2}/gi;
+	    var options = holder.instanceOptions;
+
+	    holder.holderURL = [];
+
 	    for (var fl = flags.length, j = 0; j < fl; j++) {
 	        var flag = flags[j];
 	        if (flag.match(uriRegex)) {
@@ -654,55 +759,54 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (App.flags.dimensions.match(flag)) {
 	            render = true;
-	            ret.dimensions = App.flags.dimensions.output(flag);
+	            holder.dimensions = App.flags.dimensions.output(flag);
 	            push = true;
 	        } else if (App.flags.fluid.match(flag)) {
 	            render = true;
-	            ret.dimensions = App.flags.fluid.output(flag);
-	            ret.fluid = true;
+	            holder.dimensions = App.flags.fluid.output(flag);
+	            holder.fluid = true;
 	            push = true;
 	        } else if (App.flags.textmode.match(flag)) {
-	            ret.textmode = App.flags.textmode.output(flag);
+	            holder.textmode = App.flags.textmode.output(flag);
 	            push = true;
 	        } else if (App.flags.colors.match(flag)) {
 	            var colors = App.flags.colors.output(flag);
-	            ret.theme = extend(ret.theme, colors);
-	            //todo: convert implicit theme use to a theme: flag
+	            holder.theme = extend(holder.theme, colors);
 	            push = true;
 	        } else if (options.themes[flag]) {
 	            //If a theme is specified, it will override custom colors
 	            if (options.themes.hasOwnProperty(flag)) {
-	                ret.theme = extend(options.themes[flag], null);
+	                holder.theme = extend(options.themes[flag], null);
 	            }
 	            push = true;
 	        } else if (App.flags.font.match(flag)) {
-	            ret.font = App.flags.font.output(flag);
+	            holder.font = App.flags.font.output(flag);
 	            push = true;
 	        } else if (App.flags.auto.match(flag)) {
-	            ret.auto = true;
+	            holder.auto = true;
 	            push = true;
 	        } else if (App.flags.text.match(flag)) {
-	            ret.text = App.flags.text.output(flag);
+	            holder.text = App.flags.text.output(flag);
 	            push = true;
 	        } else if (App.flags.size.match(flag)) {
-	            ret.size = App.flags.size.output(flag);
+	            holder.size = App.flags.size.output(flag);
 	            push = true;
 	        } else if (App.flags.random.match(flag)) {
 	            if (App.vars.cache.themeKeys == null) {
 	                App.vars.cache.themeKeys = Object.keys(options.themes);
 	            }
 	            var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-	            ret.theme = extend(options.themes[theme], null);
+	            holder.theme = extend(options.themes[theme], null);
 	            push = true;
 	        }
 
 	        if (push) {
-	            ret.holderURL.push(flag);
+	            holder.holderURL.push(flag);
 	        }
 	    }
-	    ret.holderURL.unshift(options.domain);
-	    ret.holderURL = ret.holderURL.join('/');
-	    return render ? ret : false;
+	    holder.holderURL.unshift(options.domain);
+	    holder.holderURL = holder.holderURL.join('/');
+	    return render ? holder : false;
 	}
 
 	/**
@@ -728,7 +832,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (el.nodeName.toLowerCase() === 'object') {
 	            var textLines = theme.text.split('\\n');
 	            for (var k = 0; k < textLines.length; k++) {
-	                textLines[k] = encodeHtmlEntity(textLines[k]);
+	                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
 	            }
 	            theme.text = textLines.join('\\n');
 	        }
@@ -881,6 +985,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default:
 	                throw 'Holder: invalid renderer: ' + engineSettings.renderer;
 	        }
+
 	        return image;
 	    }
 
@@ -941,6 +1046,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 * @param scene Holder scene object
 	 */
+	//todo: make this function reusable
+	//todo: merge app defaults and setup properties into the scene argument
 	function buildSceneGraph(scene) {
 	    var fontSize = App.defaults.size;
 	    if (parseFloat(scene.theme.size)) {
@@ -955,7 +1062,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
 	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 	    };
-	    scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+	    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+	    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
+
+	    scene.align = scene.theme.align || scene.flags.align || 'center';
 
 	    switch (scene.flags.textmode) {
 	        case 'literal':
@@ -983,7 +1095,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var holderTextGroup = new Shape.Group('holderTextGroup', {
 	        text: scene.text,
-	        align: 'center',
+	        align: scene.align,
 	        font: scene.font,
 	        fill: scene.theme.foreground
 	    });
@@ -997,7 +1109,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
-	    //todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
 	    var textNode = null;
 	    var line = null;
 
@@ -1006,22 +1117,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	        line.height = height;
 	        parent.width = Math.max(parent.width, line.width);
 	        parent.height += line.height;
-	        parent.add(line);
 	    }
+
+	    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+	    var maxLineWidth = sceneMargin;
 
 	    if (tpdata.lineCount > 1) {
 	        var offsetX = 0;
 	        var offsetY = 0;
-	        var maxLineWidth = scene.width * App.setup.lineWrapRatio;
 	        var lineIndex = 0;
+	        var lineKey;
 	        line = new Shape.Group('line' + lineIndex);
+
+	        //Double margin so that left/right-aligned next is not flush with edge of image
+	        if (scene.align === 'left' || scene.align === 'right') {
+	            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+	        }
 
 	        for (var i = 0; i < tpdata.words.length; i++) {
 	            var word = tpdata.words[i];
 	            textNode = new Shape.Text(word.text);
 	            var newline = word.text == '\\n';
-	            if (offsetX + word.width >= maxLineWidth || newline === true) {
+	            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
 	                finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	                holderTextGroup.add(line);
 	                offsetX = 0;
 	                offsetY += holderTextGroup.properties.leading;
 	                lineIndex += 1;
@@ -1037,18 +1156,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+	        holderTextGroup.add(line);
 
-	        for (var lineKey in holderTextGroup.children) {
-	            line = holderTextGroup.children[lineKey];
-	            line.moveTo(
-	                (holderTextGroup.width - line.width) / 2,
-	                null,
-	                null);
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo(scene.width - line.width, null, null);
+	            }
+
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            for (lineKey in holderTextGroup.children) {
+	                line = holderTextGroup.children[lineKey];
+	                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
+	            }
+
+	            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
 	        }
 
-	        holderTextGroup.moveTo(
-	            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
-	            null);
+	        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
 
 	        //If the text exceeds vertical space, move it down so the first line is visible
 	        if ((scene.height - holderTextGroup.height) / 2 < 0) {
@@ -1060,9 +1188,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        line.add(textNode);
 	        holderTextGroup.add(line);
 
-	        holderTextGroup.moveTo(
-	            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
-	            null);
+	        if (scene.align === 'left') {
+	            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+	        } else if (scene.align === 'right') {
+	            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+	        } else {
+	            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
+	        }
+
+	        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
 	    }
 
 	    //todo: renderlist
@@ -1276,7 +1410,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var htgProps = holderTextGroup.properties;
 	            setAttr(stagingText, {
 	                'y': htgProps.font.size,
-	                'style': cssProps({
+	                'style': utils.cssProps({
 	                    'font-weight': htgProps.font.weight,
 	                    'font-size': htgProps.font.size + htgProps.font.units,
 	                    'font-family': htgProps.font.family
@@ -1307,7 +1441,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                stagingTextNode.nodeValue = '';
 	                for (var i = 0; i < words.length; i++) {
 	                    if (words[i].length === 0) continue;
-	                    stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
+	                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
 	                    var bbox = stagingText.getBBox();
 	                    wordWidths.push({
 	                        text: words[i],
@@ -1397,7 +1531,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var textGroupEl = newEl('g', SVG_NS);
 	        var tpdata = textGroup.textPositionData;
 	        var textCSSRule = '#' + holderId + ' text { ' +
-	            cssProps({
+	            utils.cssProps({
 	                'fill': tgProps.fill,
 	                'font-weight': tgProps.font.weight,
 	                'font-family': tgProps.font.family + ', monospace',
@@ -1447,13 +1581,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }
 
-	        var svgString = 'data:image/svg+xml;base64,' +
-	            btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.engineSettings))));
+	        //todo: factor the background check up the chain, perhaps only return reference
+	        var svgString = svgStringToDataURI(serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
 	        return svgString;
 	    };
 	})();
 
 	//Helpers
+
+	//todo: move svg-related helpers to a dedicated file
+
+	/**
+	 * Converts serialized SVG to a string suitable for data URI use
+	 * @param svgString Serialized SVG string
+	 * @param [base64] Use base64 encoding for data URI
+	 */
+	var svgStringToDataURI = function() {
+	    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
+	    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+
+	    return function(svgString, base64) {
+	        if (base64) {
+	            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+	        } else {
+	            return rawPrefix + encodeURIComponent(svgString);
+	        }
+	    };
+	}();
 
 	/**
 	 * Generic new DOM element function
@@ -1556,12 +1710,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            xml.insertBefore(csspi, xml.firstChild);
 	        }
 
-	        //Add <?xml ... ?> UTF-8 directive
-	        //todo: remove in 2.7
-	        /*
-	            var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-	            xml.insertBefore(xmlpi, xml.firstChild);
-	        */
 	        xml.removeChild(xml.documentElement);
 	        svgCSS = serializer.serializeToString(xml);
 	    }
@@ -1862,7 +2010,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var augment = __webpack_require__(4);
+	var augment = __webpack_require__(5);
 
 	var SceneGraph = function(sceneProperties) {
 	    var nodeCount = 1;
@@ -2083,7 +2231,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Returns an element's dimensions if it's visible, `false` otherwise.
 	 *
-	 * @private
 	 * @param el DOM element
 	 */
 	exports.dimensionCheck = function(el) {
@@ -2099,10 +2246,130 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
+
+	/**
+	 * Returns true if value is truthy or if it is "semantically truthy"
+	 * @param val
+	 */
+	exports.truthy = function(val) {
+	    if (typeof val === 'string') {
+	        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
+	    }
+	    return !!val;
+	};
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//Modified version of component/querystring
+	//Changes: updated dependencies, dot notation parsing, JSHint fixes
+	//Fork at https://github.com/imsky/querystring
+
+	/**
+	 * Module dependencies.
+	 */
+
+	var encode = encodeURIComponent;
+	var decode = decodeURIComponent;
+	var trim = __webpack_require__(7);
+	var type = __webpack_require__(6);
+
+	var arrayRegex = /(\w+)\[(\d+)\]/;
+	var objectRegex = /\w+\.\w+/;
+
+	/**
+	 * Parse the given query `str`.
+	 *
+	 * @param {String} str
+	 * @return {Object}
+	 * @api public
+	 */
+
+	exports.parse = function(str){
+	  if ('string' !== typeof str) return {};
+
+	  str = trim(str);
+	  if ('' === str) return {};
+	  if ('?' === str.charAt(0)) str = str.slice(1);
+
+	  var obj = {};
+	  var pairs = str.split('&');
+	  for (var i = 0; i < pairs.length; i++) {
+	    var parts = pairs[i].split('=');
+	    var key = decode(parts[0]);
+	    var m, ctx, prop;
+
+	    if (m = arrayRegex.exec(key)) {
+	      obj[m[1]] = obj[m[1]] || [];
+	      obj[m[1]][m[2]] = decode(parts[1]);
+	      continue;
+	    }
+
+	    if (m = objectRegex.test(key)) {
+	      m = key.split('.');
+	      ctx = obj;
+	      
+	      while (m.length) {
+	        prop = m.shift();
+
+	        if (!prop.length) continue;
+
+	        if (!ctx[prop]) {
+	          ctx[prop] = {};
+	        } else if (ctx[prop] && typeof ctx[prop] !== 'object') {
+	          break;
+	        }
+
+	        if (!m.length) {
+	          ctx[prop] = decode(parts[1]);
+	        }
+
+	        ctx = ctx[prop];
+	      }
+
+	      continue;
+	    }
+
+	    obj[parts[0]] = null == parts[1] ? '' : decode(parts[1]);
+	  }
+
+	  return obj;
+	};
+
+	/**
+	 * Stringify the given `obj`.
+	 *
+	 * @param {Object} obj
+	 * @return {String}
+	 * @api public
+	 */
+
+	exports.stringify = function(obj){
+	  if (!obj) return '';
+	  var pairs = [];
+
+	  for (var key in obj) {
+	    var value = obj[key];
+
+	    if ('array' == type(value)) {
+	      for (var i = 0; i < value.length; ++i) {
+	        pairs.push(encode(key + '[' + i + ']') + '=' + encode(value[i]));
+	      }
+	      continue;
+	    }
+
+	    pairs.push(encode(key) + '=' + encode(obj[key]));
+	  }
+
+	  return pairs.join('&');
+	};
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Factory = function () {};
@@ -2133,7 +2400,72 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = augment;
 
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * toString ref.
+	 */
+
+	var toString = Object.prototype.toString;
+
+	/**
+	 * Return the type of `val`.
+	 *
+	 * @param {Mixed} val
+	 * @return {String}
+	 * @api public
+	 */
+
+	module.exports = function(val){
+	  switch (toString.call(val)) {
+	    case '[object Date]': return 'date';
+	    case '[object RegExp]': return 'regexp';
+	    case '[object Arguments]': return 'arguments';
+	    case '[object Array]': return 'array';
+	    case '[object Error]': return 'error';
+	  }
+
+	  if (val === null) return 'null';
+	  if (val === undefined) return 'undefined';
+	  if (val !== val) return 'nan';
+	  if (val && val.nodeType === 1) return 'element';
+
+	  val = val.valueOf
+	    ? val.valueOf()
+	    : Object.prototype.valueOf.apply(val)
+
+	  return typeof val;
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
 /***/ }
 /******/ ])
 });
 ;
+(function(ctx, isMeteorPackage) {
+    if (isMeteorPackage) {
+        Holder = ctx.Holder;
+    }
+})(this, Meteor && Package);

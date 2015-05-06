@@ -112,7 +112,6 @@ exports.decodeHtmlEntity = function(str) {
 /**
  * Returns an element's dimensions if it's visible, `false` otherwise.
  *
- * @private
  * @param el DOM element
  */
 exports.dimensionCheck = function(el) {
@@ -126,4 +125,16 @@ exports.dimensionCheck = function(el) {
     } else {
         return false;
     }
+};
+
+
+/**
+ * Returns true if value is truthy or if it is "semantically truthy"
+ * @param val
+ */
+exports.truthy = function(val) {
+    if (typeof val === 'string') {
+        return val === 'true' || val === 'yes' || val === '1' || val === 'on' || val === '✓';
+    }
+    return !!val;
 };

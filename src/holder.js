@@ -7,12 +7,9 @@ Holder.js - client side image placeholders
 var onDomReady = require('./lib/ondomready');
 var SceneGraph = require('./scenegraph');
 var utils = require('./utils');
+var querystring = require('./lib/querystring');
 
 var extend = utils.extend;
-var cssProps = utils.cssProps;
-var encodeHtmlEntity = utils.encodeHtmlEntity;
-var decodeHtmlEntity = utils.decodeHtmlEntity;
-var imageExists = utils.imageExists;
 var getNodeArray = utils.getNodeArray;
 var dimensionCheck = utils.dimensionCheck;
 
@@ -199,7 +196,7 @@ var Holder = {
                     } else {
                         //If the placeholder has not been rendered, check if the image exists and render a fallback if it doesn't
                         (function(src, options, engineSettings, dataSrc, image) {
-                            imageExists(src, function(exists) {
+                            utils.imageExists(src, function(exists) {
                                 if (!exists) {
                                     prepareImageElement(options, engineSettings, dataSrc, image);
                                 }
@@ -256,6 +253,7 @@ var App = {
         units: 'pt',
         scale: 1 / 16
     },
+    //todo: remove in 2.8
     flags: {
         dimensions: {
             regex: /^(\d+)x(\d+)$/,
@@ -342,22 +340,124 @@ function prepareImageElement(options, engineSettings, src, el) {
 }
 
 /**
- * Processes a Holder URL and extracts flags
+ * Processes a Holder URL
  *
  * @private
  * @param url URL
  * @param options Instance options from Holder.run
  */
 function parseURL(url, options) {
-    var ret = {
+    var holder = {
         theme: extend(App.settings.themes.gray, null),
         stylesheets: options.stylesheets,
-        holderURL: []
+        instanceOptions: options
     };
+
+    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
+        return parseQueryString(url, holder);
+    } else {
+        return parseFlags(url, holder);
+    }
+}
+
+/**
+ * Processes a Holder URL and extracts configuration from query string
+ *
+ * @private
+ * @param url URL
+ * @param holder Staging Holder object
+ */
+function parseQueryString(url, holder) {
+    var parts = url.split('?');
+    var basics = parts[0].split('/');
+
+    holder.holderURL = url;
+
+    var dimensions = basics[1];
+    var dimensionData = dimensions.match(/([\d]+p?)x([\d]+p?)/);
+
+    if (!dimensionData) return false;
+
+    holder.fluid = dimensions.indexOf('p') !== -1;
+
+    holder.dimensions = {
+        width: dimensionData[1].replace('p', '%'),
+        height: dimensionData[2].replace('p', '%')
+    };
+
+    if (parts.length === 2) {
+        var options = querystring.parse(parts[1]);
+
+        // Colors
+
+        if (options.bg) {
+            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+        }
+
+        if (options.fg) {
+            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+        }
+
+        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+            holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
+        }
+
+        // Text
+
+        if (options.text) {
+            holder.text = options.text;
+        }
+
+        if (options.textmode) {
+            holder.textmode = options.textmode;
+        }
+
+        if (options.size) {
+            holder.size = options.size;
+        }
+
+        if (options.font) {
+            holder.font = options.font;
+        }
+
+        if (options.align) {
+            holder.align = options.align;
+        }
+
+        holder.nowrap = utils.truthy(options.nowrap);
+
+        // Miscellaneous
+
+        holder.auto = utils.truthy(options.auto);
+
+        if (utils.truthy(options.random)) {
+            App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
+            var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
+            holder.theme = extend(holder.instanceOptions.themes[_theme], null);
+        }
+    }
+
+    return holder;
+}
+
+//todo: remove in 2.8
+/**
+ * Processes a Holder URL and extracts flags
+ *
+ * @private
+ * @deprecated
+ * @param url URL
+ * @param holder Staging Holder object
+ */
+function parseFlags(url, holder) {
     var render = false;
     var vtab = String.fromCharCode(11);
     var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
     var uriRegex = /%[0-9a-f]{2}/gi;
+    var options = holder.instanceOptions;
+
+    holder.holderURL = [];
+
     for (var fl = flags.length, j = 0; j < fl; j++) {
         var flag = flags[j];
         if (flag.match(uriRegex)) {
@@ -372,55 +472,54 @@ function parseURL(url, options) {
 
         if (App.flags.dimensions.match(flag)) {
             render = true;
-            ret.dimensions = App.flags.dimensions.output(flag);
+            holder.dimensions = App.flags.dimensions.output(flag);
             push = true;
         } else if (App.flags.fluid.match(flag)) {
             render = true;
-            ret.dimensions = App.flags.fluid.output(flag);
-            ret.fluid = true;
+            holder.dimensions = App.flags.fluid.output(flag);
+            holder.fluid = true;
             push = true;
         } else if (App.flags.textmode.match(flag)) {
-            ret.textmode = App.flags.textmode.output(flag);
+            holder.textmode = App.flags.textmode.output(flag);
             push = true;
         } else if (App.flags.colors.match(flag)) {
             var colors = App.flags.colors.output(flag);
-            ret.theme = extend(ret.theme, colors);
-            //todo: convert implicit theme use to a theme: flag
+            holder.theme = extend(holder.theme, colors);
             push = true;
         } else if (options.themes[flag]) {
             //If a theme is specified, it will override custom colors
             if (options.themes.hasOwnProperty(flag)) {
-                ret.theme = extend(options.themes[flag], null);
+                holder.theme = extend(options.themes[flag], null);
             }
             push = true;
         } else if (App.flags.font.match(flag)) {
-            ret.font = App.flags.font.output(flag);
+            holder.font = App.flags.font.output(flag);
             push = true;
         } else if (App.flags.auto.match(flag)) {
-            ret.auto = true;
+            holder.auto = true;
             push = true;
         } else if (App.flags.text.match(flag)) {
-            ret.text = App.flags.text.output(flag);
+            holder.text = App.flags.text.output(flag);
             push = true;
         } else if (App.flags.size.match(flag)) {
-            ret.size = App.flags.size.output(flag);
+            holder.size = App.flags.size.output(flag);
             push = true;
         } else if (App.flags.random.match(flag)) {
             if (App.vars.cache.themeKeys == null) {
                 App.vars.cache.themeKeys = Object.keys(options.themes);
             }
             var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-            ret.theme = extend(options.themes[theme], null);
+            holder.theme = extend(options.themes[theme], null);
             push = true;
         }
 
         if (push) {
-            ret.holderURL.push(flag);
+            holder.holderURL.push(flag);
         }
     }
-    ret.holderURL.unshift(options.domain);
-    ret.holderURL = ret.holderURL.join('/');
-    return render ? ret : false;
+    holder.holderURL.unshift(options.domain);
+    holder.holderURL = holder.holderURL.join('/');
+    return render ? holder : false;
 }
 
 /**
@@ -446,7 +545,7 @@ function prepareDOMElement(prepSettings) {
         if (el.nodeName.toLowerCase() === 'object') {
             var textLines = theme.text.split('\\n');
             for (var k = 0; k < textLines.length; k++) {
-                textLines[k] = encodeHtmlEntity(textLines[k]);
+                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
             }
             theme.text = textLines.join('\\n');
         }
@@ -599,6 +698,7 @@ function render(renderSettings) {
             default:
                 throw 'Holder: invalid renderer: ' + engineSettings.renderer;
         }
+
         return image;
     }
 
@@ -659,6 +759,8 @@ function render(renderSettings) {
  * @private
  * @param scene Holder scene object
  */
+//todo: make this function reusable
+//todo: merge app defaults and setup properties into the scene argument
 function buildSceneGraph(scene) {
     var fontSize = App.defaults.size;
     if (parseFloat(scene.theme.size)) {
@@ -673,7 +775,12 @@ function buildSceneGraph(scene) {
         units: scene.theme.units ? scene.theme.units : App.defaults.units,
         weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
     };
-    scene.text = scene.theme.text ? scene.theme.text : Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+    scene.text = scene.theme.text || Math.floor(scene.width) + 'x' + Math.floor(scene.height);
+
+    scene.noWrap = scene.theme.nowrap || scene.flags.nowrap;
+
+    scene.align = scene.theme.align || scene.flags.align || 'center';
 
     switch (scene.flags.textmode) {
         case 'literal':
@@ -701,7 +808,7 @@ function buildSceneGraph(scene) {
 
     var holderTextGroup = new Shape.Group('holderTextGroup', {
         text: scene.text,
-        align: 'center',
+        align: scene.align,
         font: scene.font,
         fill: scene.theme.foreground
     });
@@ -715,7 +822,6 @@ function buildSceneGraph(scene) {
     }
     holderTextGroup.properties.leading = tpdata.boundingBox.height;
 
-    //todo: alignment: TL, TC, TR, CL, CR, BL, BC, BR
     var textNode = null;
     var line = null;
 
@@ -724,22 +830,30 @@ function buildSceneGraph(scene) {
         line.height = height;
         parent.width = Math.max(parent.width, line.width);
         parent.height += line.height;
-        parent.add(line);
     }
+
+    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+    var maxLineWidth = sceneMargin;
 
     if (tpdata.lineCount > 1) {
         var offsetX = 0;
         var offsetY = 0;
-        var maxLineWidth = scene.width * App.setup.lineWrapRatio;
         var lineIndex = 0;
+        var lineKey;
         line = new Shape.Group('line' + lineIndex);
+
+        //Double margin so that left/right-aligned next is not flush with edge of image
+        if (scene.align === 'left' || scene.align === 'right') {
+            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+        }
 
         for (var i = 0; i < tpdata.words.length; i++) {
             var word = tpdata.words[i];
             textNode = new Shape.Text(word.text);
             var newline = word.text == '\\n';
-            if (offsetX + word.width >= maxLineWidth || newline === true) {
+            if (!scene.noWrap && (offsetX + word.width >= maxLineWidth || newline === true)) {
                 finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+                holderTextGroup.add(line);
                 offsetX = 0;
                 offsetY += holderTextGroup.properties.leading;
                 lineIndex += 1;
@@ -755,18 +869,27 @@ function buildSceneGraph(scene) {
         }
 
         finalizeLine(holderTextGroup, line, offsetX, holderTextGroup.properties.leading);
+        holderTextGroup.add(line);
 
-        for (var lineKey in holderTextGroup.children) {
-            line = holderTextGroup.children[lineKey];
-            line.moveTo(
-                (holderTextGroup.width - line.width) / 2,
-                null,
-                null);
+        if (scene.align === 'left') {
+            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+        } else if (scene.align === 'right') {
+            for (lineKey in holderTextGroup.children) {
+                line = holderTextGroup.children[lineKey];
+                line.moveTo(scene.width - line.width, null, null);
+            }
+
+            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+        } else {
+            for (lineKey in holderTextGroup.children) {
+                line = holderTextGroup.children[lineKey];
+                line.moveTo((holderTextGroup.width - line.width) / 2, null, null);
+            }
+
+            holderTextGroup.moveTo((scene.width - holderTextGroup.width) / 2, null, null);
         }
 
-        holderTextGroup.moveTo(
-            (scene.width - holderTextGroup.width) / 2, (scene.height - holderTextGroup.height) / 2,
-            null);
+        holderTextGroup.moveTo(null, (scene.height - holderTextGroup.height) / 2, null);
 
         //If the text exceeds vertical space, move it down so the first line is visible
         if ((scene.height - holderTextGroup.height) / 2 < 0) {
@@ -778,9 +901,15 @@ function buildSceneGraph(scene) {
         line.add(textNode);
         holderTextGroup.add(line);
 
-        holderTextGroup.moveTo(
-            (scene.width - tpdata.boundingBox.width) / 2, (scene.height - tpdata.boundingBox.height) / 2,
-            null);
+        if (scene.align === 'left') {
+            holderTextGroup.moveTo(scene.width - sceneMargin, null, null);
+        } else if (scene.align === 'right') {
+            holderTextGroup.moveTo(0 - (scene.width - sceneMargin), null, null);
+        } else {
+            holderTextGroup.moveTo((scene.width - tpdata.boundingBox.width) / 2, null, null);
+        }
+
+        holderTextGroup.moveTo(null, (scene.height - tpdata.boundingBox.height) / 2, null);
     }
 
     //todo: renderlist
@@ -994,7 +1123,7 @@ var stagingRenderer = (function() {
             var htgProps = holderTextGroup.properties;
             setAttr(stagingText, {
                 'y': htgProps.font.size,
-                'style': cssProps({
+                'style': utils.cssProps({
                     'font-weight': htgProps.font.weight,
                     'font-size': htgProps.font.size + htgProps.font.units,
                     'font-family': htgProps.font.family
@@ -1025,7 +1154,7 @@ var stagingRenderer = (function() {
                 stagingTextNode.nodeValue = '';
                 for (var i = 0; i < words.length; i++) {
                     if (words[i].length === 0) continue;
-                    stagingTextNode.nodeValue = decodeHtmlEntity(words[i]);
+                    stagingTextNode.nodeValue = utils.decodeHtmlEntity(words[i]);
                     var bbox = stagingText.getBBox();
                     wordWidths.push({
                         text: words[i],
@@ -1115,7 +1244,7 @@ var sgSVGRenderer = (function() {
         var textGroupEl = newEl('g', SVG_NS);
         var tpdata = textGroup.textPositionData;
         var textCSSRule = '#' + holderId + ' text { ' +
-            cssProps({
+            utils.cssProps({
                 'fill': tgProps.fill,
                 'font-weight': tgProps.font.weight,
                 'font-family': tgProps.font.family + ', monospace',
@@ -1165,13 +1294,33 @@ var sgSVGRenderer = (function() {
             }
         }
 
-        var svgString = 'data:image/svg+xml;base64,' +
-            btoa(unescape(encodeURIComponent(serializeSVG(svg, renderSettings.engineSettings))));
+        //todo: factor the background check up the chain, perhaps only return reference
+        var svgString = svgStringToDataURI(serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
         return svgString;
     };
 })();
 
 //Helpers
+
+//todo: move svg-related helpers to a dedicated file
+
+/**
+ * Converts serialized SVG to a string suitable for data URI use
+ * @param svgString Serialized SVG string
+ * @param [base64] Use base64 encoding for data URI
+ */
+var svgStringToDataURI = function() {
+    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
+    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
+
+    return function(svgString, base64) {
+        if (base64) {
+            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+        } else {
+            return rawPrefix + encodeURIComponent(svgString);
+        }
+    };
+}();
 
 /**
  * Generic new DOM element function
@@ -1274,12 +1423,6 @@ function serializeSVG(svg, engineSettings) {
             xml.insertBefore(csspi, xml.firstChild);
         }
 
-        //Add <?xml ... ?> UTF-8 directive
-        //todo: remove in 2.7
-        /*
-            var xmlpi = xml.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8" standalone="yes"');
-            xml.insertBefore(xmlpi, xml.firstChild);
-        */
         xml.removeChild(xml.documentElement);
         svgCSS = serializer.serializeToString(xml);
     }
