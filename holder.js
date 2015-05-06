@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.7.0+6h7nj
+Version 2.7.1+6hydf
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -303,7 +303,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//Constants and definitions
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
-	var version = '2.7.0';
+	var version = '2.7.1';
 	var generatorComment = '\n' +
 	    'Created with Holder.js ' + version + '.\n' +
 	    'Learn more at http://holderjs.com\n' +
@@ -2274,8 +2274,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var encode = encodeURIComponent;
 	var decode = decodeURIComponent;
-	var trim = __webpack_require__(7);
-	var type = __webpack_require__(6);
+	var trim = __webpack_require__(6);
+	var type = __webpack_require__(7);
 
 	var arrayRegex = /(\w+)\[(\d+)\]/;
 	var objectRegex = /\w+\.\w+/;
@@ -2404,6 +2404,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
 	/**
 	 * toString ref.
 	 */
@@ -2440,26 +2460,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
-	};
-
-
 /***/ }
 /******/ ])
 });
@@ -2468,4 +2468,4 @@ return /******/ (function(modules) { // webpackBootstrap
     if (isMeteorPackage) {
         Holder = ctx.Holder;
     }
-})(this, Meteor && Package);
+})(this, typeof Meteor !== 'undefined' && typeof Package !== 'undefined');
