@@ -38,8 +38,6 @@ To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
 ## Options
 
-**Note:** URL flags have been deprecated. For flag usage see the [2.6 documentation](https://github.com/imsky/holder/blob/v2.6.0/README.md).
-
 Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
 
 | Option                       | Property | Example                            |

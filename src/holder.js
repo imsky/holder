@@ -252,69 +252,6 @@ var App = {
         size: 10,
         units: 'pt',
         scale: 1 / 16
-    },
-    //todo: remove in 2.8
-    flags: {
-        dimensions: {
-            regex: /^(\d+)x(\d+)$/,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    width: +exec[1],
-                    height: +exec[2]
-                };
-            }
-        },
-        fluid: {
-            regex: /^([0-9]+%?)x([0-9]+%?)$/,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    width: exec[1],
-                    height: exec[2]
-                };
-            }
-        },
-        colors: {
-            regex: /(?:#|\^)([0-9a-f]{3,})\:(?:#|\^)([0-9a-f]{3,})/i,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    foreground: '#' + exec[2],
-                    background: '#' + exec[1]
-                };
-            }
-        },
-        text: {
-            regex: /text\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1].replace('\\/', '/');
-            }
-        },
-        font: {
-            regex: /font\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        },
-        auto: {
-            regex: /^auto$/
-        },
-        textmode: {
-            regex: /textmode\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        },
-        random: {
-            regex: /^random$/
-        },
-        size: {
-            regex: /size\:(\d+)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        }
     }
 };
 
@@ -353,11 +290,7 @@ function parseURL(url, options) {
         instanceOptions: options
     };
 
-    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
-        return parseQueryString(url, holder);
-    } else {
-        return parseFlags(url, holder);
-    }
+    return parseQueryString(url, holder);
 }
 
 /**
@@ -438,88 +371,6 @@ function parseQueryString(url, holder) {
     }
 
     return holder;
-}
-
-//todo: remove in 2.8
-/**
- * Processes a Holder URL and extracts flags
- *
- * @private
- * @deprecated
- * @param url URL
- * @param holder Staging Holder object
- */
-function parseFlags(url, holder) {
-    var render = false;
-    var vtab = String.fromCharCode(11);
-    var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
-    var uriRegex = /%[0-9a-f]{2}/gi;
-    var options = holder.instanceOptions;
-
-    holder.holderURL = [];
-
-    for (var fl = flags.length, j = 0; j < fl; j++) {
-        var flag = flags[j];
-        if (flag.match(uriRegex)) {
-            try {
-                flag = decodeURIComponent(flag);
-            } catch (e) {
-                flag = flags[j];
-            }
-        }
-
-        var push = false;
-
-        if (App.flags.dimensions.match(flag)) {
-            render = true;
-            holder.dimensions = App.flags.dimensions.output(flag);
-            push = true;
-        } else if (App.flags.fluid.match(flag)) {
-            render = true;
-            holder.dimensions = App.flags.fluid.output(flag);
-            holder.fluid = true;
-            push = true;
-        } else if (App.flags.textmode.match(flag)) {
-            holder.textmode = App.flags.textmode.output(flag);
-            push = true;
-        } else if (App.flags.colors.match(flag)) {
-            var colors = App.flags.colors.output(flag);
-            holder.theme = extend(holder.theme, colors);
-            push = true;
-        } else if (options.themes[flag]) {
-            //If a theme is specified, it will override custom colors
-            if (options.themes.hasOwnProperty(flag)) {
-                holder.theme = extend(options.themes[flag], null);
-            }
-            push = true;
-        } else if (App.flags.font.match(flag)) {
-            holder.font = App.flags.font.output(flag);
-            push = true;
-        } else if (App.flags.auto.match(flag)) {
-            holder.auto = true;
-            push = true;
-        } else if (App.flags.text.match(flag)) {
-            holder.text = App.flags.text.output(flag);
-            push = true;
-        } else if (App.flags.size.match(flag)) {
-            holder.size = App.flags.size.output(flag);
-            push = true;
-        } else if (App.flags.random.match(flag)) {
-            if (App.vars.cache.themeKeys == null) {
-                App.vars.cache.themeKeys = Object.keys(options.themes);
-            }
-            var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-            holder.theme = extend(options.themes[theme], null);
-            push = true;
-        }
-
-        if (push) {
-            holder.holderURL.push(flag);
-        }
-    }
-    holder.holderURL.unshift(options.domain);
-    holder.holderURL = holder.holderURL.join('/');
-    return render ? holder : false;
 }
 
 /**
