@@ -1,4 +1,4 @@
-var augment = require('./lib/augment');
+var augment = require('./vendor/augment');
 
 var SceneGraph = function(sceneProperties) {
     var nodeCount = 1;

@@ -4,10 +4,11 @@ Holder.js - client side image placeholders
 */
 
 //Libraries and functions
-var onDomReady = require('./lib/ondomready');
-var SceneGraph = require('./scenegraph');
-var utils = require('./utils');
-var querystring = require('./lib/querystring');
+var onDomReady = require('./lib/vendor/ondomready');
+var querystring = require('./lib/vendor/querystring');
+
+var SceneGraph = require('./lib/scenegraph');
+var utils = require('./lib/utils');
 
 var extend = utils.extend;
 var getNodeArray = utils.getNodeArray;
@@ -44,6 +45,7 @@ var Holder = {
      * @param {string} el Selector of target element(s)
      */
     addImage: function(src, el) {
+        //todo: use jquery fallback if available for all QSA references
         var node = document.querySelectorAll(el);
         if (node.length) {
             for (var i = 0, l = node.length; i < l; i++) {

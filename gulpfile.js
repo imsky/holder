@@ -41,7 +41,7 @@ gulp.task('todo', function() {
 });
 
 gulp.task('build', ['beautify'], function() {
-    return gulp.src('src/holder.js')
+    return gulp.src('src/index.js')
         .pipe(webpack({
             output: {
                 library: 'Holder',
