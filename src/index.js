@@ -1,6 +1,6 @@
 /*
 Holder.js - client side image placeholders
-© 2012-2015 Ivan Malopinsky - http://imsky.co
+(c) 2012-2015 Ivan Malopinsky - http://imsky.co
 */
 
 //Libraries and functions
@@ -766,7 +766,6 @@ function buildSceneGraph(scene) {
     }
 
     //todo: renderlist
-
     return sceneGraph;
 }
 
