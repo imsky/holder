@@ -35,7 +35,7 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('todo', function() {
-    return gulp.src('src/holder.js')
+    return gulp.src('src/index.js')
         .pipe(todo())
         .pipe(gulp.dest('./'));
 });
