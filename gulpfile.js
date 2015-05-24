@@ -80,9 +80,9 @@ gulp.task('banner', ['minify'], function() {
 });
 
 gulp.task('beautify', function() {
-    return gulp.src(['src/*.js'])
+    return gulp.src(['src/lib/*.js'])
         .pipe(beautify())
-        .pipe(gulp.dest('src/'));
+        .pipe(gulp.dest('src/lib/'));
 });
 
 gulp.task('meteor', function() {

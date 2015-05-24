@@ -11,7 +11,7 @@ var NODE_TYPE_COMMENT = 8;
  * @param width Document width
  * @param height Document height
  */
-exports.initSVG = function (svg, width, height) {
+exports.initSVG = function(svg, width, height) {
     var defs, style, initialize = false;
 
     if (svg && svg.querySelector) {
@@ -86,7 +86,7 @@ exports.svgStringToDataURI = function() {
  * @param svg SVG context
  * @param stylesheets CSS stylesheets to include
  */
-exports.serializeSVG = function (svg, engineSettings) {
+exports.serializeSVG = function(svg, engineSettings) {
     if (!global.XMLSerializer) return;
     var serializer = new XMLSerializer();
     var svgCSS = '';
