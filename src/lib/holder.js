@@ -14,7 +14,6 @@ var SVG = require('./svg');
 var DOM = require('./dom');
 
 var extend = utils.extend;
-var getNodeArray = utils.getNodeArray;
 var dimensionCheck = utils.dimensionCheck;
 
 //Constants and definitions
@@ -97,10 +96,10 @@ var Holder = {
             engineSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
         }
 
-        var images = getNodeArray(options.images);
-        var bgnodes = getNodeArray(options.bgnodes);
-        var stylenodes = getNodeArray(options.stylenodes);
-        var objects = getNodeArray(options.objects);
+        var images = DOM.getNodeArray(options.images);
+        var bgnodes = DOM.getNodeArray(options.bgnodes);
+        var stylenodes = DOM.getNodeArray(options.stylenodes);
+        var objects = DOM.getNodeArray(options.objects);
 
         engineSettings.stylesheets = [];
         engineSettings.svgXMLStylesheet = true;
