@@ -12,10 +12,19 @@ var NODE_TYPE_COMMENT = 8;
  * @param height Document height
  */
 exports.initSVG = function (svg, width, height) {
-    var defs, style;
+    var defs, style, initialize = false;
 
-    if (svg == null) {
+    if (svg && svg.querySelector) {
+        style = svg.querySelector('style');
+        if (style === null) {
+            initialize = true;
+        }
+    } else {
         svg = DOM.newEl('svg', SVG_NS);
+        initialize = true;
+    }
+
+    if (initialize) {
         defs = DOM.newEl('defs', SVG_NS);
         style = DOM.newEl('style', SVG_NS);
         DOM.setAttr(style, {
@@ -23,8 +32,6 @@ exports.initSVG = function (svg, width, height) {
         });
         defs.appendChild(style);
         svg.appendChild(defs);
-    } else {
-        style = svg.querySelector('style');
     }
 
     //IE throws an exception if this is set and Chrome requires it to be set

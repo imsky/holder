@@ -9,3 +9,4 @@ ua-parser.js
 *.html
 *.png
 !index.html
+!detach.html
