@@ -40,7 +40,7 @@ gulp.task('todo', function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('build', ['beautify'], function() {
+gulp.task('build', ['jshint'], function() {
     return gulp.src('src/index.js')
         .pipe(webpack({
             output: {
@@ -79,7 +79,7 @@ gulp.task('banner', ['minify'], function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('beautify', ['jshint'], function() {
+gulp.task('beautify', function() {
     return gulp.src(['src/*.js'])
         .pipe(beautify())
         .pipe(gulp.dest('src/'));
