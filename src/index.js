@@ -661,7 +661,8 @@ function buildSceneGraph(scene) {
         //todo: generalize darken/lighten to more than RRGGBB hex values
         //todo: add contrasting outline for dark backgrounds
         holderBg.properties.outline = {
-            fill: '#' + lightenColor(holderBg.properties.fill.substr(1), -20)
+            fill: '#' + lightenColor(holderBg.properties.fill.substr(1), -10),
+            width: 2
         };
     }
 
@@ -1063,7 +1064,7 @@ var sgCanvasRenderer = (function() {
         if (bg.properties.outline) {
             //todo: abstract this into a method
             ctx.strokeStyle = bg.properties.outline.fill;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = bg.properties.outline.width;
             ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
             // TL, TR, BR, BL
             ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
@@ -1136,6 +1137,7 @@ var sgSVGRenderer = (function() {
         var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
         var holderCSS = xml.createCDATASection(textCSSRule);
         var styleEl = svg.querySelector('style');
+        var bg = root.children.holderBg;
 
         setAttr(sceneGroupEl, {
             id: holderId
@@ -1145,13 +1147,38 @@ var sgSVGRenderer = (function() {
         styleEl.appendChild(holderCSS);
 
         sceneGroupEl.appendChild(bgEl);
+
+        //todo: abstract this into a cross-browser SVG outline method
+        if (bg.properties.outline) {
+            var outlineEl = newEl('path', SVG_NS);
+            var outlineWidth = bg.properties.outline.width;
+            var outlineOffsetWidth = outlineWidth / 2;
+            setAttr(outlineEl, {
+                'd': [
+                    'M', outlineOffsetWidth, outlineOffsetWidth,
+                    'H', bg.width - outlineOffsetWidth,
+                    'V', bg.height - outlineOffsetWidth,
+                    'H', outlineOffsetWidth,
+                    'V', 0,
+                    'M', 0, outlineOffsetWidth,
+                    'L', bg.width, bg.height - outlineOffsetWidth,
+                    'M', 0, bg.height - outlineOffsetWidth,
+                    'L', bg.width, outlineOffsetWidth
+                ].join(' '),
+                'stroke-width': bg.properties.outline.width,
+                'stroke': bg.properties.outline.fill,
+                'fill': 'none'
+            });
+            sceneGroupEl.appendChild(outlineEl);
+        }
+
         sceneGroupEl.appendChild(textGroupEl);
         svg.appendChild(sceneGroupEl);
 
         setAttr(bgEl, {
-            'width': root.children.holderBg.width,
-            'height': root.children.holderBg.height,
-            'fill': root.children.holderBg.properties.fill
+            'width': bg.width,
+            'height': bg.height,
+            'fill': bg.properties.fill
         });
 
         textGroup.y += tpdata.boundingBox.height * 0.8;
