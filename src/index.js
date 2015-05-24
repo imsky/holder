@@ -6,6 +6,7 @@ Holder.js - client side image placeholders
 //Libraries and functions
 var onDomReady = require('./lib/vendor/ondomready');
 var querystring = require('./lib/vendor/querystring');
+var lightenColor = require('./lib/vendor/lightenColor');
 
 var SceneGraph = require('./lib/scenegraph');
 var utils = require('./lib/utils');
@@ -81,6 +82,7 @@ var Holder = {
      * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
      */
     run: function(userOptions) {
+        //todo: split processing into separate queues
         userOptions = userOptions || {};
         var engineSettings = {};
         var options = extend(App.settings, userOptions);
@@ -119,13 +121,7 @@ var Holder = {
             if (!global.getComputedStyle) continue;
             var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
             var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
-            var rawURL = null;
-
-            if (dataBackgroundImage == null) {
-                rawURL = backgroundImage;
-            } else {
-                rawURL = dataBackgroundImage;
-            }
+            var rawURL = dataBackgroundImage || backgroundImage;
 
             var holderURL = null;
             var holderString = '?' + options.domain + '/';
@@ -364,6 +360,8 @@ function parseQueryString(url, holder) {
         // Miscellaneous
 
         holder.auto = utils.truthy(options.auto);
+
+        holder.outline = utils.truthy(options.outline);
 
         if (utils.truthy(options.random)) {
             App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
@@ -658,6 +656,14 @@ function buildSceneGraph(scene) {
 
     holderBg.resize(scene.width, scene.height);
     sceneGraph.root.add(holderBg);
+
+    if (scene.flags.outline) {
+        //todo: generalize darken/lighten to more than RRGGBB hex values
+        //todo: add contrasting outline for dark backgrounds
+        holderBg.properties.outline = {
+            fill: '#' + lightenColor(holderBg.properties.fill.substr(1), -20)
+        };
+    }
 
     var holderTextGroup = new Shape.Group('holderTextGroup', {
         text: scene.text,
@@ -1044,8 +1050,33 @@ var sgCanvasRenderer = (function() {
         canvas.height = App.dpr(root.properties.height);
         ctx.textBaseline = 'middle';
 
-        ctx.fillStyle = root.children.holderBg.properties.fill;
-        ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
+        var bg = root.children.holderBg;
+        var bgWidth = App.dpr(bg.width);
+        var bgHeight = App.dpr(bg.height);
+        //todo: parametrize outline width (e.g. in scene object)
+        var outlineWidth = 2;
+        var outlineOffsetWidth = outlineWidth / 2;
+
+        ctx.fillStyle = bg.properties.fill;
+        ctx.fillRect(0, 0, bgWidth, bgHeight);
+
+        if (bg.properties.outline) {
+            //todo: abstract this into a method
+            ctx.strokeStyle = bg.properties.outline.fill;
+            ctx.lineWidth = 2;
+            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
+            // TL, TR, BR, BL
+            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
+            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
+            // Diagonals
+            ctx.moveTo(0, outlineOffsetWidth);
+            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
+            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(bgWidth, outlineOffsetWidth);
+            ctx.stroke();
+        }
 
         var textGroup = root.children.holderTextGroup;
         var tgProps = textGroup.properties;
