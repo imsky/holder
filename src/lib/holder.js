@@ -6,12 +6,12 @@ Holder.js - client side image placeholders
 //Libraries and functions
 var onDomReady = require('./vendor/ondomready');
 var querystring = require('./vendor/querystring');
-var lightenColor = require('./vendor/lightenColor');
 
 var SceneGraph = require('./scenegraph');
 var utils = require('./utils');
 var SVG = require('./svg');
 var DOM = require('./dom');
+var Color = require('./color');
 
 var extend = utils.extend;
 var dimensionCheck = utils.dimensionCheck;
@@ -660,9 +660,16 @@ function buildSceneGraph(scene) {
 
     if (scene.flags.outline) {
         //todo: generalize darken/lighten to more than RRGGBB hex values
-        //todo: add contrasting outline for dark backgrounds
+        var outlineColor = new Color(holderBg.properties.fill);
+
+        if (outlineColor.lighterThan('7f7f7f')) {
+            outlineColor.lighten(-0.1);
+        } else {
+            outlineColor.lighten(0.1);
+        }
+
         holderBg.properties.outline = {
-            fill: '#' + lightenColor(holderBg.properties.fill.substr(1), -10),
+            fill: outlineColor.toHex(true),
             width: 2
         };
     }
