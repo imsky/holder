@@ -116,7 +116,7 @@ Color.prototype.mix = function (color, multiplier) {
 
 /**
  * Returns the result of blending another color on top of current color with alpha
- * @param color Color to blend with
+ * @param color Color to blend on top of current color, i.e. "Ca"
  */
  //todo: see if .blendAlpha can be merged into .mix
 Color.prototype.blendAlpha = function (color) {
@@ -124,16 +124,13 @@ Color.prototype.blendAlpha = function (color) {
         color = new Color(color);
     }
 
-    var r = this.rgb.r;
-    var g = this.rgb.g;
-    var b = this.rgb.b;
-
-    var alpha = color.alpha;
+    var Ca = color;
+    var Cb = this;
 
     //todo: write alpha blending function
-    r = alpha * color.rgb.r + (1 - alpha) * r;
-    g = alpha * color.rgb.g + (1 - alpha) * g;
-    b = alpha * color.rgb.b + (1 - alpha) * b;
+    var r = Ca.alpha * Ca.rgb.r + (1 - Ca.alpha) * Cb.rgb.r;
+    var g = Ca.alpha * Ca.rgb.g + (1 - Ca.alpha) * Cb.rgb.g;
+    var b = Ca.alpha * Ca.rgb.b + (1 - Ca.alpha) * Cb.rgb.b;
 
     return new Color(Color.rgbToHex(r, g, b));
 };
