@@ -1,4 +1,4 @@
-var Color = function (color) {
+var Color = function (color, options) {
     //todo: support array->color conversion
     //todo: support rgba, hsla, and rrggbbaa notation
     if (typeof color !== 'string') return;
@@ -15,24 +15,32 @@ var Color = function (color) {
 
     if (color.length !== 6) return;
 
-    this.set(parseInt(color, 16));
+    this.alpha = 1;
+
+    if (options) {
+        this.alpha = options.alpha || this.alpha;
+    }
+
+    colorSet.call(this, parseInt(color, 16));
 };
 
+Color.rgbToHex = function (r, g, b) {
+    return (((r | 0) << 16) + ((g | 0) << 8) + (b | 0)).toString(16);
+};
 
 /**
  * Sets the color from a raw RGB888 integer
  * @param raw RGB888 representation of color
  */
-Color.prototype.set = function (raw) {
-    var triple = raw;
-
+ //todo: refactor into a more generic method
+function colorSet (raw) {
     this.rgb = {};
     this.yuv = {};
-    this.raw = triple;
+    this.raw = raw;
 
-    this.rgb.r = (triple & 0xFF0000) >> 16;
-    this.rgb.g = (triple & 0x00FF00) >> 8;
-    this.rgb.b = (triple & 0x0000FF);
+    this.rgb.r = (raw & 0xFF0000) >> 16;
+    this.rgb.g = (raw & 0x00FF00) >> 8;
+    this.rgb.b = (raw & 0x0000FF);
 
     // BT.709
     this.yuv.y = 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
@@ -40,12 +48,13 @@ Color.prototype.set = function (raw) {
     this.yuv.v = 0.615 * this.rgb.r - 0.55861 * this.rgb.g - 0.05639 * this.rgb.b;
 
     return this;
-};
+}
 
 /**
  * Lighten or darken a color
  * @param multiplier Amount to lighten or darken (-1 to 1)
  */
+ //todo: return new color
 Color.prototype.lighten = function (multiplier) {
     var r = this.rgb.r;
     var g = this.rgb.g;
@@ -53,7 +62,7 @@ Color.prototype.lighten = function (multiplier) {
 
     var m = (255 * multiplier) | 0;
 
-    this.set(((r + m) << 16) + ((g + m) << 8) + (b + m));
+    colorSet.call(this, ((r + m) << 16) + ((g + m) << 8) + (b + m));
     return this;
 };
 
@@ -75,6 +84,58 @@ Color.prototype.lighterThan = function (color) {
     }
 
     return this.yuv.y > color.yuv.y;
+};
+
+/**
+ * Returns the result of mixing current color with another color
+ * @param color Color to mix with
+ * @param multiplier How much to mix with the other color
+ */
+Color.prototype.mix = function (color, multiplier) {
+    if (!(color instanceof Color)) {
+        color = new Color(color);
+    }
+
+    var r = this.rgb.r;
+    var g = this.rgb.g;
+    var b = this.rgb.b;
+    var a = this.alpha;
+
+    var m = typeof multiplier !== 'undefined' ? multiplier : 0.5;
+
+    //todo: write a lerp function
+    r = r + m * (color.rgb.r - r);
+    g = g + m * (color.rgb.g - g);
+    b = b + m * (color.rgb.b - b);
+    a = a + m * (color.alpha - a);
+
+    return new Color(Color.rgbToHex(r, g, b), {
+        'alpha': a
+    });
+};
+
+/**
+ * Returns the result of blending another color on top of current color with alpha
+ * @param color Color to blend with
+ */
+ //todo: see if .blendAlpha can be merged into .mix
+Color.prototype.blendAlpha = function (color) {
+    if (!(color instanceof Color)) {
+        color = new Color(color);
+    }
+
+    var r = this.rgb.r;
+    var g = this.rgb.g;
+    var b = this.rgb.b;
+
+    var alpha = color.alpha;
+
+    //todo: write alpha blending function
+    r = alpha * color.rgb.r + (1 - alpha) * r;
+    g = alpha * color.rgb.g + (1 - alpha) * g;
+    b = alpha * color.rgb.b + (1 - alpha) * b;
+
+    return new Color(Color.rgbToHex(r, g, b));
 };
 
 module.exports = Color;

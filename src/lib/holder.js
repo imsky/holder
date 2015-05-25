@@ -330,6 +330,11 @@ function parseQueryString(url, holder) {
             holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
         }
 
+        //todo: add automatic foreground to themes without foreground
+        if (options.bg && !options.fg) {
+            holder.autoFg = true;
+        }
+
         if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
             holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
         }
@@ -513,8 +518,8 @@ function prepareDOMElement(prepSettings) {
 function render(renderSettings) {
     var image = null;
     var mode = renderSettings.mode;
-    var holderSettings = renderSettings.holderSettings;
     var el = renderSettings.el;
+    var holderSettings = renderSettings.holderSettings;
     var engineSettings = renderSettings.engineSettings;
 
     switch (engineSettings.renderer) {
@@ -674,11 +679,21 @@ function buildSceneGraph(scene) {
         };
     }
 
+    var holderTextColor = scene.theme.foreground;
+
+    if (scene.flags.autoFg) {
+        var holderBgColor = new Color(holderBg.properties.fill);
+        var lightColor = new Color('fff');
+        var darkColor = new Color('000', { 'alpha': 0.7 });
+
+        holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
+    }
+
     var holderTextGroup = new Shape.Group('holderTextGroup', {
         text: scene.text,
         align: scene.align,
         font: scene.font,
-        fill: scene.theme.foreground
+        fill: holderTextColor
     });
 
     holderTextGroup.moveTo(null, null, 1);

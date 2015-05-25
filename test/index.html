@@ -13,6 +13,8 @@
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
 	.thumb.fullpage {float:none;clear:both;width:auto;height:100px;margin:25px}
 	.autosize img {width:100%}
+	.float-holder { overflow:hidden; }
+	.float-holder img { float: left; }
 	#holder1 {background:url('?holder.js/300x200?text=Background%20placeholder&bg=000&fg=fff');width:300px;height:200px}
 </style>
 </head>
@@ -153,10 +155,10 @@
 	</div>
 </div>
 <div class="thumb">
-	<div style="overflow:hidden">
-	<img data-src="holder.js/50x75?theme=sky" style="float:left">
-	<img data-src="holder.js/100x75?theme=vine" style="float:left">
-	<img data-src="holder.js/150x75?theme=lava" style="float:left">
+	<div class="float-holder">
+	<img data-src="holder.js/50x75?theme=sky">
+	<img data-src="holder.js/100x75?theme=vine">
+	<img data-src="holder.js/150x75?theme=lava">
 	</div>
 	<div style="overflow:hidden">
 	<img data-src="holder.js/300x125?theme=industrial" style="float:left">
@@ -178,6 +180,30 @@
 	</div>
 	<div class="caption">
 		SVG and canvas placeholders with outline enabled
+	</div>
+</div>
+<div class="thumb">
+	<div>
+		<img data-src="holder.js/100px100?bg=34495e">
+		<img data-src="holder.js/100px100?bg=f1c40f">
+	</div>
+	<div class="caption">
+		Placeholders with automatic foreground color
+	</div>
+</div>
+<div class="thumb">
+	<div class="float-holder">
+		<img data-src="holder.js/25px100?bg=000000">
+		<img data-src="holder.js/25px100?bg=222222">
+		<img data-src="holder.js/25px100?bg=444444">
+		<img data-src="holder.js/25px100?bg=666666">
+		<img data-src="holder.js/25px100?bg=888888">
+		<img data-src="holder.js/25px100?bg=aaaaaa">
+		<img data-src="holder.js/25px100?bg=cccccc">
+		<img data-src="holder.js/25px100?bg=ffffff">
+	</div>
+	<div class="caption">
+		Placeholders with automatic foreground color, grayscale
 	</div>
 </div>
 <div class="fullpage thumb">

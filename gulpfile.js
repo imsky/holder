@@ -54,7 +54,7 @@ gulp.task('build', ['jshint'], function() {
 
 gulp.task('bundle', ['build'], function() {
     return gulp.src([
-            'src/lib/polyfills.js',
+            'src/lib/vendor/polyfills.js',
             'holder.js',
             'src/meteor/shim.js'
         ])
