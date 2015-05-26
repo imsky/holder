@@ -54,7 +54,6 @@ function colorSet (raw) {
  * Lighten or darken a color
  * @param multiplier Amount to lighten or darken (-1 to 1)
  */
- //todo: return new color
 Color.prototype.lighten = function (multiplier) {
     var r = this.rgb.r;
     var g = this.rgb.g;
@@ -62,8 +61,7 @@ Color.prototype.lighten = function (multiplier) {
 
     var m = (255 * multiplier) | 0;
 
-    colorSet.call(this, ((r + m) << 16) + ((g + m) << 8) + (b + m));
-    return this;
+    return new Color(Color.rgbToHex(r + m, g + m, b + m));
 };
 
 /**
@@ -91,6 +89,7 @@ Color.prototype.lighterThan = function (color) {
  * @param color Color to mix with
  * @param multiplier How much to mix with the other color
  */
+ /*
 Color.prototype.mix = function (color, multiplier) {
     if (!(color instanceof Color)) {
         color = new Color(color);
@@ -113,6 +112,7 @@ Color.prototype.mix = function (color, multiplier) {
         'alpha': a
     });
 };
+*/
 
 /**
  * Returns the result of blending another color on top of current color with alpha

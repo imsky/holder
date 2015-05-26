@@ -601,7 +601,7 @@ function render(renderSettings) {
                         'type': 'image/svg+xml'
                     });
                 }
-            }, 100);
+            }, 150);
         }
     }
     //todo: account for re-rendering
@@ -667,11 +667,7 @@ function buildSceneGraph(scene) {
         //todo: generalize darken/lighten to more than RRGGBB hex values
         var outlineColor = new Color(holderBg.properties.fill);
 
-        if (outlineColor.lighterThan('7f7f7f')) {
-            outlineColor.lighten(-0.1);
-        } else {
-            outlineColor.lighten(0.1);
-        }
+        outlineColor = outlineColor.lighten(outlineColor.lighterThan('7f7f7f') ? -0.1 : 0.1);
 
         holderBg.properties.outline = {
             fill: outlineColor.toHex(true),
