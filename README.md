@@ -36,23 +36,21 @@ The above tag will render as a placeholder 300 pixels wide and 200 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
-## Options
+## Placeholder options
 
 Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
 
-| Option                       | Property | Example                            |
-|------------------------------|----------|------------------------------------|
-| Theme                        | theme    | `holder.js/300x200?theme=sky`      |
-| Random theme                 | random   | `holder.js/300x200?random=yes`     |
-| Background color             | bg       | `holder.js/300x200?bg=2a2025`      |
-| Outline                      | outline  | `holder.js/300x200?outline=yes`    |
-| Text                         | text     | `holder.js/300x200?text=Hello`     |
-| Text color                   | fg       | `holder.js/300x200?fg=ffffff`      |
-| Text size                    | size     | `holder.js/300x200?size=50`        |
-| Text font                    | font     | `holder.js/300x200?font=Helvetica` |
-| Text alignment               | align    | `holder.js/300x200?align=left`     |
+* `theme`: The theme to use for the placeholder. Example: `holder.js/300x200?theme=sky`
+* `random`: Use random theme. Example: `holder.js/300x200?random=yes`
+* `bg`: Background color. Example: `holder.js/300x200?bg=2a2025`
+* `fg`: Foreground (text) color. Example: `holder.js/300x200?fg=ffffff`
+* `text`: Custom text. Example: `holder.js/300x200?text=Hello`
+* `size`: Custom text size. Defaults to `pt` units. Example: `holder.js/300x200?size=50`
+* `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
+* `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
+* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
 
-## Themes
+### Themes
 
 ![](http://imsky.github.io/holder/images/holder_sky.png)![](http://imsky.github.io/holder/images/holder_vine.png)![](http://imsky.github.io/holder/images/holder_lava.png)
 
@@ -60,7 +58,87 @@ Holder includes support for themes, to help placeholders blend in with your layo
 
 There are 6 default themes: ``sky``, ``vine``, ``lava``, ``gray``, ``industrial``, and ``social``.
 
-## Text
+#### Customizing themes
+
+Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
+
+```js
+Holder.addTheme("dark", {
+  background: "#000",
+  foreground: "#aaa",
+  size: 11,
+  font: "Monaco",
+  fontweight: "normal"
+});
+```
+
+If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
+
+```js
+Holder.addTheme("thumbnail", { background: "#fff", text: "Thumbnail" });
+```
+
+#### Using custom themes
+
+There are two ways to use custom themes with Holder:
+
+* Include theme at runtime to render placeholders already using the theme name
+* Include theme at any point and re-render placeholders that are using the theme name
+
+The first approach is the easiest. After you include ``holder.js``, add a ``script`` tag that adds the theme you want:
+
+```html
+<script src="holder.js"></script>
+<script>
+Holder.addTheme("bright", {
+  background: "white", foreground: "gray", size: 12
+});
+</script>
+```
+
+The second approach requires that you call ``run`` after you add the theme, like this:
+
+```js
+Holder.addTheme("bright", {background: "white", foreground: "gray", size: 12}).run();
+```
+
+#### Using custom themes and domain on specific images
+
+You can use Holder in different areas on different images with custom themes:
+
+```html
+<img data-src="example.com/100x100?theme=simple" id="new">
+```
+
+```js
+Holder.run({
+  domain: "example.com",
+  themes: {
+    "simple": {
+      background: "#fff",
+      foreground: "#000",
+      size: 12
+    }
+  },
+  images: "#new"
+});
+```
+
+#### Inserting an image with custom theme
+
+You can add a placeholder programmatically by chaining Holder calls:
+
+```js
+Holder.addTheme("new", {
+  foreground: "#ccc",
+  background: "#000",
+  size: 10
+}).addImage("holder.js/200x100?theme=new", "body").run();
+```
+
+The first argument in ``addImage`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
+
+### Text
 
 Holder automatically adds line breaks to text that goes outside of the image boundaries. If the text is so long it goes out of both horizontal and vertical boundaries, the text is moved to the top. If you prefer to control the line breaks, you can add `\n` to the `text` property:
 
@@ -88,73 +166,7 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 
 `<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified. As with `<img>` placeholders, the `data-src` attribute is more reliable than the `data` attribute.
 
-## Customizing themes
-
-Themes have 5 properties: ``foreground``, ``background``, ``size``, ``font`` and ``fontweight``. The ``size`` property specifies the minimum font size for the theme. The ``fontweight`` default value is ``bold``. You can create a sample theme like this:
-
-```js
-Holder.addTheme("dark", {
-  background: "#000",
-  foreground: "#aaa",
-  size: 11,
-  font: "Monaco",
-  fontweight: "normal"
-});
-```
-
-If you have a group of placeholders where you'd like to use particular text, you can do so by adding a ``text`` property to the theme:
-
-```js
-Holder.addTheme("thumbnail", { background: "#fff", text: "Thumbnail" });
-```
-
-## Using custom themes
-
-There are two ways to use custom themes with Holder:
-
-* Include theme at runtime to render placeholders already using the theme name
-* Include theme at any point and re-render placeholders that are using the theme name
-
-The first approach is the easiest. After you include ``holder.js``, add a ``script`` tag that adds the theme you want:
-
-```html
-<script src="holder.js"></script>
-<script>
-Holder.addTheme("bright", {
-  background: "white", foreground: "gray", size: 12
-});
-</script>
-```
-
-The second approach requires that you call ``run`` after you add the theme, like this:
-
-```js
-Holder.addTheme("bright", {background: "white", foreground: "gray", size: 12}).run();
-```
-
-## Using custom themes and domain on specific images
-
-You can use Holder in different areas on different images with custom themes:
-
-```html
-<img data-src="example.com/100x100?theme=simple" id="new">
-```
-
-```js
-Holder.run({
-  domain: "example.com",
-  themes: {
-    "simple": {
-      background: "#fff",
-      foreground: "#000",
-      size: 12
-    }
-  },
-  images: "#new"
-});
-```
-
-## Fluid placeholders
+### Fluid placeholders
 
 Specifying a dimension in percentages creates a fluid placeholder that responds to media queries.
 
@@ -164,7 +176,7 @@ Specifying a dimension in percentages creates a fluid placeholder that responds 
 
 By default, the fluid placeholder will show its current size in pixels. To display the original dimensions, i.e. 100%x75, set the ``textmode`` flag to ``literal`` like so: `holder.js/100px75?textmode=literal`.
 
-## Automatically sized placeholders
+### Automatically sized placeholders
 
 If you'd like to avoid Holder enforcing an image size, use the ``auto`` flag like so:
 
@@ -176,7 +188,7 @@ The above will render a placeholder without any embedded CSS for height or width
 
 To show the current size of an automatically sized placeholder, set the ``textmode`` flag to ``exact`` like so: `holder.js/200x200?auto=yes&textmode=exact`.
 
-## Preventing updates on window resize
+### Preventing updates on window resize
 
 Both fluid placeholders and automatically sized placeholders in exact mode are updated when the window is resized. To set whether or not a particular image is updated on window resize, you can use the `setResizeUpdate` method like so:
 
@@ -215,39 +227,21 @@ The Holder URL in CSS should have a `?` in front. Like in image placeholders, yo
 
 **Important:** Make sure to define a height and/or width for elements with background placeholders. Fluid background placeholders are not yet supported.
 
-## Custom settings
+## Runtime settings
 
-Holder extends its default settings with the settings you provide, so you only have to include those settings you want changed. For example, you can run Holder on a specific domain like this:
+Holder provides several options at runtime that affect the process of image generation. These are passed in through `Holder.run` calls.
 
-```js
-Holder.run({domain:"example.com"});
-```
+* `domain`: The domain to use for image generation. Default value: `holder.js`.
+* `dataAttr`: The HTML attribute used to define a fallback to the native `src` attribute. Default value: `data-src`.
+* `renderer`: The renderer to use. Options available: `svg`, `canvas`. Default value: `svg`.
+* `images`: The CSS selector used for finding `img` tags. Default value: `img`.
+* `objects`: The CSS selector used for finding `object` placeholders. Default value: `object`.
+* `bgnodes`: The CSS selector used for finding elements that have background palceholders. Default value: `body .holderjs`.
+* `stylenodes`: The CSS selector used for finding stylesheets to import into SVG placeholders. Default value: `head link.holderjs`.
 
-## Using custom settings on load
+### Using custom settings on load
 
 You can prevent Holder from running its default configuration by executing ``Holder.run`` with your custom settings right after including ``holder.js``. However, you'll have to execute ``Holder.run`` again to render any placeholders that use the default configuration.
-
-## Inserting an image with optional custom theme
-
-You can add a placeholder programmatically by chaining Holder calls:
-
-```js
-Holder.addTheme("new", {
-  foreground: "#ccc",
-  background: "#000",
-  size: 10
-}).addImage("holder.js/200x100?theme=new", "body").run();
-```
-
-The first argument in ``addImage`` is the ``src`` attribute, and the second is a CSS selector of the parent element.
-
-## Using different renderers
-
-Holder has three renderers: canvas, SVG, and HTML. The SVG renderer is used by default, however you can set the renderer using the `renderer` option, with either `svg`, `canvas`, or `html` values.
-
-```js
-Holder.run({renderer: 'canvas'});
-```
 
 ## Using with [lazyload.js](https://github.com/tuupola/jquery_lazyload)
 
