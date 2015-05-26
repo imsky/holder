@@ -207,7 +207,7 @@ Holder.setResizeUpdate(img, true);
 
 This will enable updates and immediately render the placeholder.
 
-## Background placeholders
+### Background placeholders
 
 Holder can render placeholders as background images for elements with the `holderjs` class, like this:
 
@@ -238,6 +238,7 @@ Holder provides several options at runtime that affect the process of image gene
 * `objects`: The CSS selector used for finding `object` placeholders. Default value: `object`.
 * `bgnodes`: The CSS selector used for finding elements that have background palceholders. Default value: `body .holderjs`.
 * `stylenodes`: The CSS selector used for finding stylesheets to import into SVG placeholders. Default value: `head link.holderjs`.
+* `lineWrapRatio`: The ratio at which text will wrap from the edge of the image. Default value: `0.9`.
 
 ### Using custom settings on load
 
@@ -262,7 +263,7 @@ Because Meteor includes scripts at the top of the document by default, the DOM m
 * Firefox 3+
 * Safari 4+
 * Internet Explorer 9+ (with partial support for 6-8)
-* Opera 15+ (with partial support for 12)
+* Opera 12+
 * Android (with fallback)
 
 ## License

@@ -53,7 +53,7 @@ var Holder = {
             for (var i = 0, l = node.length; i < l; i++) {
                 var img = DOM.newEl('img');
                 var domProps = {};
-                domProps[App.vars.dataAttr] = src;
+                domProps[App.setup.dataAttr] = src;
                 DOM.setAttr(img, domProps);
                 node[i].appendChild(img);
             }
@@ -89,7 +89,8 @@ var Holder = {
         var options = extend(App.settings, userOptions);
 
         App.vars.preempted = true;
-        App.vars.dataAttr = options.dataAttr || App.vars.dataAttr;
+        App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
+        App.vars.lineWrapRatio = options.lineWrapRatio || App.setup.lineWrapRatio;
 
         engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
         if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
@@ -219,7 +220,6 @@ var App = {
         objects: 'object',
         bgnodes: 'body .holderjs',
         stylenodes: 'head link.holderjs',
-        stylesheets: [],
         themes: {
             'gray': {
                 background: '#EEEEEE',
@@ -711,7 +711,7 @@ function buildSceneGraph(scene) {
         parent.height += line.height;
     }
 
-    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+    var sceneMargin = scene.width * App.vars.lineWrapRatio;
     var maxLineWidth = sceneMargin;
 
     if (tpdata.lineCount > 1) {
@@ -723,7 +723,7 @@ function buildSceneGraph(scene) {
 
         //Double margin so that left/right-aligned next is not flush with edge of image
         if (scene.align === 'left' || scene.align === 'right') {
-            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+            maxLineWidth = scene.width * (1 - (1 - (App.vars.lineWrapRatio)) * 2);
         }
 
         for (var i = 0; i < tpdata.words.length; i++) {
@@ -1013,7 +1013,7 @@ var stagingRenderer = (function() {
             var stagingTextBBox = stagingText.getBBox();
 
             //Get line count and split the string into words
-            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.setup.lineWrapRatio));
+            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.vars.lineWrapRatio));
             var words = htgProps.text.split(' ');
             var newlines = htgProps.text.match(/\\n/g);
             lineCount += newlines == null ? 0 : newlines.length;
@@ -1272,6 +1272,7 @@ App.setup = {
     supportsCanvas: false,
     supportsSVG: false,
     lineWrapRatio: 0.9,
+    dataAttr: 'data-src',
     renderers: ['html', 'canvas', 'svg']
 };
 
@@ -1288,8 +1289,7 @@ App.vars = {
     invisibleId: 0,
     visibilityCheckStarted: false,
     debounceTimer: null,
-    cache: {},
-    dataAttr: 'data-src'
+    cache: {}
 };
 
 //Pre-flight

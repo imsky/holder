@@ -87,6 +87,12 @@
 	</div>
 </div>
 <div class="thumb">
+	<img data-src="holder.margin/300x200?theme=lava&text=The five boxing wizards jump quickly.&align=right">
+	<div class="caption">
+		 Placeholder with right-aligned text and custom margin
+	</div>
+</div>
+<div class="thumb">
 	<script>
 	var r = Math.random();
 	if(r > 0.5){
@@ -280,6 +286,11 @@ Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).ru
 
 Holder.addTheme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
 	domain: "fontawesome.holder"
+});
+
+Holder.run({
+	domain: 'holder.margin',
+	lineWrapRatio: 0.5
 });
 
 Holder.run({
