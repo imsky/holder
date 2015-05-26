@@ -35,13 +35,13 @@ gulp.task('jshint', function() {
 });
 
 gulp.task('todo', function() {
-    return gulp.src('src/holder.js')
+    return gulp.src('src/index.js')
         .pipe(todo())
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('build', ['beautify'], function() {
-    return gulp.src('src/holder.js')
+gulp.task('build', ['jshint'], function() {
+    return gulp.src('src/index.js')
         .pipe(webpack({
             output: {
                 library: 'Holder',
@@ -54,7 +54,7 @@ gulp.task('build', ['beautify'], function() {
 
 gulp.task('bundle', ['build'], function() {
     return gulp.src([
-            'src/lib/polyfills.js',
+            'src/lib/vendor/polyfills.js',
             'holder.js',
             'src/meteor/shim.js'
         ])
@@ -79,10 +79,10 @@ gulp.task('banner', ['minify'], function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('beautify', ['jshint'], function() {
-    return gulp.src(['src/*.js'])
+gulp.task('beautify', function() {
+    return gulp.src(['src/lib/*.js'])
         .pipe(beautify())
-        .pipe(gulp.dest('src/'));
+        .pipe(gulp.dest('src/lib/'));
 });
 
 gulp.task('meteor', function() {

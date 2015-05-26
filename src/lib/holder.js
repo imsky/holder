@@ -1,16 +1,19 @@
 /*
 Holder.js - client side image placeholders
-© 2012-2015 Ivan Malopinsky - http://imsky.co
+(c) 2012-2015 Ivan Malopinsky - http://imsky.co
 */
 
 //Libraries and functions
-var onDomReady = require('./lib/ondomready');
+var onDomReady = require('./vendor/ondomready');
+var querystring = require('./vendor/querystring');
+
 var SceneGraph = require('./scenegraph');
 var utils = require('./utils');
-var querystring = require('./lib/querystring');
+var SVG = require('./svg');
+var DOM = require('./dom');
+var Color = require('./color');
 
 var extend = utils.extend;
-var getNodeArray = utils.getNodeArray;
 var dimensionCheck = utils.dimensionCheck;
 
 //Constants and definitions
@@ -44,13 +47,14 @@ var Holder = {
      * @param {string} el Selector of target element(s)
      */
     addImage: function(src, el) {
+        //todo: use jquery fallback if available for all QSA references
         var node = document.querySelectorAll(el);
         if (node.length) {
             for (var i = 0, l = node.length; i < l; i++) {
-                var img = newEl('img');
+                var img = DOM.newEl('img');
                 var domProps = {};
-                domProps[App.vars.dataAttr] = src;
-                setAttr(img, domProps);
+                domProps[App.setup.dataAttr] = src;
+                DOM.setAttr(img, domProps);
                 node[i].appendChild(img);
             }
         }
@@ -79,22 +83,24 @@ var Holder = {
      * @param {Object} userOptions Options object, can contain domain, themes, images, and bgnodes properties
      */
     run: function(userOptions) {
+        //todo: split processing into separate queues
         userOptions = userOptions || {};
         var engineSettings = {};
         var options = extend(App.settings, userOptions);
 
         App.vars.preempted = true;
-        App.vars.dataAttr = options.dataAttr || App.vars.dataAttr;
+        App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
+        App.vars.lineWrapRatio = options.lineWrapRatio || App.setup.lineWrapRatio;
 
         engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
         if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
             engineSettings.renderer = App.setup.supportsSVG ? 'svg' : (App.setup.supportsCanvas ? 'canvas' : 'html');
         }
 
-        var images = getNodeArray(options.images);
-        var bgnodes = getNodeArray(options.bgnodes);
-        var stylenodes = getNodeArray(options.stylenodes);
-        var objects = getNodeArray(options.objects);
+        var images = DOM.getNodeArray(options.images);
+        var bgnodes = DOM.getNodeArray(options.bgnodes);
+        var stylenodes = DOM.getNodeArray(options.stylenodes);
+        var objects = DOM.getNodeArray(options.objects);
 
         engineSettings.stylesheets = [];
         engineSettings.svgXMLStylesheet = true;
@@ -105,7 +111,7 @@ var Holder = {
             if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
                 var href = styleNode.attributes.href.value;
                 //todo: write isomorphic relative-to-absolute URL function
-                var proxyLink = newEl('a');
+                var proxyLink = DOM.newEl('a');
                 proxyLink.href = href;
                 var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
                 engineSettings.stylesheets.push(stylesheetURL);
@@ -117,13 +123,7 @@ var Holder = {
             if (!global.getComputedStyle) continue;
             var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
             var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
-            var rawURL = null;
-
-            if (dataBackgroundImage == null) {
-                rawURL = backgroundImage;
-            } else {
-                rawURL = dataBackgroundImage;
-            }
+            var rawURL = dataBackgroundImage || backgroundImage;
 
             var holderURL = null;
             var holderString = '?' + options.domain + '/';
@@ -220,7 +220,6 @@ var App = {
         objects: 'object',
         bgnodes: 'body .holderjs',
         stylenodes: 'head link.holderjs',
-        stylesheets: [],
         themes: {
             'gray': {
                 background: '#EEEEEE',
@@ -252,69 +251,6 @@ var App = {
         size: 10,
         units: 'pt',
         scale: 1 / 16
-    },
-    //todo: remove in 2.8
-    flags: {
-        dimensions: {
-            regex: /^(\d+)x(\d+)$/,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    width: +exec[1],
-                    height: +exec[2]
-                };
-            }
-        },
-        fluid: {
-            regex: /^([0-9]+%?)x([0-9]+%?)$/,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    width: exec[1],
-                    height: exec[2]
-                };
-            }
-        },
-        colors: {
-            regex: /(?:#|\^)([0-9a-f]{3,})\:(?:#|\^)([0-9a-f]{3,})/i,
-            output: function(val) {
-                var exec = this.regex.exec(val);
-                return {
-                    foreground: '#' + exec[2],
-                    background: '#' + exec[1]
-                };
-            }
-        },
-        text: {
-            regex: /text\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1].replace('\\/', '/');
-            }
-        },
-        font: {
-            regex: /font\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        },
-        auto: {
-            regex: /^auto$/
-        },
-        textmode: {
-            regex: /textmode\:(.*)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        },
-        random: {
-            regex: /^random$/
-        },
-        size: {
-            regex: /size\:(\d+)/,
-            output: function(val) {
-                return this.regex.exec(val)[1];
-            }
-        }
     }
 };
 
@@ -353,11 +289,7 @@ function parseURL(url, options) {
         instanceOptions: options
     };
 
-    if (url.match(/([\d]+p?)x([\d]+p?)(?:\?|$)/)) {
-        return parseQueryString(url, holder);
-    } else {
-        return parseFlags(url, holder);
-    }
+    return parseQueryString(url, holder);
 }
 
 /**
@@ -398,6 +330,11 @@ function parseQueryString(url, holder) {
             holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
         }
 
+        //todo: add automatic foreground to themes without foreground
+        if (options.bg && !options.fg) {
+            holder.autoFg = true;
+        }
+
         if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
             holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
         }
@@ -430,6 +367,8 @@ function parseQueryString(url, holder) {
 
         holder.auto = utils.truthy(options.auto);
 
+        holder.outline = utils.truthy(options.outline);
+
         if (utils.truthy(options.random)) {
             App.vars.cache.themeKeys = App.vars.cache.themeKeys || Object.keys(holder.instanceOptions.themes);
             var _theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
@@ -438,88 +377,6 @@ function parseQueryString(url, holder) {
     }
 
     return holder;
-}
-
-//todo: remove in 2.8
-/**
- * Processes a Holder URL and extracts flags
- *
- * @private
- * @deprecated
- * @param url URL
- * @param holder Staging Holder object
- */
-function parseFlags(url, holder) {
-    var render = false;
-    var vtab = String.fromCharCode(11);
-    var flags = url.replace(/([^\\])\//g, '$1' + vtab).split(vtab);
-    var uriRegex = /%[0-9a-f]{2}/gi;
-    var options = holder.instanceOptions;
-
-    holder.holderURL = [];
-
-    for (var fl = flags.length, j = 0; j < fl; j++) {
-        var flag = flags[j];
-        if (flag.match(uriRegex)) {
-            try {
-                flag = decodeURIComponent(flag);
-            } catch (e) {
-                flag = flags[j];
-            }
-        }
-
-        var push = false;
-
-        if (App.flags.dimensions.match(flag)) {
-            render = true;
-            holder.dimensions = App.flags.dimensions.output(flag);
-            push = true;
-        } else if (App.flags.fluid.match(flag)) {
-            render = true;
-            holder.dimensions = App.flags.fluid.output(flag);
-            holder.fluid = true;
-            push = true;
-        } else if (App.flags.textmode.match(flag)) {
-            holder.textmode = App.flags.textmode.output(flag);
-            push = true;
-        } else if (App.flags.colors.match(flag)) {
-            var colors = App.flags.colors.output(flag);
-            holder.theme = extend(holder.theme, colors);
-            push = true;
-        } else if (options.themes[flag]) {
-            //If a theme is specified, it will override custom colors
-            if (options.themes.hasOwnProperty(flag)) {
-                holder.theme = extend(options.themes[flag], null);
-            }
-            push = true;
-        } else if (App.flags.font.match(flag)) {
-            holder.font = App.flags.font.output(flag);
-            push = true;
-        } else if (App.flags.auto.match(flag)) {
-            holder.auto = true;
-            push = true;
-        } else if (App.flags.text.match(flag)) {
-            holder.text = App.flags.text.output(flag);
-            push = true;
-        } else if (App.flags.size.match(flag)) {
-            holder.size = App.flags.size.output(flag);
-            push = true;
-        } else if (App.flags.random.match(flag)) {
-            if (App.vars.cache.themeKeys == null) {
-                App.vars.cache.themeKeys = Object.keys(options.themes);
-            }
-            var theme = App.vars.cache.themeKeys[0 | Math.random() * App.vars.cache.themeKeys.length];
-            holder.theme = extend(options.themes[theme], null);
-            push = true;
-        }
-
-        if (push) {
-            holder.holderURL.push(flag);
-        }
-    }
-    holder.holderURL.unshift(options.domain);
-    holder.holderURL = holder.holderURL.join('/');
-    return render ? holder : false;
 }
 
 /**
@@ -571,14 +428,14 @@ function prepareDOMElement(prepSettings) {
 
     if (mode == 'background') {
         if (el.getAttribute('data-background-src') == null) {
-            setAttr(el, {
+            DOM.setAttr(el, {
                 'data-background-src': holderURL
             });
         }
     } else {
         var domProps = {};
         domProps[App.vars.dataAttr] = holderURL;
-        setAttr(el, domProps);
+        DOM.setAttr(el, domProps);
     }
 
     flags.theme = theme;
@@ -590,7 +447,7 @@ function prepareDOMElement(prepSettings) {
     };
 
     if (mode == 'image' || mode == 'fluid') {
-        setAttr(el, {
+        DOM.setAttr(el, {
             'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
         });
     }
@@ -661,8 +518,8 @@ function prepareDOMElement(prepSettings) {
 function render(renderSettings) {
     var image = null;
     var mode = renderSettings.mode;
-    var holderSettings = renderSettings.holderSettings;
     var el = renderSettings.el;
+    var holderSettings = renderSettings.holderSettings;
     var engineSettings = renderSettings.engineSettings;
 
     switch (engineSettings.renderer) {
@@ -714,14 +571,14 @@ function render(renderSettings) {
         el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
     } else {
         if (el.nodeName.toLowerCase() === 'img') {
-            setAttr(el, {
+            DOM.setAttr(el, {
                 'src': image
             });
         } else if (el.nodeName.toLowerCase() === 'object') {
-            setAttr(el, {
+            DOM.setAttr(el, {
                 'data': image
             });
-            setAttr(el, {
+            DOM.setAttr(el, {
                 'type': 'image/svg+xml'
             });
         }
@@ -733,22 +590,22 @@ function render(renderSettings) {
                 }
                 //todo: refactor this code into a function
                 if (el.nodeName.toLowerCase() === 'img') {
-                    setAttr(el, {
+                    DOM.setAttr(el, {
                         'src': image
                     });
                 } else if (el.nodeName.toLowerCase() === 'object') {
-                    setAttr(el, {
+                    DOM.setAttr(el, {
                         'data': image
                     });
-                    setAttr(el, {
+                    DOM.setAttr(el, {
                         'type': 'image/svg+xml'
                     });
                 }
-            }, 100);
+            }, 150);
         }
     }
     //todo: account for re-rendering
-    setAttr(el, {
+    DOM.setAttr(el, {
         'data-holder-rendered': true
     });
 }
@@ -806,11 +663,33 @@ function buildSceneGraph(scene) {
     holderBg.resize(scene.width, scene.height);
     sceneGraph.root.add(holderBg);
 
+    if (scene.flags.outline) {
+        //todo: generalize darken/lighten to more than RRGGBB hex values
+        var outlineColor = new Color(holderBg.properties.fill);
+
+        outlineColor = outlineColor.lighten(outlineColor.lighterThan('7f7f7f') ? -0.1 : 0.1);
+
+        holderBg.properties.outline = {
+            fill: outlineColor.toHex(true),
+            width: 2
+        };
+    }
+
+    var holderTextColor = scene.theme.foreground;
+
+    if (scene.flags.autoFg) {
+        var holderBgColor = new Color(holderBg.properties.fill);
+        var lightColor = new Color('fff');
+        var darkColor = new Color('000', { 'alpha': 0.285714 });
+
+        holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
+    }
+
     var holderTextGroup = new Shape.Group('holderTextGroup', {
         text: scene.text,
         align: scene.align,
         font: scene.font,
-        fill: scene.theme.foreground
+        fill: holderTextColor
     });
 
     holderTextGroup.moveTo(null, null, 1);
@@ -832,7 +711,7 @@ function buildSceneGraph(scene) {
         parent.height += line.height;
     }
 
-    var sceneMargin = scene.width * App.setup.lineWrapRatio;
+    var sceneMargin = scene.width * App.vars.lineWrapRatio;
     var maxLineWidth = sceneMargin;
 
     if (tpdata.lineCount > 1) {
@@ -844,7 +723,7 @@ function buildSceneGraph(scene) {
 
         //Double margin so that left/right-aligned next is not flush with edge of image
         if (scene.align === 'left' || scene.align === 'right') {
-            maxLineWidth = scene.width * (1 - (1 - (App.setup.lineWrapRatio)) * 2);
+            maxLineWidth = scene.width * (1 - (1 - (App.vars.lineWrapRatio)) * 2);
         }
 
         for (var i = 0; i < tpdata.words.length; i++) {
@@ -913,7 +792,6 @@ function buildSceneGraph(scene) {
     }
 
     //todo: renderlist
-
     return sceneGraph;
 }
 
@@ -1097,14 +975,14 @@ var stagingRenderer = (function() {
                 firstTimeSetup = true;
             }
 
-            svg = initSVG(svg, rootNode.properties.width, rootNode.properties.height);
+            svg = SVG.initSVG(svg, rootNode.properties.width, rootNode.properties.height);
             //Show staging element before staging
             svg.style.display = 'block';
 
             if (firstTimeSetup) {
-                stagingText = newEl('text', SVG_NS);
+                stagingText = DOM.newEl('text', SVG_NS);
                 stagingTextNode = tnode(null);
-                setAttr(stagingText, {
+                DOM.setAttr(stagingText, {
                     x: 0
                 });
                 stagingText.appendChild(stagingTextNode);
@@ -1121,7 +999,7 @@ var stagingRenderer = (function() {
 
             var holderTextGroup = rootNode.children.holderTextGroup;
             var htgProps = holderTextGroup.properties;
-            setAttr(stagingText, {
+            DOM.setAttr(stagingText, {
                 'y': htgProps.font.size,
                 'style': utils.cssProps({
                     'font-weight': htgProps.font.weight,
@@ -1135,7 +1013,7 @@ var stagingRenderer = (function() {
             var stagingTextBBox = stagingText.getBBox();
 
             //Get line count and split the string into words
-            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.setup.lineWrapRatio));
+            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.vars.lineWrapRatio));
             var words = htgProps.text.split(' ');
             var newlines = htgProps.text.match(/\\n/g);
             lineCount += newlines == null ? 0 : newlines.length;
@@ -1180,7 +1058,7 @@ var stagingRenderer = (function() {
 })();
 
 var sgCanvasRenderer = (function() {
-    var canvas = newEl('canvas');
+    var canvas = DOM.newEl('canvas');
     var ctx = null;
 
     return function(sceneGraph) {
@@ -1192,8 +1070,33 @@ var sgCanvasRenderer = (function() {
         canvas.height = App.dpr(root.properties.height);
         ctx.textBaseline = 'middle';
 
-        ctx.fillStyle = root.children.holderBg.properties.fill;
-        ctx.fillRect(0, 0, App.dpr(root.children.holderBg.width), App.dpr(root.children.holderBg.height));
+        var bg = root.children.holderBg;
+        var bgWidth = App.dpr(bg.width);
+        var bgHeight = App.dpr(bg.height);
+        //todo: parametrize outline width (e.g. in scene object)
+        var outlineWidth = 2;
+        var outlineOffsetWidth = outlineWidth / 2;
+
+        ctx.fillStyle = bg.properties.fill;
+        ctx.fillRect(0, 0, bgWidth, bgHeight);
+
+        if (bg.properties.outline) {
+            //todo: abstract this into a method
+            ctx.strokeStyle = bg.properties.outline.fill;
+            ctx.lineWidth = bg.properties.outline.width;
+            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
+            // TL, TR, BR, BL
+            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
+            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
+            // Diagonals
+            ctx.moveTo(0, outlineOffsetWidth);
+            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
+            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
+            ctx.lineTo(bgWidth, outlineOffsetWidth);
+            ctx.stroke();
+        }
 
         var textGroup = root.children.holderTextGroup;
         var tgProps = textGroup.properties;
@@ -1218,9 +1121,9 @@ var sgCanvasRenderer = (function() {
 var sgSVGRenderer = (function() {
     //Prevent IE <9 from initializing SVG renderer
     if (!global.XMLSerializer) return;
-    var xml = createXML();
-    var svg = initSVG(null, 0, 0);
-    var bgEl = newEl('rect', SVG_NS);
+    var xml = DOM.createXML();
+    var svg = SVG.initSVG(null, 0, 0);
+    var bgEl = DOM.newEl('rect', SVG_NS);
     svg.appendChild(bgEl);
 
     //todo: create a reusable pool for textNodes, resize if more words present
@@ -1228,7 +1131,7 @@ var sgSVGRenderer = (function() {
     return function(sceneGraph, renderSettings) {
         var root = sceneGraph.root;
 
-        initSVG(svg, root.properties.width, root.properties.height);
+        SVG.initSVG(svg, root.properties.width, root.properties.height);
 
         var groups = svg.querySelectorAll('g');
 
@@ -1238,10 +1141,10 @@ var sgSVGRenderer = (function() {
 
         var holderURL = renderSettings.holderSettings.flags.holderURL;
         var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
-        var sceneGroupEl = newEl('g', SVG_NS);
+        var sceneGroupEl = DOM.newEl('g', SVG_NS);
         var textGroup = root.children.holderTextGroup;
         var tgProps = textGroup.properties;
-        var textGroupEl = newEl('g', SVG_NS);
+        var textGroupEl = DOM.newEl('g', SVG_NS);
         var tpdata = textGroup.textPositionData;
         var textCSSRule = '#' + holderId + ' text { ' +
             utils.cssProps({
@@ -1253,8 +1156,9 @@ var sgSVGRenderer = (function() {
         var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
         var holderCSS = xml.createCDATASection(textCSSRule);
         var styleEl = svg.querySelector('style');
+        var bg = root.children.holderBg;
 
-        setAttr(sceneGroupEl, {
+        DOM.setAttr(sceneGroupEl, {
             id: holderId
         });
 
@@ -1262,13 +1166,38 @@ var sgSVGRenderer = (function() {
         styleEl.appendChild(holderCSS);
 
         sceneGroupEl.appendChild(bgEl);
+
+        //todo: abstract this into a cross-browser SVG outline method
+        if (bg.properties.outline) {
+            var outlineEl = DOM.newEl('path', SVG_NS);
+            var outlineWidth = bg.properties.outline.width;
+            var outlineOffsetWidth = outlineWidth / 2;
+            DOM.setAttr(outlineEl, {
+                'd': [
+                    'M', outlineOffsetWidth, outlineOffsetWidth,
+                    'H', bg.width - outlineOffsetWidth,
+                    'V', bg.height - outlineOffsetWidth,
+                    'H', outlineOffsetWidth,
+                    'V', 0,
+                    'M', 0, outlineOffsetWidth,
+                    'L', bg.width, bg.height - outlineOffsetWidth,
+                    'M', 0, bg.height - outlineOffsetWidth,
+                    'L', bg.width, outlineOffsetWidth
+                ].join(' '),
+                'stroke-width': bg.properties.outline.width,
+                'stroke': bg.properties.outline.fill,
+                'fill': 'none'
+            });
+            sceneGroupEl.appendChild(outlineEl);
+        }
+
         sceneGroupEl.appendChild(textGroupEl);
         svg.appendChild(sceneGroupEl);
 
-        setAttr(bgEl, {
-            'width': root.children.holderBg.width,
-            'height': root.children.holderBg.height,
-            'fill': root.children.holderBg.properties.fill
+        DOM.setAttr(bgEl, {
+            'width': bg.width,
+            'height': bg.height,
+            'fill': bg.properties.fill
         });
 
         textGroup.y += tpdata.boundingBox.height * 0.8;
@@ -1280,10 +1209,10 @@ var sgSVGRenderer = (function() {
                 var x = textGroup.x + line.x + word.x;
                 var y = textGroup.y + line.y + word.y;
 
-                var textEl = newEl('text', SVG_NS);
+                var textEl = DOM.newEl('text', SVG_NS);
                 var textNode = document.createTextNode(null);
 
-                setAttr(textEl, {
+                DOM.setAttr(textEl, {
                     'x': x,
                     'y': y
                 });
@@ -1295,151 +1224,12 @@ var sgSVGRenderer = (function() {
         }
 
         //todo: factor the background check up the chain, perhaps only return reference
-        var svgString = svgStringToDataURI(serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
+        var svgString = SVG.svgStringToDataURI(SVG.serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
         return svgString;
     };
 })();
 
 //Helpers
-
-//todo: move svg-related helpers to a dedicated file
-
-/**
- * Converts serialized SVG to a string suitable for data URI use
- * @param svgString Serialized SVG string
- * @param [base64] Use base64 encoding for data URI
- */
-var svgStringToDataURI = function() {
-    var rawPrefix = 'data:image/svg+xml;charset=UTF-8,';
-    var base64Prefix = 'data:image/svg+xml;charset=UTF-8;base64,';
-
-    return function(svgString, base64) {
-        if (base64) {
-            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
-        } else {
-            return rawPrefix + encodeURIComponent(svgString);
-        }
-    };
-}();
-
-/**
- * Generic new DOM element function
- *
- * @private
- * @param tag Tag to create
- * @param namespace Optional namespace value
- */
-function newEl(tag, namespace) {
-    if (namespace == null) {
-        return document.createElement(tag);
-    } else {
-        return document.createElementNS(namespace, tag);
-    }
-}
-
-/**
- * Generic setAttribute function
- *
- * @private
- * @param el Reference to DOM element
- * @param attrs Object with attribute keys and values
- */
-function setAttr(el, attrs) {
-    for (var a in attrs) {
-        el.setAttribute(a, attrs[a]);
-    }
-}
-
-/**
- * Generic SVG element creation function
- *
- * @private
- * @param svg SVG context, set to null if new
- * @param width Document width
- * @param height Document height
- */
-function initSVG(svg, width, height) {
-    var defs, style;
-
-    if (svg == null) {
-        svg = newEl('svg', SVG_NS);
-        defs = newEl('defs', SVG_NS);
-        style = newEl('style', SVG_NS);
-        setAttr(style, {
-            'type': 'text/css'
-        });
-        defs.appendChild(style);
-        svg.appendChild(defs);
-    } else {
-        style = svg.querySelector('style');
-    }
-
-    //IE throws an exception if this is set and Chrome requires it to be set
-    if (svg.webkitMatchesSelector) {
-        svg.setAttribute('xmlns', SVG_NS);
-    }
-
-    //Remove comment nodes
-    for (var i = 0; i < svg.childNodes.length; i++) {
-        if (svg.childNodes[i].nodeType === NODE_TYPE_COMMENT) {
-            svg.removeChild(svg.childNodes[i]);
-        }
-    }
-
-    //Remove CSS
-    while (style.childNodes.length) {
-        style.removeChild(style.childNodes[0]);
-    }
-
-    setAttr(svg, {
-        'width': width,
-        'height': height,
-        'viewBox': '0 0 ' + width + ' ' + height,
-        'preserveAspectRatio': 'none'
-    });
-
-    return svg;
-}
-
-/**
- * Returns serialized SVG with XML processing instructions
- *
- * @private
- * @param svg SVG context
- * @param stylesheets CSS stylesheets to include
- */
-function serializeSVG(svg, engineSettings) {
-    if (!global.XMLSerializer) return;
-    var serializer = new XMLSerializer();
-    var svgCSS = '';
-    var stylesheets = engineSettings.stylesheets;
-
-    //External stylesheets: Processing Instruction method
-    if (engineSettings.svgXMLStylesheet) {
-        var xml = createXML();
-        //Add <?xml-stylesheet ?> directives
-        for (var i = stylesheets.length - 1; i >= 0; i--) {
-            var csspi = xml.createProcessingInstruction('xml-stylesheet', 'href="' + stylesheets[i] + '" rel="stylesheet"');
-            xml.insertBefore(csspi, xml.firstChild);
-        }
-
-        xml.removeChild(xml.documentElement);
-        svgCSS = serializer.serializeToString(xml);
-    }
-
-    var svgText = serializer.serializeToString(svg);
-    svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
-    return svgCSS + svgText;
-}
-
-/**
- * Creates a XML document
- * @private
- */
-function createXML() {
-    if (!global.DOMParser) return;
-    return new DOMParser().parseFromString('<xml />', 'application/xml');
-}
 
 /**
  * Prevents a function from being called too often, waits until a timer elapses to call it again
@@ -1482,6 +1272,7 @@ App.setup = {
     supportsCanvas: false,
     supportsSVG: false,
     lineWrapRatio: 0.9,
+    dataAttr: 'data-src',
     renderers: ['html', 'canvas', 'svg']
 };
 
@@ -1498,8 +1289,7 @@ App.vars = {
     invisibleId: 0,
     visibilityCheckStarted: false,
     debounceTimer: null,
-    cache: {},
-    dataAttr: 'data-src'
+    cache: {}
 };
 
 //Pre-flight
@@ -1508,7 +1298,7 @@ App.vars = {
     var devicePixelRatio = 1,
         backingStoreRatio = 1;
 
-    var canvas = newEl('canvas');
+    var canvas = DOM.newEl('canvas');
     var ctx = null;
 
     if (canvas.getContext) {

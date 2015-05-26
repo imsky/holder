@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<title>Holder Detached DOM Testing</title>
+<meta charset="utf-8">
+<style>
+	body {background: #fff; font-family:Arial,sans-serif;margin:0 auto;min-width:1080px}
+	.thumb {width:300px;height:250px;margin:25px;float:left}
+	.thumb img, .thumb .holderjs, .thumb object {display:block;margin:0 auto}
+	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
+	button {clear: both;display:block;margin:10px;font-size:1.2em;}
+</style>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="../holder.js"></script>
+<script>
+Holder.run();
+$(function () {
+	var cloneThumb = $('.thumb:first').clone();
+
+	Holder.run();
+
+	$("#replaceBtn").on('click', function (e) {
+		$('body').remove();
+		var newBody = $('<body />');
+		newBody.append(cloneThumb);
+		newBody.appendTo($('html'));
+		Holder.run();
+	});
+});
+</script>
+</head>
+<body>
+	<button id="replaceBtn">Replace body</button>
+	<div class="thumb">
+		<img data-src="holder.js/300x200">
+		<div class="caption">
+			 Plain placeholder
+		</div>
+	</div>
+</body>
+</html>

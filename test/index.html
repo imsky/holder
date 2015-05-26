@@ -13,6 +13,8 @@
 	.thumb .caption {padding:10px;text-align:center;margin-top:10px}
 	.thumb.fullpage {float:none;clear:both;width:auto;height:100px;margin:25px}
 	.autosize img {width:100%}
+	.float-holder { overflow:hidden; }
+	.float-holder img { float: left; }
 	#holder1 {background:url('?holder.js/300x200?text=Background%20placeholder&bg=000&fg=fff');width:300px;height:200px}
 </style>
 </head>
@@ -49,12 +51,6 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.js/300x200/#EE403D:#FFFFFF/text:Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
-	<div class="caption">
-		 Placeholder with lengthy text (Legacy)
-	</div>
-</div>
-<div class="thumb">
 	<img data-src="holder.canvas/300x200?bg=EE403D&fg=FFFFFF&text=Lorem ipsum dolor sit amet, consectetur adipiscing elit.">
 	<div class="caption">
 		Canvas placeholder with lengthy text
@@ -88,6 +84,12 @@
 	<img data-src="holder.js/300x200?theme=lava&text=The five boxing wizards jump quickly.&align=right">
 	<div class="caption">
 		 Placeholder with right-aligned text
+	</div>
+</div>
+<div class="thumb">
+	<img data-src="holder.margin/300x200?theme=lava&text=The five boxing wizards jump quickly.&align=right">
+	<div class="caption">
+		 Placeholder with right-aligned text and custom margin
 	</div>
 </div>
 <div class="thumb">
@@ -159,10 +161,10 @@
 	</div>
 </div>
 <div class="thumb">
-	<div style="overflow:hidden">
-	<img data-src="holder.js/50x75?theme=sky" style="float:left">
-	<img data-src="holder.js/100x75?theme=vine" style="float:left">
-	<img data-src="holder.js/150x75?theme=lava" style="float:left">
+	<div class="float-holder">
+	<img data-src="holder.js/50x75?theme=sky">
+	<img data-src="holder.js/100x75?theme=vine">
+	<img data-src="holder.js/150x75?theme=lava">
 	</div>
 	<div style="overflow:hidden">
 	<img data-src="holder.js/300x125?theme=industrial" style="float:left">
@@ -177,16 +179,52 @@
 		Placeholder with custom font size
 	</div>
 </div>
+<div class="thumb">
+	<div>
+	<img data-src="holder.js/100px100?outline=yes">
+	<img data-src="holder.canvas/100px100?outline=yes">
+	</div>
+	<div class="caption">
+		SVG and canvas placeholders with outline enabled
+	</div>
+</div>
+<div class="thumb">
+	<div>
+		<img data-src="holder.js/100px100?bg=34495e">
+		<img data-src="holder.js/100px100?bg=f1c40f">
+	</div>
+	<div class="caption">
+		Placeholders with automatic foreground color
+	</div>
+</div>
+<div class="thumb">
+	<div>
+		<img data-src="holder.js/100px100?bg=eeeeee">
+		<img data-src="holder.js/100px100">
+	</div>
+	<div class="caption">
+		Placeholders with automatic and default color
+	</div>
+</div>
+<div class="thumb">
+	<div class="float-holder">
+		<img data-src="holder.js/25px100?bg=000000">
+		<img data-src="holder.js/25px100?bg=222222">
+		<img data-src="holder.js/25px100?bg=444444">
+		<img data-src="holder.js/25px100?bg=666666">
+		<img data-src="holder.js/25px100?bg=888888">
+		<img data-src="holder.js/25px100?bg=aaaaaa">
+		<img data-src="holder.js/25px100?bg=cccccc">
+		<img data-src="holder.js/25px100?bg=ffffff">
+	</div>
+	<div class="caption">
+		Placeholders with automatic foreground color, grayscale
+	</div>
+</div>
 <div class="fullpage thumb">
 	<img data-src="holder.js/90px80p?theme=sky">
 	<div class="caption">
 		 Full-page fluid placeholder
-	</div>
-</div>
-<div class="fullpage thumb">
-	<img data-src="holder.js/90%x80%/sky">
-	<div class="caption">
-		 Full-page fluid placeholder (Legacy)
 	</div>
 </div>
 <div class="fullpage thumb">
@@ -213,6 +251,12 @@
 	</div>
 	<div class="caption">
 		Fluid placeholder inside invisible parent element.
+	</div>
+</div>
+<div class="fullpage thumb">
+	<img data-src="holder.js/90px80p?theme=sky&outline=yes">
+	<div class="caption">
+		 Full-page fluid placeholder with outline enabled
 	</div>
 </div>
 
@@ -242,6 +286,11 @@ Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).ru
 
 Holder.addTheme("fontawesome", {foreground: "#00ccaa", background: "#002211", size: 12}).run({
 	domain: "fontawesome.holder"
+});
+
+Holder.run({
+	domain: 'holder.margin',
+	lineWrapRatio: 0.5
 });
 
 Holder.run({
