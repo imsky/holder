@@ -8,6 +8,12 @@ server.deploy({
 
 runner({
     'browserName': 'chrome'
-}, function () {
+}, function (err, retval) {
+    console.log('Test result: ', retval);
+
+    if (!retval) {
+        process.exitCode = -1;
+    }
+
     process.exit();
 });

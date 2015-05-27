@@ -19,15 +19,19 @@ module.exports = function (options, cb) {
     .url('http://localhost:8000')
     .execute(function () {
         var expectImages = document.querySelectorAll('img').length - document.querySelectorAll('img[data-exclude]').length;
-        var renderedImages = document.querySelectorAll('img[data-holder-rendered]');
-        return expectImages === renderedImages;
+        var renderedImages = document.querySelectorAll('img[data-holder-rendered]').length;
+        return {'expected': expectImages, 'rendered': renderedImages};
     }, function (err, ret) {
-        if (!ret.value) {
+        var expected = ret.value.expected;
+        var rendered = ret.value.rendered;
+        console.log('Expected', expected);
+        console.log('Rendered', rendered);
+        if (expected !== rendered) {
             retval = false;
         }
     })
     .pause(15 * 1000)
     .end(function () {
-        cb(null, retval)
+        cb(null, retval);
     });
 };
