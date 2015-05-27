@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+    - "0.12"
+env:
+  global:
+    - secure: oFLrNQrXJ5F2XrJ9Fe515PY6JyYbQCHeIVDY+7yc7E90bIZJEb0lVuRGMHrY0Win2WrwdtqdvljMk48YwtY0i6w3z2FbUPn5bNStPMXlxJ9pb6bnXwi1ixNjljveMRo8ZGZYvm66HPYaVn59PUELE4mfIFTYooqdlbGtZTMaRc8=
+    - secure: qJqn+4QtqjPlKe0vkZlYPUXLE9xODLt0Azs1A4vu4SJoI4jtU6BBcccAkG232JAKC2GiLG5daMMeDMRoUCXHANqyQBf0i/ep56DGwVncmrdNVcGubZdcR8Blj6Ib+aHUgXS0sRrX5PETCBv7t+FZVIzQM4Acq1OiPQEAnTWqAmM=
+addons:
+  sauce_connect: true
+install:
+    - npm install -g gulp
+    - npm install
+    - gulp
