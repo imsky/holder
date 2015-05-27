@@ -8,11 +8,11 @@ module.exports = function (options, cb) {
         'key': process.env.SAUCE_ACCESS_KEY,
         'host': 'localhost',
         'port': 4445,
-        'name': 'Holder.js Test',
-        'tags': [options.browserName],
         'desiredCapabilities': {
             'browserName': options.browserName,
-            'tunnel-identifier': process.env.TRAVIS_JOB_NUMBER
+            'tunnel-identifier': process.env.TRAVIS_JOB_NUMBER,
+            'name': 'Holder.js Test',
+            'tags': [options.browserName]
         }
     })
     .init()
