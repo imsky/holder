@@ -19,7 +19,7 @@ var banner =
     '\u00A9 <%= year %> <%= pkg.author.name %> - <%= pkg.author.url %>\n\n' +
     'Site:     <%= pkg.homepage %>\n' +
     'Issues:   <%= pkg.bugs.url %>\n' +
-    'License:  <%= pkg.license.url %>\n\n' +
+    'License:  <%= pkg.license %>\n\n' +
     '*/\n';
 
 function generateBuild() {
