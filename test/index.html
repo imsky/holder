@@ -138,7 +138,7 @@
 <div class="thumb">
 	<div id="thumb1"></div>
 	<div class="caption">
-		 Placeholder added using <code>addImage</code> using a selector
+		 Placeholder added using <code>addImage</code> with a selector
 	</div>
 </div>
 <div class="thumb">
@@ -223,7 +223,7 @@
 <div class="thumb">
 	<div id="holderAddImageDomTest"></div>
 	<div class="caption">
-		Placeholder added using <code>addImage</code> using a DOM node
+		Placeholder added using <code>addImage</code> with a DOM node
 	</div>
 </div>
 <div class="fullpage thumb">
@@ -298,7 +298,7 @@ Holder.run({
 	lineWrapRatio: 0.5
 });
 
-Holder.addImage("holder.js/300x200?theme=social&text=Added using addImage with a DOM node", document.querySelector('#holderAddImageDomTest'));
+Holder.addImage("holder.js/300x200?theme=social&text=Added using addImage with a DOM node", document.querySelector('#holderAddImageDomTest')).run();
 
 Holder.run({
 	domain: "holder.canvas",

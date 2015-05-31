@@ -44,11 +44,11 @@ var Holder = {
      * Appends a placeholder to an element
      *
      * @param {string} src Placeholder URL string
-     * @param {string} el Selector of target element(s)
+     * @param el A selector or a reference to a DOM node
      */
     addImage: function(src, el) {
         //todo: use jquery fallback if available for all QSA references
-        var node = document.querySelectorAll(el);
+        var node = DOM.getNodeArray(el);
         if (node.length) {
             for (var i = 0, l = node.length; i < l; i++) {
                 var img = DOM.newEl('img');
