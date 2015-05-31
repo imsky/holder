@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
-var uglify = require('gulp-uglifyjs');
+var uglify = require('gulp-uglify');
 var header = require('gulp-header');
 var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
@@ -8,6 +8,7 @@ var gulputil = require('gulp-util');
 var replace = require('gulp-replace');
 var webpack = require('gulp-webpack');
 var beautify = require('gulp-jsbeautifier');
+var rename = require('gulp-rename');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -63,9 +64,10 @@ gulp.task('bundle', ['build'], function() {
 });
 
 gulp.task('minify', ['bundle'], function() {
-    return gulp.src("holder.js")
-        .pipe(uglify("holder.min.js"))
-        .pipe(gulp.dest("./"));
+    return gulp.src('holder.js')
+        .pipe(uglify())
+        .pipe(rename('holder.min.js'))
+        .pipe(gulp.dest('./'));
 });
 
 gulp.task('banner', ['minify'], function() {
@@ -97,6 +99,6 @@ gulp.task('watch', function() {
 });
 
 gulp.task('default', ['todo', 'bundle', 'minify', 'banner', 'meteor'], function() {
-    gulputil.log("Finished build " + build);
+    gulputil.log('Finished build ' + build);
     build = generateBuild();
 });
