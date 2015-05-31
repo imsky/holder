@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<title>Holder.js Render Benchmark</title>
+<meta charset="utf-8">
+</head>
+<body>
+<div id="test">Test is running&hellip;</div>
+<script src="benchmark.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script>
+var src = 'holder.js/300x200';
+
+Benchmark.options.minSamples = 100;
+
+var suite = new Benchmark.Suite;
+var benchmark = new Benchmark('Holder.js Render', function () {
+    var html = '<img data-src="holder.js/300x200"><img data-src="holder.js/300x200"><img data-src="holder.js/301x201">';
+    $('#test').html(html);
+    Holder.run();
+});
+
+var qs = window.location.search;
+if (qs.indexOf('release=') === -1){
+    alert('No release specified.');
+} else {
+    var release = qs.replace('?release=', '');
+    $.getScript('releases/holder-' + release + '/holder.js', function () {
+        Holder.run();
+        parent.postMessage('start ' + release, '*');
+        benchmark.run();
+        setTimeout(function () {
+            parent.postMessage('end' + ' ' + release + ' ' + benchmark.hz, '*');
+        }, 1000);
+    });
+}
+</script>
+</body>
+</html>
