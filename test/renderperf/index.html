@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+<title>Holder.js Render Performance Benchmark</title>
+</head>
+<body>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/async/1.0.0/async.min.js"></script>
+<script>
+var releases_all = '1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 1.9.0 2.0 2.1.0 2.2.0 2.3.0 2.4.0 2.5.0 2.6.0 2.7.0'.split(' ');
+//1.0 = original, 1.5 = fluid placeholders added, 2.4 = svg, test suite added, 2.5 = invisible placeholders rendering, 2.7.1 = latest stable, master = latest unstable
+//extra last test is added to remove any side effect of running last
+var releases_important = '1.0 1.5 2.4.0 2.5.2 2.7.1 master 1.0'.split(' '); 
+var idx = 1;
+
+function test(release) {
+    return function (cb) {
+        console.log('Starting benchmark for ' + release);
+        var iframe = $("<iframe/>").attr({
+            'width': 450,
+            'height': 300,
+            'src': 'testcase.html?release=' + release
+        });
+
+        $('body').append(iframe);
+
+        var to = setTimeout(function() {
+            throw "Test timed out: " + release;
+        }, 5000);
+
+        $(window).on('message.' + idx, function(e) {
+            var event = e.originalEvent;
+            var data = event.data.split(' ');
+            if (data[0] === 'start') {
+                clearTimeout(to);
+            } else if (data[0] === 'end') {
+                var hz = parseFloat(data[2]).toFixed(2);
+                $(window).off('message.' + idx);
+                iframe.remove();
+                idx++;
+                cb(null, data[1] + ' ' + hz);
+            }
+        });
+    };
+}
+
+var tests = releases_important.map(function (release) {
+    return test(release);
+});
+
+document.title = 'Starting tests in 5 seconds';
+setTimeout(function () {
+    document.title = 'Tests started';
+    async.series(tests, function (err, results) {
+        console.log(results);
+    });
+}, 5000);
+</script>
+</body>
+</html>
