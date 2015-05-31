@@ -680,7 +680,9 @@ function buildSceneGraph(scene) {
     if (scene.flags.autoFg) {
         var holderBgColor = new Color(holderBg.properties.fill);
         var lightColor = new Color('fff');
-        var darkColor = new Color('000', { 'alpha': 0.285714 });
+        var darkColor = new Color('000', {
+            'alpha': 0.285714
+        });
 
         holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
     }

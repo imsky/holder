@@ -1,4 +1,4 @@
-var Color = function (color, options) {
+var Color = function(color, options) {
     //todo: support array->color conversion
     //todo: support rgba, hsla, and rrggbbaa notation
     if (typeof color !== 'string') return;
@@ -24,7 +24,7 @@ var Color = function (color, options) {
     colorSet.call(this, parseInt(color, 16));
 };
 
-Color.rgbToHex = function (r, g, b) {
+Color.rgbToHex = function(r, g, b) {
     return (((r | 0) << 16) + ((g | 0) << 8) + (b | 0)).toString(16);
 };
 
@@ -32,8 +32,8 @@ Color.rgbToHex = function (r, g, b) {
  * Sets the color from a raw RGB888 integer
  * @param raw RGB888 representation of color
  */
- //todo: refactor into a more generic method
-function colorSet (raw) {
+//todo: refactor into a more generic method
+function colorSet(raw) {
     this.rgb = {};
     this.yuv = {};
     this.raw = raw;
@@ -54,7 +54,7 @@ function colorSet (raw) {
  * Lighten or darken a color
  * @param multiplier Amount to lighten or darken (-1 to 1)
  */
-Color.prototype.lighten = function (multiplier) {
+Color.prototype.lighten = function(multiplier) {
     var r = this.rgb.r;
     var g = this.rgb.g;
     var b = this.rgb.b;
@@ -67,8 +67,8 @@ Color.prototype.lighten = function (multiplier) {
 /**
  * Output color in hex format
  * @param addHash Add a hash character to the beginning of the output
- */ 
-Color.prototype.toHex = function (addHash) {
+ */
+Color.prototype.toHex = function(addHash) {
     return (addHash ? '#' : '') + this.raw.toString(16);
 };
 
@@ -76,7 +76,7 @@ Color.prototype.toHex = function (addHash) {
  * Returns whether or not current color is lighter than another color
  * @param color Color to compare against
  */
-Color.prototype.lighterThan = function (color) {
+Color.prototype.lighterThan = function(color) {
     if (!(color instanceof Color)) {
         color = new Color(color);
     }
@@ -89,7 +89,7 @@ Color.prototype.lighterThan = function (color) {
  * @param color Color to mix with
  * @param multiplier How much to mix with the other color
  */
- /*
+/*
 Color.prototype.mix = function (color, multiplier) {
     if (!(color instanceof Color)) {
         color = new Color(color);
@@ -118,8 +118,8 @@ Color.prototype.mix = function (color, multiplier) {
  * Returns the result of blending another color on top of current color with alpha
  * @param color Color to blend on top of current color, i.e. "Ca"
  */
- //todo: see if .blendAlpha can be merged into .mix
-Color.prototype.blendAlpha = function (color) {
+//todo: see if .blendAlpha can be merged into .mix
+Color.prototype.blendAlpha = function(color) {
     if (!(color instanceof Color)) {
         color = new Color(color);
     }
