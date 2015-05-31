@@ -6,7 +6,6 @@ ua-parser.js
 *.svg
 *.woff
 *.ttf
-*.html
 *.png
 !index.html
 !detach.html
