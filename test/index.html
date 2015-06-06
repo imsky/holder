@@ -19,7 +19,6 @@
 </style>
 </head>
 <body>
-
 <div class="thumb">
 	<img data-src="holder.js/300x200">
 	<div class="caption">
@@ -106,9 +105,10 @@
 		Placeholder with (randomly) missing image source
 	</div>
 </div>
+
 <div class="thumb">
 	<div class="autosize">
-		<img data-src="holder.js/200x133?bg=111&fg=ffff00&auto=yes">
+		<img data-src="holder.js/200x133?bg=111&fg=ffff00&auto=yes" onclick="this.src='image.jpg'">
 	</div>
 	<div class="caption">
 		 Auto-sized placeholder
@@ -271,7 +271,9 @@
 <script src="require.js" data-main="test.js"></script>
 -->
 <script>
-	
+
+Holder.run({'renderer':'html'});
+
 $(function () {
 	$("#invisible").show();
 
