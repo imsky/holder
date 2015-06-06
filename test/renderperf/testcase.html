@@ -26,9 +26,11 @@ if (qs.indexOf('release=') === -1){
 } else {
     var release = qs.replace('?release=', '');
     $.getScript('releases/holder-' + release + '/holder.js', function () {
+        console.log('Starting benchmark for ' + release);
         Holder.run();
         parent.postMessage('start ' + release, '*');
         benchmark.run();
+        console.log('Benchmark finished for ' + release + ': ' + benchmark.hz);
         setTimeout(function () {
             parent.postMessage('end' + ' ' + release + ' ' + benchmark.hz, '*');
         }, 1000);
