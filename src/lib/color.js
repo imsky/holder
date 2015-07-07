@@ -17,11 +17,11 @@ var Color = function(color, options) {
 
     this.alpha = 1;
 
-    if (options) {
-        this.alpha = options.alpha || this.alpha;
+    if (options && options.alpha) {
+        this.alpha = options.alpha;
     }
 
-    colorSet.call(this, parseInt(color, 16));
+    this.set(parseInt(color, 16));
 };
 
 Color.rgbToHex = function(r, g, b) {
@@ -33,22 +33,33 @@ Color.rgbToHex = function(r, g, b) {
  * @param raw RGB888 representation of color
  */
 //todo: refactor into a more generic method
-function colorSet(raw) {
+Color.prototype.set = function (val) {
+    var mode;
+
     this.rgb = {};
     this.yuv = {};
-    this.raw = raw;
+    this.raw = 0;
 
-    this.rgb.r = (raw & 0xFF0000) >> 16;
-    this.rgb.g = (raw & 0x00FF00) >> 8;
-    this.rgb.b = (raw & 0x0000FF);
+    if (typeof val === 'number') {
+        mode = 'raw';
+    }
 
-    // BT.709
-    this.yuv.y = 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
-    this.yuv.u = -0.09991 * this.rgb.r - 0.33609 * this.rgb.g + 0.436 * this.rgb.b;
-    this.yuv.v = 0.615 * this.rgb.r - 0.55861 * this.rgb.g - 0.05639 * this.rgb.b;
+    switch (mode) {
+        case 'raw':
+            var raw = val;
+            this.raw = raw;
+            this.rgb.r = (raw & 0xFF0000) >> 16;
+            this.rgb.g = (raw & 0x00FF00) >> 8;
+            this.rgb.b = (raw & 0x0000FF);
+            // BT.709
+            this.yuv.y = 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
+            this.yuv.u = -0.09991 * this.rgb.r - 0.33609 * this.rgb.g + 0.436 * this.rgb.b;
+            this.yuv.v = 0.615 * this.rgb.r - 0.55861 * this.rgb.g - 0.05639 * this.rgb.b;
+        break;
+    }
 
     return this;
-}
+};
 
 /**
  * Lighten or darken a color
