@@ -583,7 +583,7 @@ function render(renderSettings) {
             });
         }
         if (engineSettings.reRender) {
-            global.setTimeout(function() {
+            global.setTimeout(function etc() {
                 var image = getRenderedImage();
                 if (image == null) {
                     throw 'Holder: couldn\'t render placeholder';
@@ -628,7 +628,7 @@ function buildSceneGraph(scene) {
 
     scene.font = {
         family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-        size: textSize(scene.width, scene.height, fontSize),
+        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
         units: scene.theme.units ? scene.theme.units : App.defaults.units,
         weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
     };
@@ -804,15 +804,16 @@ function buildSceneGraph(scene) {
  * @param width Parent width
  * @param height Parent height
  * @param fontSize Requested text size
+ * @param scale Proportional scale of text
  */
-function textSize(width, height, fontSize) {
+function textSize(width, height, fontSize, scale) {
     var stageWidth = parseInt(width, 10);
     var stageHeight = parseInt(height, 10);
 
     var bigSide = Math.max(stageWidth, stageHeight);
     var smallSide = Math.min(stageWidth, stageHeight);
 
-    var newHeight = 0.8 * Math.min(smallSide, bigSide * App.defaults.scale);
+    var newHeight = 0.8 * Math.min(smallSide, bigSide * scale);
     return Math.round(Math.max(fontSize, newHeight));
 }
 

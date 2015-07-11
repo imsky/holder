@@ -6,7 +6,6 @@ var NODE_TYPE_COMMENT = 8;
 /**
  * Generic SVG element creation function
  *
- * @private
  * @param svg SVG context, set to null if new
  * @param width Document width
  * @param height Document height
@@ -82,7 +81,6 @@ exports.svgStringToDataURI = function() {
 /**
  * Returns serialized SVG with XML processing instructions
  *
- * @private
  * @param svg SVG context
  * @param stylesheets CSS stylesheets to include
  */
