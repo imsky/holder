@@ -1,6 +1,6 @@
 var Color = function(color, options) {
-    //todo: support array->color conversion
     //todo: support rgba, hsla, and rrggbbaa notation
+    //todo: use CIELAB internally
     if (typeof color !== 'string') return;
 
     if (color.charAt(0) === '#') {
@@ -24,39 +24,112 @@ var Color = function(color, options) {
     this.set(parseInt(color, 16));
 };
 
-Color.rgbToHex = function(r, g, b) {
+//todo: jsdocs
+Color.rgb2hex = function(r, g, b) {
     return (((r | 0) << 16) + ((g | 0) << 8) + (b | 0)).toString(16);
+};
+
+//todo: jsdocs
+Color.hsl2rgb = function (h, s, l) {
+    var C = (1 - Math.abs(2 * l - 1)) * s;
+    var m = l - (C / 2);
+    var H = h / 60;
+    var X = C * (1 - Math.abs(parseInt(H) % 2 - 1));
+
+    var r = 0, g = 0, b = 0;
+
+    if (H >= 0 && H < 1) {
+        r = C;
+        g = X;
+    } else if (H >= 1 && H < 2) {
+        r = X;
+        g = C;
+    } else if (H >= 2 && H < 3) {
+        g = C;
+        b = X;
+    } else if (H >= 3 && H < 4) {
+        g = X;
+        b = C;
+    } else if (H >= 4 && H < 5) {
+        r = X;
+        b = C;
+    } else if (H >= 5 && H < 6) {
+        r = C;
+        b = X;
+    }
+
+    r += m;
+    g += m;
+    b += m;
+
+    return [r, g, b];
 };
 
 /**
  * Sets the color from a raw RGB888 integer
  * @param raw RGB888 representation of color
  */
-//todo: refactor into a more generic method
+//todo: refactor into a static method
+//todo: factor out individual color spaces
+//todo: add CIELAB and CIELUV
 Color.prototype.set = function (val) {
-    var mode;
+    this.raw = val;
 
-    this.rgb = {};
-    this.yuv = {};
-    this.raw = 0;
+    var r = (this.raw & 0xFF0000) >> 16;
+    var g = (this.raw & 0x00FF00) >> 8;
+    var b = (this.raw & 0x0000FF);
 
-    if (typeof val === 'number') {
-        mode = 'raw';
+    // BT.709
+    var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    var u = -0.09991 * r - 0.33609 * g + 0.436 * b;
+    var v = 0.615 * r - 0.55861 * g - 0.05639 * b;
+
+    var _r = parseFloat((r / 255).toFixed(4));
+    var _g = parseFloat((g / 255).toFixed(4));
+    var _b = parseFloat((b / 255).toFixed(4));
+
+    var M = Math.max(_r, _g, _b);
+    var m = Math.min(_r, _g, _b);
+    var C = M - m;
+
+    var h = 0;
+    var s = 0;
+    var l = (M + m) / 2;
+
+    if (C !== 0) {
+        switch(M) {
+            case _r:
+                h = parseInt((_g - _b) / C) % 6;
+                break;
+            case _g:
+                h = parseInt((_b - _r) / C) + 2;
+                break;
+            case _b:
+                h = parseInt((_r - _g) / C) + 4;
+                break;
+        }
+
+        h *= 60;
+        s = C / (1 - Math.abs(2 * l - 1));
     }
 
-    switch (mode) {
-        case 'raw':
-            var raw = val;
-            this.raw = raw;
-            this.rgb.r = (raw & 0xFF0000) >> 16;
-            this.rgb.g = (raw & 0x00FF00) >> 8;
-            this.rgb.b = (raw & 0x0000FF);
-            // BT.709
-            this.yuv.y = 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
-            this.yuv.u = -0.09991 * this.rgb.r - 0.33609 * this.rgb.g + 0.436 * this.rgb.b;
-            this.yuv.v = 0.615 * this.rgb.r - 0.55861 * this.rgb.g - 0.05639 * this.rgb.b;
-        break;
-    }
+    this.hsl = {
+        h: h,
+        s: s,
+        l: l
+    };
+
+    this.rgb = {
+        r: r,
+        g: g,
+        b: b
+    };
+
+    this.yuv = {
+        y: y,
+        u: u,
+        v: v
+    };
 
     return this;
 };
@@ -72,7 +145,9 @@ Color.prototype.lighten = function(multiplier) {
 
     var m = (255 * multiplier) | 0;
 
-    return new Color(Color.rgbToHex(r + m, g + m, b + m));
+    var c = new Color(Color.rgb2hex(r + m, g + m, b + m));
+    if (!c.raw) debugger;
+    return c;
 };
 
 /**
@@ -143,7 +218,7 @@ Color.prototype.blendAlpha = function(color) {
     var g = Ca.alpha * Ca.rgb.g + (1 - Ca.alpha) * Cb.rgb.g;
     var b = Ca.alpha * Ca.rgb.b + (1 - Ca.alpha) * Cb.rgb.b;
 
-    return new Color(Color.rgbToHex(r, g, b));
+    return new Color(Color.rgb2hex(r, g, b));
 };
 
 module.exports = Color;
