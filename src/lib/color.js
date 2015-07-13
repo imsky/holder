@@ -1,7 +1,10 @@
 var Color = function(color, options) {
     //todo: support rgba, hsla, and rrggbbaa notation
     //todo: use CIELAB internally
+    //todo: add clamp function (with sign)
     if (typeof color !== 'string') return;
+
+    this.original = color;
 
     if (color.charAt(0) === '#') {
         color = color.slice(1);
@@ -26,15 +29,23 @@ var Color = function(color, options) {
 
 //todo: jsdocs
 Color.rgb2hex = function(r, g, b) {
-    return (((r | 0) << 16) + ((g | 0) << 8) + (b | 0)).toString(16);
+    function format (decimal) {
+        var hex = (decimal | 0).toString(16);
+        if (decimal < 16) {
+            hex = '0' + hex;
+        }
+        return hex;
+    }
+
+    return [r, g, b].map(format).join('');
 };
 
 //todo: jsdocs
 Color.hsl2rgb = function (h, s, l) {
-    var C = (1 - Math.abs(2 * l - 1)) * s;
-    var m = l - (C / 2);
     var H = h / 60;
+    var C = (1 - Math.abs(2 * l - 1)) * s;
     var X = C * (1 - Math.abs(parseInt(H) % 2 - 1));
+    var m = l - (C / 2);
 
     var r = 0, g = 0, b = 0;
 
@@ -58,9 +69,15 @@ Color.hsl2rgb = function (h, s, l) {
         b = X;
     }
 
+    var ret = [r, g, b];
+
     r += m;
     g += m;
     b += m;
+
+    r = parseInt(r * 255);
+    g = parseInt(g * 255);
+    b = parseInt(b * 255);
 
     return [r, g, b];
 };
@@ -71,7 +88,7 @@ Color.hsl2rgb = function (h, s, l) {
  */
 //todo: refactor into a static method
 //todo: factor out individual color spaces
-//todo: add CIELAB and CIELUV
+//todo: add HSL, CIELAB, and CIELUV
 Color.prototype.set = function (val) {
     this.raw = val;
 
@@ -83,41 +100,6 @@ Color.prototype.set = function (val) {
     var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
     var u = -0.09991 * r - 0.33609 * g + 0.436 * b;
     var v = 0.615 * r - 0.55861 * g - 0.05639 * b;
-
-    var _r = parseFloat((r / 255).toFixed(4));
-    var _g = parseFloat((g / 255).toFixed(4));
-    var _b = parseFloat((b / 255).toFixed(4));
-
-    var M = Math.max(_r, _g, _b);
-    var m = Math.min(_r, _g, _b);
-    var C = M - m;
-
-    var h = 0;
-    var s = 0;
-    var l = (M + m) / 2;
-
-    if (C !== 0) {
-        switch(M) {
-            case _r:
-                h = parseInt((_g - _b) / C) % 6;
-                break;
-            case _g:
-                h = parseInt((_b - _r) / C) + 2;
-                break;
-            case _b:
-                h = parseInt((_r - _g) / C) + 4;
-                break;
-        }
-
-        h *= 60;
-        s = C / (1 - Math.abs(2 * l - 1));
-    }
-
-    this.hsl = {
-        h: h,
-        s: s,
-        l: l
-    };
 
     this.rgb = {
         r: r,
@@ -139,15 +121,13 @@ Color.prototype.set = function (val) {
  * @param multiplier Amount to lighten or darken (-1 to 1)
  */
 Color.prototype.lighten = function(multiplier) {
-    var r = this.rgb.r;
-    var g = this.rgb.g;
-    var b = this.rgb.b;
-
-    var m = (255 * multiplier) | 0;
-
-    var c = new Color(Color.rgb2hex(r + m, g + m, b + m));
-    if (!c.raw) debugger;
-    return c;
+    var cm = Math.min(1, Math.max(0, Math.abs(multiplier))) * (multiplier < 0 ? -1 : 1);
+    var bm = (255 * cm) | 0;
+    var cr = Math.min(255, Math.max(0, this.rgb.r + bm));
+    var cg = Math.min(255, Math.max(0, this.rgb.g + bm));
+    var cb = Math.min(255, Math.max(0, this.rgb.b + bm));
+    var hex = Color.rgb2hex(cr, cg, cb);
+    return new Color(hex);
 };
 
 /**
