@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.0+7srgw
+Version 2.8.0+9ywal
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -303,8 +303,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	*/
 
 	//Libraries and functions
-	var onDomReady = __webpack_require__(3);
-	var querystring = __webpack_require__(2);
+	var onDomReady = __webpack_require__(2);
+	var querystring = __webpack_require__(3);
 
 	var SceneGraph = __webpack_require__(4);
 	var utils = __webpack_require__(5);
@@ -711,8 +711,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var engineSettings = extend(_engineSettings, null);
 
 	    if (flags.font) {
+	        /*
+	        If external fonts are used in a <img> placeholder rendered with SVG, Holder falls back to canvas.
+
+	        This is done because Firefox and Chrome disallow embedded SVGs from referencing external assets.
+	        The workaround is either to change the placeholder tag from <img> to <object> or to use the canvas renderer.
+	        */
 	        theme.font = flags.font;
-	        //Only run the <canvas> webfont fallback if noFontFallback is false, if the node is not an image, and if canvas is supported
 	        if (!engineSettings.noFontFallback && el.nodeName.toLowerCase() === 'img' && App.setup.supportsCanvas && engineSettings.renderer === 'svg') {
 	            engineSettings = extend(engineSettings, {
 	                renderer: 'canvas'
@@ -882,7 +887,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	        if (engineSettings.reRender) {
-	            global.setTimeout(function() {
+	            global.setTimeout(function () {
 	                var image = getRenderedImage();
 	                if (image == null) {
 	                    throw 'Holder: couldn\'t render placeholder';
@@ -927,7 +932,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    scene.font = {
 	        family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-	        size: textSize(scene.width, scene.height, fontSize),
+	        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
 	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
 	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 	    };
@@ -963,11 +968,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    sceneGraph.root.add(holderBg);
 
 	    if (scene.flags.outline) {
-	        //todo: generalize darken/lighten to more than RRGGBB hex values
 	        var outlineColor = new Color(holderBg.properties.fill);
-
 	        outlineColor = outlineColor.lighten(outlineColor.lighterThan('7f7f7f') ? -0.1 : 0.1);
-
 	        holderBg.properties.outline = {
 	            fill: outlineColor.toHex(true),
 	            width: 2
@@ -979,7 +981,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (scene.flags.autoFg) {
 	        var holderBgColor = new Color(holderBg.properties.fill);
 	        var lightColor = new Color('fff');
-	        var darkColor = new Color('000', { 'alpha': 0.285714 });
+	        var darkColor = new Color('000', {
+	            'alpha': 0.285714
+	        });
 
 	        holderTextColor = holderBgColor.blendAlpha(holderBgColor.lighterThan('7f7f7f') ? darkColor : lightColor).toHex(true);
 	    }
@@ -1101,15 +1105,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param width Parent width
 	 * @param height Parent height
 	 * @param fontSize Requested text size
+	 * @param scale Proportional scale of text
 	 */
-	function textSize(width, height, fontSize) {
+	function textSize(width, height, fontSize, scale) {
 	    var stageWidth = parseInt(width, 10);
 	    var stageHeight = parseInt(height, 10);
 
 	    var bigSide = Math.max(stageWidth, stageHeight);
 	    var smallSide = Math.min(stageWidth, stageHeight);
 
-	    var newHeight = 0.8 * Math.min(smallSide, bigSide * App.defaults.scale);
+	    var newHeight = 0.8 * Math.min(smallSide, bigSide * scale);
 	    return Math.round(Math.max(fontSize, newHeight));
 	}
 
@@ -1652,114 +1657,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	//Modified version of component/querystring
-	//Changes: updated dependencies, dot notation parsing, JSHint fixes
-	//Fork at https://github.com/imsky/querystring
-
-	/**
-	 * Module dependencies.
-	 */
-
-	var encode = encodeURIComponent;
-	var decode = decodeURIComponent;
-	var trim = __webpack_require__(10);
-	var type = __webpack_require__(9);
-
-	var arrayRegex = /(\w+)\[(\d+)\]/;
-	var objectRegex = /\w+\.\w+/;
-
-	/**
-	 * Parse the given query `str`.
-	 *
-	 * @param {String} str
-	 * @return {Object}
-	 * @api public
-	 */
-
-	exports.parse = function(str){
-	  if ('string' !== typeof str) return {};
-
-	  str = trim(str);
-	  if ('' === str) return {};
-	  if ('?' === str.charAt(0)) str = str.slice(1);
-
-	  var obj = {};
-	  var pairs = str.split('&');
-	  for (var i = 0; i < pairs.length; i++) {
-	    var parts = pairs[i].split('=');
-	    var key = decode(parts[0]);
-	    var m, ctx, prop;
-
-	    if (m = arrayRegex.exec(key)) {
-	      obj[m[1]] = obj[m[1]] || [];
-	      obj[m[1]][m[2]] = decode(parts[1]);
-	      continue;
-	    }
-
-	    if (m = objectRegex.test(key)) {
-	      m = key.split('.');
-	      ctx = obj;
-	      
-	      while (m.length) {
-	        prop = m.shift();
-
-	        if (!prop.length) continue;
-
-	        if (!ctx[prop]) {
-	          ctx[prop] = {};
-	        } else if (ctx[prop] && typeof ctx[prop] !== 'object') {
-	          break;
-	        }
-
-	        if (!m.length) {
-	          ctx[prop] = decode(parts[1]);
-	        }
-
-	        ctx = ctx[prop];
-	      }
-
-	      continue;
-	    }
-
-	    obj[parts[0]] = null == parts[1] ? '' : decode(parts[1]);
-	  }
-
-	  return obj;
-	};
-
-	/**
-	 * Stringify the given `obj`.
-	 *
-	 * @param {Object} obj
-	 * @return {String}
-	 * @api public
-	 */
-
-	exports.stringify = function(obj){
-	  if (!obj) return '';
-	  var pairs = [];
-
-	  for (var key in obj) {
-	    var value = obj[key];
-
-	    if ('array' == type(value)) {
-	      for (var i = 0; i < value.length; ++i) {
-	        pairs.push(encode(key + '[' + i + ']') + '=' + encode(value[i]));
-	      }
-	      continue;
-	    }
-
-	    pairs.push(encode(key) + '=' + encode(obj[key]));
-	  }
-
-	  return pairs.join('&');
-	};
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
 	/*!
 	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
 	 *
@@ -1915,6 +1812,114 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = typeof window !== "undefined" && _onDomReady(window);
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	//Modified version of component/querystring
+	//Changes: updated dependencies, dot notation parsing, JSHint fixes
+	//Fork at https://github.com/imsky/querystring
+
+	/**
+	 * Module dependencies.
+	 */
+
+	var encode = encodeURIComponent;
+	var decode = decodeURIComponent;
+	var trim = __webpack_require__(9);
+	var type = __webpack_require__(10);
+
+	var arrayRegex = /(\w+)\[(\d+)\]/;
+	var objectRegex = /\w+\.\w+/;
+
+	/**
+	 * Parse the given query `str`.
+	 *
+	 * @param {String} str
+	 * @return {Object}
+	 * @api public
+	 */
+
+	exports.parse = function(str){
+	  if ('string' !== typeof str) return {};
+
+	  str = trim(str);
+	  if ('' === str) return {};
+	  if ('?' === str.charAt(0)) str = str.slice(1);
+
+	  var obj = {};
+	  var pairs = str.split('&');
+	  for (var i = 0; i < pairs.length; i++) {
+	    var parts = pairs[i].split('=');
+	    var key = decode(parts[0]);
+	    var m, ctx, prop;
+
+	    if (m = arrayRegex.exec(key)) {
+	      obj[m[1]] = obj[m[1]] || [];
+	      obj[m[1]][m[2]] = decode(parts[1]);
+	      continue;
+	    }
+
+	    if (m = objectRegex.test(key)) {
+	      m = key.split('.');
+	      ctx = obj;
+	      
+	      while (m.length) {
+	        prop = m.shift();
+
+	        if (!prop.length) continue;
+
+	        if (!ctx[prop]) {
+	          ctx[prop] = {};
+	        } else if (ctx[prop] && typeof ctx[prop] !== 'object') {
+	          break;
+	        }
+
+	        if (!m.length) {
+	          ctx[prop] = decode(parts[1]);
+	        }
+
+	        ctx = ctx[prop];
+	      }
+
+	      continue;
+	    }
+
+	    obj[parts[0]] = null == parts[1] ? '' : decode(parts[1]);
+	  }
+
+	  return obj;
+	};
+
+	/**
+	 * Stringify the given `obj`.
+	 *
+	 * @param {Object} obj
+	 * @return {String}
+	 * @api public
+	 */
+
+	exports.stringify = function(obj){
+	  if (!obj) return '';
+	  var pairs = [];
+
+	  for (var key in obj) {
+	    var value = obj[key];
+
+	    if ('array' == type(value)) {
+	      for (var i = 0; i < value.length; ++i) {
+	        pairs.push(encode(key + '[' + i + ']') + '=' + encode(value[i]));
+	      }
+	      continue;
+	    }
+
+	    pairs.push(encode(key) + '=' + encode(obj[key]));
+	  }
+
+	  return pairs.join('&');
+	};
+
 
 /***/ },
 /* 4 */
@@ -2161,7 +2166,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Generic SVG element creation function
 	 *
-	 * @private
 	 * @param svg SVG context, set to null if new
 	 * @param width Document width
 	 * @param height Document height
@@ -2237,7 +2241,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Returns serialized SVG with XML processing instructions
 	 *
-	 * @private
 	 * @param svg SVG context
 	 * @param stylesheets CSS stylesheets to include
 	 */
@@ -2274,7 +2277,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Generic new DOM element function
 	 *
-	 * @private
 	 * @param tag Tag to create
 	 * @param namespace Optional namespace value
 	 */
@@ -2291,11 +2293,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Generic setAttribute function
 	 *
-	 * @private
 	 * @param el Reference to DOM element
 	 * @param attrs Object with attribute keys and values
 	 */
-	exports.setAttr = function(el, attrs) {
+	exports.setAttr = function (el, attrs) {
 	    for (var a in attrs) {
 	        el.setAttribute(a, attrs[a]);
 	    }
@@ -2339,10 +2340,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Color = function (color, options) {
-	    //todo: support array->color conversion
+	var Color = function(color, options) {
 	    //todo: support rgba, hsla, and rrggbbaa notation
+	    //todo: use CIELAB internally
+	    //todo: add clamp function (with sign)
 	    if (typeof color !== 'string') return;
+
+	    this.original = color;
 
 	    if (color.charAt(0) === '#') {
 	        color = color.slice(1);
@@ -2358,58 +2362,121 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.alpha = 1;
 
-	    if (options) {
-	        this.alpha = options.alpha || this.alpha;
+	    if (options && options.alpha) {
+	        this.alpha = options.alpha;
 	    }
 
-	    colorSet.call(this, parseInt(color, 16));
+	    this.set(parseInt(color, 16));
 	};
 
-	Color.rgbToHex = function (r, g, b) {
-	    return (((r | 0) << 16) + ((g | 0) << 8) + (b | 0)).toString(16);
+	//todo: jsdocs
+	Color.rgb2hex = function(r, g, b) {
+	    function format (decimal) {
+	        var hex = (decimal | 0).toString(16);
+	        if (decimal < 16) {
+	            hex = '0' + hex;
+	        }
+	        return hex;
+	    }
+
+	    return [r, g, b].map(format).join('');
+	};
+
+	//todo: jsdocs
+	Color.hsl2rgb = function (h, s, l) {
+	    var H = h / 60;
+	    var C = (1 - Math.abs(2 * l - 1)) * s;
+	    var X = C * (1 - Math.abs(parseInt(H) % 2 - 1));
+	    var m = l - (C / 2);
+
+	    var r = 0, g = 0, b = 0;
+
+	    if (H >= 0 && H < 1) {
+	        r = C;
+	        g = X;
+	    } else if (H >= 1 && H < 2) {
+	        r = X;
+	        g = C;
+	    } else if (H >= 2 && H < 3) {
+	        g = C;
+	        b = X;
+	    } else if (H >= 3 && H < 4) {
+	        g = X;
+	        b = C;
+	    } else if (H >= 4 && H < 5) {
+	        r = X;
+	        b = C;
+	    } else if (H >= 5 && H < 6) {
+	        r = C;
+	        b = X;
+	    }
+
+	    var ret = [r, g, b];
+
+	    r += m;
+	    g += m;
+	    b += m;
+
+	    r = parseInt(r * 255);
+	    g = parseInt(g * 255);
+	    b = parseInt(b * 255);
+
+	    return [r, g, b];
 	};
 
 	/**
 	 * Sets the color from a raw RGB888 integer
 	 * @param raw RGB888 representation of color
 	 */
-	 //todo: refactor into a more generic method
-	function colorSet (raw) {
-	    this.rgb = {};
-	    this.yuv = {};
-	    this.raw = raw;
+	//todo: refactor into a static method
+	//todo: factor out individual color spaces
+	//todo: add HSL, CIELAB, and CIELUV
+	Color.prototype.set = function (val) {
+	    this.raw = val;
 
-	    this.rgb.r = (raw & 0xFF0000) >> 16;
-	    this.rgb.g = (raw & 0x00FF00) >> 8;
-	    this.rgb.b = (raw & 0x0000FF);
+	    var r = (this.raw & 0xFF0000) >> 16;
+	    var g = (this.raw & 0x00FF00) >> 8;
+	    var b = (this.raw & 0x0000FF);
 
 	    // BT.709
-	    this.yuv.y = 0.2126 * this.rgb.r + 0.7152 * this.rgb.g + 0.0722 * this.rgb.b;
-	    this.yuv.u = -0.09991 * this.rgb.r - 0.33609 * this.rgb.g + 0.436 * this.rgb.b;
-	    this.yuv.v = 0.615 * this.rgb.r - 0.55861 * this.rgb.g - 0.05639 * this.rgb.b;
+	    var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+	    var u = -0.09991 * r - 0.33609 * g + 0.436 * b;
+	    var v = 0.615 * r - 0.55861 * g - 0.05639 * b;
+
+	    this.rgb = {
+	        r: r,
+	        g: g,
+	        b: b
+	    };
+
+	    this.yuv = {
+	        y: y,
+	        u: u,
+	        v: v
+	    };
 
 	    return this;
-	}
+	};
 
 	/**
 	 * Lighten or darken a color
 	 * @param multiplier Amount to lighten or darken (-1 to 1)
 	 */
-	Color.prototype.lighten = function (multiplier) {
-	    var r = this.rgb.r;
-	    var g = this.rgb.g;
-	    var b = this.rgb.b;
-
-	    var m = (255 * multiplier) | 0;
-
-	    return new Color(Color.rgbToHex(r + m, g + m, b + m));
+	Color.prototype.lighten = function(multiplier) {
+	    var cm = Math.min(1, Math.max(0, Math.abs(multiplier))) * (multiplier < 0 ? -1 : 1);
+	    var bm = (255 * cm) | 0;
+	    var cr = Math.min(255, Math.max(0, this.rgb.r + bm));
+	    var cg = Math.min(255, Math.max(0, this.rgb.g + bm));
+	    var cb = Math.min(255, Math.max(0, this.rgb.b + bm));
+	    var hex = Color.rgb2hex(cr, cg, cb);
+	    return new Color(hex);
 	};
 
 	/**
 	 * Output color in hex format
 	 * @param addHash Add a hash character to the beginning of the output
-	 */ 
-	Color.prototype.toHex = function (addHash) {
+	 */
+	Color.prototype.toHex = function(addHash) {
 	    return (addHash ? '#' : '') + this.raw.toString(16);
 	};
 
@@ -2417,7 +2484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Returns whether or not current color is lighter than another color
 	 * @param color Color to compare against
 	 */
-	Color.prototype.lighterThan = function (color) {
+	Color.prototype.lighterThan = function(color) {
 	    if (!(color instanceof Color)) {
 	        color = new Color(color);
 	    }
@@ -2430,7 +2497,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param color Color to mix with
 	 * @param multiplier How much to mix with the other color
 	 */
-	 /*
+	/*
 	Color.prototype.mix = function (color, multiplier) {
 	    if (!(color instanceof Color)) {
 	        color = new Color(color);
@@ -2459,8 +2526,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Returns the result of blending another color on top of current color with alpha
 	 * @param color Color to blend on top of current color, i.e. "Ca"
 	 */
-	 //todo: see if .blendAlpha can be merged into .mix
-	Color.prototype.blendAlpha = function (color) {
+	//todo: see if .blendAlpha can be merged into .mix
+	Color.prototype.blendAlpha = function(color) {
 	    if (!(color instanceof Color)) {
 	        color = new Color(color);
 	    }
@@ -2473,7 +2540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var g = Ca.alpha * Ca.rgb.g + (1 - Ca.alpha) * Cb.rgb.g;
 	    var b = Ca.alpha * Ca.rgb.b + (1 - Ca.alpha) * Cb.rgb.b;
 
-	    return new Color(Color.rgbToHex(r, g, b));
+	    return new Color(Color.rgb2hex(r, g, b));
 	};
 
 	module.exports = Color;
@@ -2481,6 +2548,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -2516,26 +2603,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    : Object.prototype.valueOf.apply(val)
 
 	  return typeof val;
-	};
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
 	};
 
 
