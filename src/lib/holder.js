@@ -935,6 +935,7 @@ function visibilityCheck() {
         });
     }
 
+    // Done to prevent 100% CPU usage via aggressive calling of requestAnimationFrame
     setTimeout(function () {
         global.requestAnimationFrame(visibilityCheck);
     }, 10);
