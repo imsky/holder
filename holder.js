@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.1+9ywjg
+Version 2.8.1+ap6nh
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -1234,7 +1234,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 
-	    global.requestAnimationFrame(visibilityCheck);
+	    setTimeout(function () {
+	        global.requestAnimationFrame(visibilityCheck);
+	    }, 10);
 	}
 
 	/**

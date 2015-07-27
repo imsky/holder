@@ -935,7 +935,9 @@ function visibilityCheck() {
         });
     }
 
-    global.requestAnimationFrame(visibilityCheck);
+    setTimeout(function () {
+        global.requestAnimationFrame(visibilityCheck);
+    }, 10);
 }
 
 /**
