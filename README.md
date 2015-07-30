@@ -38,6 +38,38 @@ The above tag will render as a placeholder 300 pixels wide and 200 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
+### Programmatic usage
+
+By default Holder will automatically process tags on the page. To programmatically insert a placeholder use the `run()` API:
+
+```js
+// e.g. <img id="myImage" data-src="holder.js/300x200?auto=true" />
+var myImage = document.getElementById('myImage');
+
+Holder.run({
+  images: myImage,
+  /* you can pass in additional options here like you normally would */
+});
+```
+
+### Browserify packaging
+
+If you're bundling your code using [browserify](http://browserify.org/) then you will probably need to use [browserify-shim](https://github.com/thlorenz/browserify-shim) in order to get Holder working. 
+
+In your `package.json` ensure you have:
+
+```js
+"browserify-shim": {
+  "holderjs": "Holder"  
+},
+```
+
+Then in your code you can `require()` it as normal:
+
+```js
+var Holder = require('holderjs');
+```
+
 ## Placeholder options
 
 Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
@@ -51,6 +83,8 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 * `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
 * `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
 * `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
+
+
 
 ### Themes
 
