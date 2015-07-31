@@ -52,24 +52,6 @@ Holder.run({
 });
 ```
 
-### Browserify packaging
-
-If you're bundling your code using [browserify](http://browserify.org/) then you will probably need to use [browserify-shim](https://github.com/thlorenz/browserify-shim) in order to get Holder working. 
-
-In your `package.json` ensure you have:
-
-```js
-"browserify-shim": {
-  "holderjs": "Holder"  
-},
-```
-
-Then in your code you can `require()` it as normal:
-
-```js
-var Holder = require('holderjs');
-```
-
 ## Placeholder options
 
 Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
