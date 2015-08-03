@@ -43,7 +43,6 @@ To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 To programmatically insert a placeholder use the `run()` API:
 
 ```js
-// e.g. <img id="myImage" data-src="holder.js/300x200?auto=true" />
 var myImage = document.getElementById('myImage');
 
 Holder.run({
