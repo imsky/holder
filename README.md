@@ -40,15 +40,14 @@ To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
 ### Programmatic usage
 
-By default Holder will automatically process tags on the page. To programmatically insert a placeholder use the `run()` API:
+To programmatically insert a placeholder use the `run()` API:
 
 ```js
 // e.g. <img id="myImage" data-src="holder.js/300x200?auto=true" />
 var myImage = document.getElementById('myImage');
 
 Holder.run({
-  images: myImage,
-  /* you can pass in additional options here like you normally would */
+  images: myImage
 });
 ```
 
@@ -64,9 +63,7 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 * `size`: Custom text size. Defaults to `pt` units. Example: `holder.js/300x200?size=50`
 * `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
 * `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
-* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
-
-
+* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`P
 
 ### Themes
 
