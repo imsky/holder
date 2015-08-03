@@ -38,6 +38,18 @@ The above tag will render as a placeholder 300 pixels wide and 200 pixels tall.
 
 To avoid console 404 errors, you can use ``data-src`` instead of ``src``.
 
+### Programmatic usage
+
+To programmatically insert a placeholder use the `run()` API:
+
+```js
+var myImage = document.getElementById('myImage');
+
+Holder.run({
+  images: myImage
+});
+```
+
 ## Placeholder options
 
 Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&a=b`. Multiple options are separated by the `&` character.
@@ -50,7 +62,7 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 * `size`: Custom text size. Defaults to `pt` units. Example: `holder.js/300x200?size=50`
 * `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
 * `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
-* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
+* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`P
 
 ### Themes
 
