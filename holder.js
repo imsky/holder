@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.1+ap6nh
+Version 2.8.1+b5rzf
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -425,16 +425,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var rawURL = dataBackgroundImage || backgroundImage;
 
 	            var holderURL = null;
-	            var holderString = '?' + options.domain + '/';
+	            var holderString = options.domain + '/';
+	            var holderStringIndex = rawURL.indexOf(holderString);
 
-	            if (rawURL.indexOf(holderString) === 0) {
+	            if (holderStringIndex === 0) {
+	                holderURL = rawURL;
+	            } else if (holderStringIndex === 1 && rawURL[0] === '?') {
 	                holderURL = rawURL.slice(1);
-	            } else if (rawURL.indexOf(holderString) != -1) {
-	                var fragment = rawURL.substr(rawURL.indexOf(holderString)).slice(1);
-	                var fragmentMatch = fragment.match(/([^\"]*)"?\)/);
-
-	                if (fragmentMatch != null) {
-	                    holderURL = fragmentMatch[1];
+	            } else {
+	                var fragment = rawURL.substr(holderStringIndex).match(/([^\"]*)"?\)/);
+	                if (fragment !== null) {
+	                    holderURL = fragment[1];
+	                } else if (rawURL.indexOf('url(') === 0) {
+	                    throw 'Holder: unable to parse background URL: ' + rawURL;
 	                }
 	            }
 
@@ -575,30 +578,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Processes a Holder URL
-	 *
-	 * @private
-	 * @param url URL
-	 * @param options Instance options from Holder.run
-	 */
-	function parseURL(url, options) {
-	    var holder = {
-	        theme: extend(App.settings.themes.gray, null),
-	        stylesheets: options.stylesheets,
-	        instanceOptions: options
-	    };
-
-	    return parseQueryString(url, holder);
-	}
-
-	/**
 	 * Processes a Holder URL and extracts configuration from query string
 	 *
 	 * @private
 	 * @param url URL
-	 * @param holder Staging Holder object
+	 * @param instanceOptions Instance options from Holder.run
 	 */
-	function parseQueryString(url, holder) {
+	function parseURL(url, instanceOptions) {
+	    var holder = {
+	        theme: extend(App.settings.themes.gray, null),
+	        stylesheets: instanceOptions.stylesheets,
+	        instanceOptions: instanceOptions
+	    };
+
 	    var parts = url.split('?');
 	    var basics = parts[0].split('/');
 
@@ -622,11 +614,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Colors
 
 	        if (options.bg) {
-	            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+	            holder.theme.background = utils.parseColor(options.bg);
 	        }
 
 	        if (options.fg) {
-	            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+	            holder.theme.foreground = utils.parseColor(options.fg);
 	        }
 
 	        //todo: add automatic foreground to themes without foreground
@@ -1234,6 +1226,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 
+	    // Done to prevent 100% CPU usage via aggressive calling of requestAnimationFrame
 	    setTimeout(function () {
 	        global.requestAnimationFrame(visibilityCheck);
 	    }, 10);
@@ -2155,6 +2148,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return !!val;
 	};
 
+	/**
+	 * Parses input into a well-formed CSS color
+	 * @param val
+	 */
+	exports.parseColor = function(val) {
+	    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
+	    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+
+	    var match = val.match(hexre);
+	    var retval;
+
+	    if (match !== null) {
+	        retval = match[1] || match[2];
+	        if (retval[0] !== '#') {
+	            return '#' + retval;
+	        } else {
+	            return retval;
+	        }
+	    }
+
+	    match = val.match(rgbre);
+
+	    if (match !== null) {
+	        retval = 'rgb(' + match.slice(1).join(',') + ')';
+	        return retval;
+	    }
+
+	    match = val.match(rgbare);
+
+	    if (match !== null) {
+	        retval = 'rgba(' + match.slice(1).join(',') + ')';
+	        return retval;
+	    }
+
+	    return null;
+	};
 
 /***/ },
 /* 6 */
