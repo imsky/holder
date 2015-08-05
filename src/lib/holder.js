@@ -126,16 +126,19 @@ var Holder = {
             var rawURL = dataBackgroundImage || backgroundImage;
 
             var holderURL = null;
-            var holderString = '?' + options.domain + '/';
+            var holderString = options.domain + '/';
+            var holderStringIndex = rawURL.indexOf(holderString);
 
-            if (rawURL.indexOf(holderString) === 0) {
+            if (holderStringIndex === 0) {
+                holderURL = rawURL;
+            } else if (holderStringIndex === 1 && rawURL[0] === '?') {
                 holderURL = rawURL.slice(1);
-            } else if (rawURL.indexOf(holderString) != -1) {
-                var fragment = rawURL.substr(rawURL.indexOf(holderString)).slice(1);
-                var fragmentMatch = fragment.match(/([^\"]*)"?\)/);
-
-                if (fragmentMatch != null) {
-                    holderURL = fragmentMatch[1];
+            } else {
+                var fragment = rawURL.substr(holderStringIndex).match(/([^\"]*)"?\)/);
+                if (fragment !== null) {
+                    holderURL = fragment[1];
+                } else if (rawURL.indexOf('url(') === 0) {
+                    throw 'Holder: unable to parse background URL: ' + rawURL;
                 }
             }
 
@@ -276,30 +279,19 @@ function prepareImageElement(options, engineSettings, src, el) {
 }
 
 /**
- * Processes a Holder URL
- *
- * @private
- * @param url URL
- * @param options Instance options from Holder.run
- */
-function parseURL(url, options) {
-    var holder = {
-        theme: extend(App.settings.themes.gray, null),
-        stylesheets: options.stylesheets,
-        instanceOptions: options
-    };
-
-    return parseQueryString(url, holder);
-}
-
-/**
  * Processes a Holder URL and extracts configuration from query string
  *
  * @private
  * @param url URL
- * @param holder Staging Holder object
+ * @param instanceOptions Instance options from Holder.run
  */
-function parseQueryString(url, holder) {
+function parseURL(url, instanceOptions) {
+    var holder = {
+        theme: extend(App.settings.themes.gray, null),
+        stylesheets: instanceOptions.stylesheets,
+        instanceOptions: instanceOptions
+    };
+
     var parts = url.split('?');
     var basics = parts[0].split('/');
 

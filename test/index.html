@@ -286,17 +286,9 @@
 
 Holder.run({'renderer':'html'});
 
-$(function () {
-	$("#invisible").show();
+Holder.addImage("holder.js/300x200?theme=sky", "#thumb1");
 
-	var resize = true;
-	$("#toggleResize").on("click", function () {
-		resize = !resize;
-		Holder.setResizeUpdate($(this).get(0), resize);
-	});
-});
-
-Holder.addImage("holder.js/300x200?theme=sky", "#thumb1").run();
+Holder.run();
 
 Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
@@ -317,6 +309,16 @@ Holder.addImage("holder.js/300x200?theme=social&text=Added using addImage with a
 Holder.run({
 	domain: "holder.canvas",
 	renderer: "canvas"
+});
+
+$(function () {
+	$("#invisible").show();
+
+	var resize = true;
+	$("#toggleResize").on("click", function () {
+		resize = !resize;
+		Holder.setResizeUpdate($(this).get(0), resize);
+	});
 });
 </script>
 </body>
