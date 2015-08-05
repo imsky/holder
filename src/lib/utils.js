@@ -114,3 +114,41 @@ exports.truthy = function(val) {
     }
     return !!val;
 };
+
+/**
+ * Parses input into a well-formed CSS color
+ * @param val
+ */
+exports.parseColor = function(val) {
+    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
+    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
+    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+
+    var match = val.match(hexre);
+    var retval;
+
+    if (match !== null) {
+        retval = match[1] || match[2];
+        if (retval[0] !== '#') {
+            return '#' + retval;
+        } else {
+            return retval;
+        }
+    }
+
+    match = val.match(rgbre);
+
+    if (match !== null) {
+        retval = 'rgb(' + match.slice(1).join(',') + ')';
+        return retval;
+    }
+
+    match = val.match(rgbare);
+
+    if (match !== null) {
+        retval = 'rgba(' + match.slice(1).join(',') + ')';
+        return retval;
+    }
+
+    return null;
+};

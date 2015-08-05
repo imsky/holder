@@ -323,11 +323,11 @@ function parseQueryString(url, holder) {
         // Colors
 
         if (options.bg) {
-            holder.theme.background = (options.bg.indexOf('#') === -1 ? '#' : '') + options.bg;
+            holder.theme.background = utils.parseColor(options.bg);
         }
 
         if (options.fg) {
-            holder.theme.foreground = (options.fg.indexOf('#') === -1 ? '#' : '') + options.fg;
+            holder.theme.foreground = utils.parseColor(options.fg);
         }
 
         //todo: add automatic foreground to themes without foreground
