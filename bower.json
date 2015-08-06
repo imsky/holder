@@ -1,4 +1,5 @@
 {
   "name": "holderjs",
-  "main": "holder.js"
+  "main": "holder.js",
+  "license": "MIT"
 }
