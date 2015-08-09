@@ -30,7 +30,11 @@ function generateBuild() {
 var build = generateBuild();
 
 gulp.task('jshint', function() {
-    return gulp.src('src/**/*.js')
+    return gulp.src([
+        'src/lib/*.js',
+        'src/renderers/*.js',
+        'src/index.js'
+        ])
         .pipe(jshint())
         .pipe(jshint.reporter('default'));
 });

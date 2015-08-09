@@ -69,8 +69,6 @@ Color.hsl2rgb = function (h, s, l) {
         b = X;
     }
 
-    var ret = [r, g, b];
-
     r += m;
     g += m;
     b += m;

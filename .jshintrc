@@ -7,5 +7,7 @@
   "loopfunc": true,
   "smarttabs": true,
   "node": true,
-  "browser": true
+  "browser": true,
+  "undef": true,
+  "unused": true
 }
