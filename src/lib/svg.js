@@ -71,7 +71,7 @@ exports.svgStringToDataURI = function() {
 
     return function(svgString, base64) {
         if (base64) {
-            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+            return base64Prefix + btoa(global.unescape(encodeURIComponent(svgString)));
         } else {
             return rawPrefix + encodeURIComponent(svgString);
         }
