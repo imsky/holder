@@ -47,5 +47,8 @@
   },
   "scripts": {
     "test": "node test/index"
+  },
+  "dependencies": {
+    "shaven": "^0.7.3"
   }
 }
