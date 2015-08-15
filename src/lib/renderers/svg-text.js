@@ -6,18 +6,6 @@ var constants = require('../constants');
 var SVG_NS = constants.svg_ns;
 
 var templates = {
-  'svg': function (options) {
-    return  ['svg', 
-      options.content || '', 
-      {
-        'xmlns': SVG_NS,
-        'width': options.width,
-        'height': options.height,
-        'viewBox': [0, 0, options.width, options.height].join(' '),
-        'preserveAspectRatio': 'none'
-      }
-    ];
-  },
   'element': function (options) {
     var tag = options.tag;
     var content = options.content || '';
@@ -27,6 +15,7 @@ var templates = {
   }
 };
 
+//todo: deprecate tag arg, infer tag from shape object
 function convertShape (shape, tag) {
   return templates.element({
     'tag': tag,
@@ -48,10 +37,14 @@ module.exports = function (sceneGraph, renderSettings) {
     'content': bg
   });
 
-  var svg = templates.svg({
+  var svg = templates.element({
+    'tag': 'svg',
+    'content': scene,
     'width': root.properties.width,
     'height': root.properties.height,
-    'content': scene
+    'xmlns': SVG_NS,
+    'viewBox': [0, 0, root.properties.width, root.properties.height].join(' '),
+    'preserveAspectRatio': 'none'
   });
 
   var output = shaven(svg);
