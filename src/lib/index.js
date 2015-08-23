@@ -1054,12 +1054,13 @@ var stagingRenderer = (function() {
 var sgCanvasRenderer = (function() {
     var canvas = DOM.newEl('canvas');
     var ctx = null;
-    var dpr = App.dpr(1);
 
     return function(sceneGraph) {
         if (ctx == null) {
             ctx = canvas.getContext('2d');
         }
+        //todo: factor out App usage
+        var dpr = App.setup.ratio;
         var root = sceneGraph.root;
         canvas.width = dpr * root.properties.width;
         canvas.height = dpr * root.properties.height ;
@@ -1157,10 +1158,6 @@ App.setup = {
     lineWrapRatio: 0.9,
     dataAttr: 'data-src',
     renderers: ['html', 'canvas', 'svg']
-};
-
-App.dpr = function(val) {
-    return val * App.setup.ratio;
 };
 
 //Properties modified during runtime
