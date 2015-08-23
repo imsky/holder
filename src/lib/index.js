@@ -1054,19 +1054,20 @@ var stagingRenderer = (function() {
 var sgCanvasRenderer = (function() {
     var canvas = DOM.newEl('canvas');
     var ctx = null;
+    var dpr = App.dpr(1);
 
     return function(sceneGraph) {
         if (ctx == null) {
             ctx = canvas.getContext('2d');
         }
         var root = sceneGraph.root;
-        canvas.width = App.dpr(root.properties.width);
-        canvas.height = App.dpr(root.properties.height);
+        canvas.width = dpr * root.properties.width;
+        canvas.height = dpr * root.properties.height ;
         ctx.textBaseline = 'middle';
 
         var bg = root.children.holderBg;
-        var bgWidth = App.dpr(bg.width);
-        var bgHeight = App.dpr(bg.height);
+        var bgWidth = dpr * bg.width;
+        var bgHeight = dpr * bg.height;
         //todo: parametrize outline width (e.g. in scene object)
         var outlineWidth = 2;
         var outlineOffsetWidth = outlineWidth / 2;
@@ -1093,15 +1094,15 @@ var sgCanvasRenderer = (function() {
         }
 
         var textGroup = root.children.holderTextGroup;
-        ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
+        ctx.font = textGroup.properties.font.weight + ' ' + (dpr * textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
         ctx.fillStyle = textGroup.properties.fill;
 
         for (var lineKey in textGroup.children) {
             var line = textGroup.children[lineKey];
             for (var wordKey in line.children) {
                 var word = line.children[wordKey];
-                var x = App.dpr(textGroup.x + line.x + word.x);
-                var y = App.dpr(textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
+                var x = dpr * (textGroup.x + line.x + word.x);
+                var y = dpr * (textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
 
                 ctx.fillText(word.properties.text, x, y);
             }
