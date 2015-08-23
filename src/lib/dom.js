@@ -55,5 +55,8 @@ exports.getNodeArray = function(val) {
     } else if (val === null) {
         retval = [];
     }
+
+    retval = Array.prototype.slice.call(retval);
+
     return retval;
 };
