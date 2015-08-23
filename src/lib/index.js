@@ -14,7 +14,7 @@ var DOM = require('./dom');
 var Color = require('./color');
 var constants = require('./constants');
 
-var svgRenderer = require('./renderers/svg-text');
+var svgRenderer = require('./renderers/svg-dom');
 
 var extend = utils.extend;
 var dimensionCheck = utils.dimensionCheck;
@@ -455,10 +455,11 @@ function prepareDOMElement(prepSettings) {
     };
 
     if (mode == 'image') {
-        if (engineSettings.renderer == 'html' || !flags.auto) {
+        if (!flags.auto) {
             el.style.width = dimensions.width + 'px';
             el.style.height = dimensions.height + 'px';
         }
+
         if (engineSettings.renderer == 'html') {
             el.style.backgroundColor = theme.background;
         } else {
