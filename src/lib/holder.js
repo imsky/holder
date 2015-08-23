@@ -45,15 +45,15 @@ var Holder = {
      */
     addImage: function(src, el) {
         //todo: use jquery fallback if available for all QSA references
-        var node = DOM.getNodeArray(el);
-        if (node.length) {
-            for (var i = 0, l = node.length; i < l; i++) {
+        var nodes = DOM.getNodeArray(el);
+        if (nodes.length) {
+            nodes.forEach(function (node) {
                 var img = DOM.newEl('img');
                 var domProps = {};
                 domProps[App.setup.dataAttr] = src;
                 DOM.setAttr(img, domProps);
-                node[i].appendChild(img);
-            }
+                node.appendChild(img);
+            });
         }
         return this;
     },
@@ -103,8 +103,7 @@ var Holder = {
         engineSettings.svgXMLStylesheet = true;
         engineSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 
-        for (var i = 0; i < stylenodes.length; i++) {
-            var styleNode = stylenodes[i];
+        stylenodes.forEach(function (styleNode) {
             if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
                 var href = styleNode.attributes.href.value;
                 //todo: write isomorphic relative-to-absolute URL function
@@ -113,13 +112,13 @@ var Holder = {
                 var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
                 engineSettings.stylesheets.push(stylesheetURL);
             }
-        }
+        });
 
-        for (i = 0; i < bgnodes.length; i++) {
+        bgnodes.forEach(function (bgNode) {
             //Skip processing background nodes if getComputedStyle is unavailable, since only modern browsers would be able to use canvas or SVG to render to background
-            if (!global.getComputedStyle) continue;
-            var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
-            var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
+            if (!global.getComputedStyle) return;
+            var backgroundImage = global.getComputedStyle(bgNode, null).getPropertyValue('background-image');
+            var dataBackgroundImage = bgNode.getAttribute('data-background-src');
             var rawURL = dataBackgroundImage || backgroundImage;
 
             var holderURL = null;
@@ -144,16 +143,15 @@ var Holder = {
                 if (holderFlags) {
                     prepareDOMElement({
                         mode: 'background',
-                        el: bgnodes[i],
+                        el: bgNode,
                         flags: holderFlags,
                         engineSettings: engineSettings
                     });
                 }
             }
-        }
+        });
 
-        for (i = 0; i < objects.length; i++) {
-            var object = objects[i];
+        objects.forEach(function (object) {
             var objectAttr = {};
 
             try {
@@ -169,10 +167,9 @@ var Holder = {
             } else if (objectHasDataSrcURL) {
                 prepareImageElement(options, engineSettings, objectAttr.dataSrc, object);
             }
-        }
+        });
 
-        for (i = 0; i < images.length; i++) {
-            var image = images[i];
+        images.forEach(function (image) {
             var imageAttr = {};
 
             try {
@@ -207,7 +204,7 @@ var Holder = {
             } else if (imageHasDataSrcURL) {
                 prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
             }
-        }
+        });
 
         return this;
     }
@@ -910,13 +907,14 @@ function visibilityCheck() {
     var renderableImages = [];
     var keys = Object.keys(App.vars.invisibleImages);
     var el;
-    for (var i = 0, l = keys.length; i < l; i++) {
-        el = App.vars.invisibleImages[keys[i]];
+
+    keys.forEach(function (key) {
+        el = App.vars.invisibleImages[key];
         if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
             renderableImages.push(el);
-            delete App.vars.invisibleImages[keys[i]];
+            delete App.vars.invisibleImages[key];
         }
-    }
+    });
 
     if (renderableImages.length) {
         Holder.run({
