@@ -14,7 +14,7 @@ var DOM = require('./dom');
 var Color = require('./color');
 var constants = require('./constants');
 
-var svgRenderer = require('./renderers/svg-dom');
+var svgRenderer = require('./renderers/svg-text');
 
 var extend = utils.extend;
 var dimensionCheck = utils.dimensionCheck;
