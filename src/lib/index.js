@@ -46,15 +46,13 @@ var Holder = {
     addImage: function(src, el) {
         //todo: use jquery fallback if available for all QSA references
         var nodes = DOM.getNodeArray(el);
-        if (nodes.length) {
-            nodes.forEach(function (node) {
-                var img = DOM.newEl('img');
-                var domProps = {};
-                domProps[App.setup.dataAttr] = src;
-                DOM.setAttr(img, domProps);
-                node.appendChild(img);
-            });
-        }
+        nodes.forEach(function (node) {
+            var img = DOM.newEl('img');
+            var domProps = {};
+            domProps[App.setup.dataAttr] = src;
+            DOM.setAttr(img, domProps);
+            node.appendChild(img);
+        });
         return this;
     },
 

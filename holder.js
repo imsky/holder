@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.1+b5rzf
+Version 2.8.2+c34r9
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -61,6 +61,25 @@ License:  MIT
         }
       }
       return ret;
+    };
+  }
+
+  // ES5 15.4.4.18 Array.prototype.forEach ( callbackfn [ , thisArg ] )
+  // From https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/forEach
+  if (!Array.prototype.forEach) {
+    Array.prototype.forEach = function (fun /*, thisp */) {
+      if (this === void 0 || this === null) { throw TypeError(); }
+
+      var t = Object(this);
+      var len = t.length >>> 0;
+      if (typeof fun !== "function") { throw TypeError(); }
+
+      var thisp = arguments[1], i;
+      for (i = 0; i < len; i++) {
+        if (i in t) {
+          fun.call(thisp, t[i], i, t);
+        }
+      }
     };
   }
 
@@ -311,21 +330,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var SVG = __webpack_require__(6);
 	var DOM = __webpack_require__(7);
 	var Color = __webpack_require__(8);
+	var constants = __webpack_require__(9);
+
+	var svgRenderer = __webpack_require__(10);
 
 	var extend = utils.extend;
 	var dimensionCheck = utils.dimensionCheck;
 
 	//Constants and definitions
-	var SVG_NS = 'http://www.w3.org/2000/svg';
-	var NODE_TYPE_COMMENT = 8;
-	var version = '2.8.1';
-	var generatorComment = '\n' +
-	    'Created with Holder.js ' + version + '.\n' +
-	    'Learn more at http://holderjs.com\n' +
-	    '(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
+	var SVG_NS = constants.svg_ns;
 
 	var Holder = {
-	    version: version,
+	    version: constants.version,
 
 	    /**
 	     * Adds a theme to default settings
@@ -347,16 +363,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    addImage: function(src, el) {
 	        //todo: use jquery fallback if available for all QSA references
-	        var node = DOM.getNodeArray(el);
-	        if (node.length) {
-	            for (var i = 0, l = node.length; i < l; i++) {
-	                var img = DOM.newEl('img');
-	                var domProps = {};
-	                domProps[App.setup.dataAttr] = src;
-	                DOM.setAttr(img, domProps);
-	                node[i].appendChild(img);
-	            }
-	        }
+	        var nodes = DOM.getNodeArray(el);
+	        nodes.forEach(function (node) {
+	            var img = DOM.newEl('img');
+	            var domProps = {};
+	            domProps[App.setup.dataAttr] = src;
+	            DOM.setAttr(img, domProps);
+	            node.appendChild(img);
+	        });
 	        return this;
 	    },
 
@@ -405,8 +419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        engineSettings.svgXMLStylesheet = true;
 	        engineSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
 
-	        for (var i = 0; i < stylenodes.length; i++) {
-	            var styleNode = stylenodes[i];
+	        stylenodes.forEach(function (styleNode) {
 	            if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
 	                var href = styleNode.attributes.href.value;
 	                //todo: write isomorphic relative-to-absolute URL function
@@ -415,13 +428,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var stylesheetURL = proxyLink.protocol + '//' + proxyLink.host + proxyLink.pathname + proxyLink.search;
 	                engineSettings.stylesheets.push(stylesheetURL);
 	            }
-	        }
+	        });
 
-	        for (i = 0; i < bgnodes.length; i++) {
+	        bgnodes.forEach(function (bgNode) {
 	            //Skip processing background nodes if getComputedStyle is unavailable, since only modern browsers would be able to use canvas or SVG to render to background
-	            if (!global.getComputedStyle) continue;
-	            var backgroundImage = global.getComputedStyle(bgnodes[i], null).getPropertyValue('background-image');
-	            var dataBackgroundImage = bgnodes[i].getAttribute('data-background-src');
+	            if (!global.getComputedStyle) return;
+	            var backgroundImage = global.getComputedStyle(bgNode, null).getPropertyValue('background-image');
+	            var dataBackgroundImage = bgNode.getAttribute('data-background-src');
 	            var rawURL = dataBackgroundImage || backgroundImage;
 
 	            var holderURL = null;
@@ -446,16 +459,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (holderFlags) {
 	                    prepareDOMElement({
 	                        mode: 'background',
-	                        el: bgnodes[i],
+	                        el: bgNode,
 	                        flags: holderFlags,
 	                        engineSettings: engineSettings
 	                    });
 	                }
 	            }
-	        }
+	        });
 
-	        for (i = 0; i < objects.length; i++) {
-	            var object = objects[i];
+	        objects.forEach(function (object) {
 	            var objectAttr = {};
 
 	            try {
@@ -471,10 +483,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (objectHasDataSrcURL) {
 	                prepareImageElement(options, engineSettings, objectAttr.dataSrc, object);
 	            }
-	        }
+	        });
 
-	        for (i = 0; i < images.length; i++) {
-	            var image = images[i];
+	        images.forEach(function (image) {
 	            var imageAttr = {};
 
 	            try {
@@ -509,7 +520,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            } else if (imageHasDataSrcURL) {
 	                prepareImageElement(options, engineSettings, imageAttr.dataSrc, image);
 	            }
-	        }
+	        });
 
 	        return this;
 	    }
@@ -760,10 +771,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 
 	    if (mode == 'image') {
-	        if (engineSettings.renderer == 'html' || !flags.auto) {
+	        if (!flags.auto) {
 	            el.style.width = dimensions.width + 'px';
 	            el.style.height = dimensions.height + 'px';
 	        }
+
 	        if (engineSettings.renderer == 'html') {
 	            el.style.backgroundColor = theme.background;
 	        } else {
@@ -846,7 +858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                image = sgCanvasRenderer(sceneGraph, renderSettings);
 	                break;
 	            case 'svg':
-	                image = sgSVGRenderer(sceneGraph, renderSettings);
+	                image = svgRenderer(sceneGraph, renderSettings);
 	                break;
 	            default:
 	                throw 'Holder: invalid renderer: ' + engineSettings.renderer;
@@ -1212,13 +1224,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var renderableImages = [];
 	    var keys = Object.keys(App.vars.invisibleImages);
 	    var el;
-	    for (var i = 0, l = keys.length; i < l; i++) {
-	        el = App.vars.invisibleImages[keys[i]];
+
+	    keys.forEach(function (key) {
+	        el = App.vars.invisibleImages[key];
 	        if (dimensionCheck(el) && el.nodeName.toLowerCase() == 'img') {
 	            renderableImages.push(el);
-	            delete App.vars.invisibleImages[keys[i]];
+	            delete App.vars.invisibleImages[key];
 	        }
-	    }
+	    });
 
 	    if (renderableImages.length) {
 	        Holder.run({
@@ -1398,7 +1411,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        var textGroup = root.children.holderTextGroup;
-	        var tgProps = textGroup.properties;
 	        ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
 	        ctx.fillStyle = textGroup.properties.fill;
 
@@ -1414,117 +1426,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        return canvas.toDataURL('image/png');
-	    };
-	})();
-
-	var sgSVGRenderer = (function() {
-	    //Prevent IE <9 from initializing SVG renderer
-	    if (!global.XMLSerializer) return;
-	    var xml = DOM.createXML();
-	    var svg = SVG.initSVG(null, 0, 0);
-	    var bgEl = DOM.newEl('rect', SVG_NS);
-	    svg.appendChild(bgEl);
-
-	    //todo: create a reusable pool for textNodes, resize if more words present
-
-	    return function(sceneGraph, renderSettings) {
-	        var root = sceneGraph.root;
-
-	        SVG.initSVG(svg, root.properties.width, root.properties.height);
-
-	        var groups = svg.querySelectorAll('g');
-
-	        for (var i = 0; i < groups.length; i++) {
-	            groups[i].parentNode.removeChild(groups[i]);
-	        }
-
-	        var holderURL = renderSettings.holderSettings.flags.holderURL;
-	        var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
-	        var sceneGroupEl = DOM.newEl('g', SVG_NS);
-	        var textGroup = root.children.holderTextGroup;
-	        var tgProps = textGroup.properties;
-	        var textGroupEl = DOM.newEl('g', SVG_NS);
-	        var tpdata = textGroup.textPositionData;
-	        var textCSSRule = '#' + holderId + ' text { ' +
-	            utils.cssProps({
-	                'fill': tgProps.fill,
-	                'font-weight': tgProps.font.weight,
-	                'font-family': tgProps.font.family + ', monospace',
-	                'font-size': tgProps.font.size + tgProps.font.units
-	            }) + ' } ';
-	        var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
-	        var holderCSS = xml.createCDATASection(textCSSRule);
-	        var styleEl = svg.querySelector('style');
-	        var bg = root.children.holderBg;
-
-	        DOM.setAttr(sceneGroupEl, {
-	            id: holderId
-	        });
-
-	        svg.insertBefore(commentNode, svg.firstChild);
-	        styleEl.appendChild(holderCSS);
-
-	        sceneGroupEl.appendChild(bgEl);
-
-	        //todo: abstract this into a cross-browser SVG outline method
-	        if (bg.properties.outline) {
-	            var outlineEl = DOM.newEl('path', SVG_NS);
-	            var outlineWidth = bg.properties.outline.width;
-	            var outlineOffsetWidth = outlineWidth / 2;
-	            DOM.setAttr(outlineEl, {
-	                'd': [
-	                    'M', outlineOffsetWidth, outlineOffsetWidth,
-	                    'H', bg.width - outlineOffsetWidth,
-	                    'V', bg.height - outlineOffsetWidth,
-	                    'H', outlineOffsetWidth,
-	                    'V', 0,
-	                    'M', 0, outlineOffsetWidth,
-	                    'L', bg.width, bg.height - outlineOffsetWidth,
-	                    'M', 0, bg.height - outlineOffsetWidth,
-	                    'L', bg.width, outlineOffsetWidth
-	                ].join(' '),
-	                'stroke-width': bg.properties.outline.width,
-	                'stroke': bg.properties.outline.fill,
-	                'fill': 'none'
-	            });
-	            sceneGroupEl.appendChild(outlineEl);
-	        }
-
-	        sceneGroupEl.appendChild(textGroupEl);
-	        svg.appendChild(sceneGroupEl);
-
-	        DOM.setAttr(bgEl, {
-	            'width': bg.width,
-	            'height': bg.height,
-	            'fill': bg.properties.fill
-	        });
-
-	        textGroup.y += tpdata.boundingBox.height * 0.8;
-
-	        for (var lineKey in textGroup.children) {
-	            var line = textGroup.children[lineKey];
-	            for (var wordKey in line.children) {
-	                var word = line.children[wordKey];
-	                var x = textGroup.x + line.x + word.x;
-	                var y = textGroup.y + line.y + word.y;
-
-	                var textEl = DOM.newEl('text', SVG_NS);
-	                var textNode = document.createTextNode(null);
-
-	                DOM.setAttr(textEl, {
-	                    'x': x,
-	                    'y': y
-	                });
-
-	                textNode.nodeValue = word.properties.text;
-	                textEl.appendChild(textNode);
-	                textGroupEl.appendChild(textEl);
-	            }
-	        }
-
-	        //todo: factor the background check up the chain, perhaps only return reference
-	        var svgString = SVG.svgStringToDataURI(SVG.serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
-	        return svgString;
 	    };
 	})();
 
@@ -1822,8 +1723,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var encode = encodeURIComponent;
 	var decode = decodeURIComponent;
-	var trim = __webpack_require__(9);
-	var type = __webpack_require__(10);
+	var trim = __webpack_require__(11);
+	var type = __webpack_require__(12);
 
 	var arrayRegex = /(\w+)\[(\d+)\]/;
 	var objectRegex = /\w+\.\w+/;
@@ -2263,7 +2164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return function(svgString, base64) {
 	        if (base64) {
-	            return base64Prefix + btoa(unescape(encodeURIComponent(svgString)));
+	            return base64Prefix + btoa(global.unescape(encodeURIComponent(svgString)));
 	        } else {
 	            return rawPrefix + encodeURIComponent(svgString);
 	        }
@@ -2316,9 +2217,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!global.document) return;
 
 	    if (namespace == null) {
-	        return document.createElement(tag);
+	        return global.document.createElement(tag);
 	    } else {
-	        return document.createElementNS(namespace, tag);
+	        return global.document.createElementNS(namespace, tag);
 	    }
 	};
 
@@ -2363,6 +2264,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (val === null) {
 	        retval = [];
 	    }
+
+	    retval = Array.prototype.slice.call(retval);
+
 	    return retval;
 	};
 
@@ -2442,8 +2346,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        r = C;
 	        b = X;
 	    }
-
-	    var ret = [r, g, b];
 
 	    r += m;
 	    g += m;
@@ -2582,6 +2484,143 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = {
+	  'version': '2.8.2',
+	  'svg_ns': 'http://www.w3.org/2000/svg'
+	};
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {var SVG = __webpack_require__(6);
+	var DOM = __webpack_require__(7);
+	var utils = __webpack_require__(5);
+	var constants = __webpack_require__(9);
+
+	var SVG_NS = constants.svg_ns;
+
+	var generatorComment = '\n' +
+	    'Created with Holder.js ' + constants.version + '.\n' +
+	    'Learn more at http://holderjs.com\n' +
+	    '(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
+
+	module.exports = (function() {
+	    //Prevent IE <9 from initializing SVG renderer
+	    if (!global.XMLSerializer) return;
+	    var xml = DOM.createXML();
+	    var svg = SVG.initSVG(null, 0, 0);
+	    var bgEl = DOM.newEl('rect', SVG_NS);
+	    svg.appendChild(bgEl);
+
+	    //todo: create a reusable pool for textNodes, resize if more words present
+
+	    return function(sceneGraph, renderSettings) {
+	        var root = sceneGraph.root;
+
+	        SVG.initSVG(svg, root.properties.width, root.properties.height);
+
+	        var groups = svg.querySelectorAll('g');
+
+	        for (var i = 0; i < groups.length; i++) {
+	            groups[i].parentNode.removeChild(groups[i]);
+	        }
+
+	        var holderURL = renderSettings.holderSettings.flags.holderURL;
+	        var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
+	        var sceneGroupEl = DOM.newEl('g', SVG_NS);
+	        var textGroup = root.children.holderTextGroup;
+	        var tgProps = textGroup.properties;
+	        var textGroupEl = DOM.newEl('g', SVG_NS);
+	        var tpdata = textGroup.textPositionData;
+	        var textCSSRule = '#' + holderId + ' text { ' +
+	            utils.cssProps({
+	                'fill': tgProps.fill,
+	                'font-weight': tgProps.font.weight,
+	                'font-family': tgProps.font.family + ', monospace',
+	                'font-size': tgProps.font.size + tgProps.font.units
+	            }) + ' } ';
+	        var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
+	        var holderCSS = xml.createCDATASection(textCSSRule);
+	        var styleEl = svg.querySelector('style');
+	        var bg = root.children.holderBg;
+
+	        DOM.setAttr(sceneGroupEl, {
+	            id: holderId
+	        });
+
+	        svg.insertBefore(commentNode, svg.firstChild);
+	        styleEl.appendChild(holderCSS);
+
+	        sceneGroupEl.appendChild(bgEl);
+
+	        //todo: abstract this into a cross-browser SVG outline method
+	        if (bg.properties.outline) {
+	            var outlineEl = DOM.newEl('path', SVG_NS);
+	            var outlineWidth = bg.properties.outline.width;
+	            var outlineOffsetWidth = outlineWidth / 2;
+	            DOM.setAttr(outlineEl, {
+	                'd': [
+	                    'M', outlineOffsetWidth, outlineOffsetWidth,
+	                    'H', bg.width - outlineOffsetWidth,
+	                    'V', bg.height - outlineOffsetWidth,
+	                    'H', outlineOffsetWidth,
+	                    'V', 0,
+	                    'M', 0, outlineOffsetWidth,
+	                    'L', bg.width, bg.height - outlineOffsetWidth,
+	                    'M', 0, bg.height - outlineOffsetWidth,
+	                    'L', bg.width, outlineOffsetWidth
+	                ].join(' '),
+	                'stroke-width': bg.properties.outline.width,
+	                'stroke': bg.properties.outline.fill,
+	                'fill': 'none'
+	            });
+	            sceneGroupEl.appendChild(outlineEl);
+	        }
+
+	        sceneGroupEl.appendChild(textGroupEl);
+	        svg.appendChild(sceneGroupEl);
+
+	        DOM.setAttr(bgEl, {
+	            'width': bg.width,
+	            'height': bg.height,
+	            'fill': bg.properties.fill
+	        });
+
+	        textGroup.y += tpdata.boundingBox.height * 0.8;
+
+	        for (var lineKey in textGroup.children) {
+	            var line = textGroup.children[lineKey];
+	            for (var wordKey in line.children) {
+	                var word = line.children[wordKey];
+	                var x = textGroup.x + line.x + word.x;
+	                var y = textGroup.y + line.y + word.y;
+
+	                var textEl = DOM.newEl('text', SVG_NS);
+	                var textNode = document.createTextNode(null);
+
+	                DOM.setAttr(textEl, {
+	                    'x': x,
+	                    'y': y
+	                });
+
+	                textNode.nodeValue = word.properties.text;
+	                textEl.appendChild(textNode);
+	                textGroupEl.appendChild(textEl);
+	            }
+	        }
+
+	        //todo: factor the background check up the chain, perhaps only return reference
+	        var svgString = SVG.svgStringToDataURI(SVG.serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
+	        return svgString;
+	    };
+	})();
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
 	
 	exports = module.exports = trim;
 
@@ -2599,7 +2638,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
