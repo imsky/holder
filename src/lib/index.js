@@ -566,9 +566,7 @@ function render(renderSettings) {
             });
         } else if (el.nodeName.toLowerCase() === 'object') {
             DOM.setAttr(el, {
-                'data': image
-            });
-            DOM.setAttr(el, {
+                'data': image,
                 'type': 'image/svg+xml'
             });
         }
@@ -585,9 +583,7 @@ function render(renderSettings) {
                     });
                 } else if (el.nodeName.toLowerCase() === 'object') {
                     DOM.setAttr(el, {
-                        'data': image
-                    });
-                    DOM.setAttr(el, {
+                        'data': image,
                         'type': 'image/svg+xml'
                     });
                 }
