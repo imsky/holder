@@ -36,7 +36,13 @@ function textCss (properties) {
 }
 
 module.exports = function (sceneGraph, renderSettings) {
-  var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
+  var engineSettings = renderSettings.engineSettings;
+  var stylesheets = engineSettings.stylesheets;
+  var stylesheetXml = stylesheets.map(function (stylesheet) {
+    return '<?xml-stylesheet rel="stylesheet" href="' + stylesheet + '"?>';
+  }).join('\n');
+
+  var holderId = 'holder_' + Number(new Date()).toString(16);
 
   var root = sceneGraph.root;
   var textGroup = root.children.holderTextGroup;
@@ -103,7 +109,9 @@ module.exports = function (sceneGraph, renderSettings) {
   });
 
   var output = shaven(svg);
+  
+  output = stylesheetXml + output[0];
 
-  var svgString = SVG.svgStringToDataURI(output[0], renderSettings.mode === 'background');
+  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
   return svgString;
 };
