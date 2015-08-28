@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+<title>Holder.js Render Benchmark</title>
+<meta charset="utf-8">
+<style type="text/css">
+ #meter {position:fixed; top:0; left:0;}
+</style>
+</head>
+<body>
+<div id="meter"></div>
+<div id="test">Test is running&hellip;</div>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/fpsmeter/0.3.1/fpsmeter.js"></script>
+<script>
+var src = 'holder.js/300x200';
+
+function render () {
+    meter.tickStart();
+    var html = '<img data-src="' + src + '">';
+    $('#test').html(html);
+    Holder.run();
+    meter.tick();
+    setTimeout(render, 1)
+}
+
+var meter = new FPSMeter(document.getElementById('meter'));
+
+var qs = window.location.search;
+if (qs.indexOf('release=') === -1){
+    alert('No release specified.');
+} else {
+    var release = qs.replace('?release=', '');
+    $.getScript('releases/holder-' + release + '/holder.js', function () {
+        render();
+    });
+}
+</script>
+</body>
+</html>
