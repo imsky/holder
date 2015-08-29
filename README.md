@@ -182,6 +182,8 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 
 ### Fluid placeholders
 
+**Important:** Percentages are specified with the `p` character, not with the `%` character.
+
 Specifying a dimension in percentages creates a fluid placeholder that responds to media queries.
 
 ```html
