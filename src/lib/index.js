@@ -1056,7 +1056,7 @@ var sgCanvasRenderer = (function() {
             ctx = canvas.getContext('2d');
         }
         //todo: factor out App usage
-        var dpr = App.setup.ratio;
+        var dpr = utils.canvasRatio();
         var root = sceneGraph.root;
         canvas.width = dpr * root.properties.width;
         canvas.height = dpr * root.properties.height ;
@@ -1171,26 +1171,14 @@ App.vars = {
 //Pre-flight
 
 (function() {
-    var devicePixelRatio = 1,
-        backingStoreRatio = 1;
-
     var canvas = DOM.newEl('canvas');
-    var ctx = null;
 
     if (canvas.getContext) {
         if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
             App.setup.renderer = 'canvas';
-            ctx = canvas.getContext('2d');
             App.setup.supportsCanvas = true;
         }
     }
-
-    if (App.setup.supportsCanvas) {
-        devicePixelRatio = global.devicePixelRatio || 1;
-        backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-    }
-
-    App.setup.ratio = devicePixelRatio / backingStoreRatio;
 
     if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
         App.setup.renderer = 'svg';
