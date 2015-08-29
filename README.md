@@ -178,6 +178,8 @@ Placeholders using a custom font are rendered using canvas by default, due to SV
 
 **Important:** When testing locally, font URLs must have a `http` or `https` protocol defined.
 
+**Important:** Fonts served from locations other than public registries (i.e. Google Fonts, Typekit, etc.) require the correct CORS headers to be set. See [https://www.maxcdn.com/one/tutorial/how-to-use-cdn-with-webfonts/](How to use CDN with Webfonts) for more details.
+
 `<object>` placeholders work like `<img>` placeholders, with the added benefit of their DOM being able to be inspected and modified. As with `<img>` placeholders, the `data-src` attribute is more reliable than the `data` attribute.
 
 ### Fluid placeholders
