@@ -4,7 +4,7 @@
 
 Holder renders image placeholders on the client side using SVG.
 
-Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many other sites](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop).
+Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop) [other](http://libscore.com/#Holder) sites.
 
 [![Build Status](https://travis-ci.org/imsky/holder.svg?branch=master)](https://travis-ci.org/imsky/holder)
 
@@ -62,7 +62,7 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 * `size`: Custom text size. Defaults to `pt` units. Example: `holder.js/300x200?size=50`
 * `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
 * `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
-* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`P
+* `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
 
 ### Themes
 
