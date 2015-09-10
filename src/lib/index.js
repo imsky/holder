@@ -379,6 +379,8 @@ function prepareDOMElement(prepSettings) {
         theme = flags.theme;
     var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
     mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
+    var holderTemplateRe = /holder_([a-z]+)/g;
+    var dimensionsInText = false;
 
     if (flags.text != null) {
         theme.text = flags.text;
@@ -390,6 +392,19 @@ function prepareDOMElement(prepSettings) {
                 textLines[k] = utils.encodeHtmlEntity(textLines[k]);
             }
             theme.text = textLines.join('\\n');
+        }
+    }
+
+    if (theme.text) {
+        var holderTemplateMatches = theme.text.match(holderTemplateRe);
+
+        if (holderTemplateMatches !== null) {
+            //todo: optimize template replacement
+            holderTemplateMatches.forEach(function (match) {
+                if (match === 'holder_dimensions') {
+                    theme.text = theme.text.replace(match, dimensionsCaption);
+                }
+            });
         }
     }
 
@@ -438,7 +453,7 @@ function prepareDOMElement(prepSettings) {
 
     if (mode == 'image' || mode == 'fluid') {
         DOM.setAttr(el, {
-            'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
+            'alt': theme.text ? (dimensionsInText ? theme.text : theme.text + ' [' + dimensionsCaption + ']') : dimensionsCaption
         });
     }
 
