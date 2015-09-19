@@ -8,6 +8,8 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 
 [![Build Status](https://travis-ci.org/imsky/holder.svg?branch=master)](https://travis-ci.org/imsky/holder)
 
+[![Package Quality](http://npm.packagequality.com/badge/holderjs.png)](http://packagequality.com/#?package=holderjs)
+
 ## Installing
 
 * [npm](http://npmjs.com/): `npm install holderjs`
