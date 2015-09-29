@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.2+c34r9
+Version 2.8.2+d08qq
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -252,7 +252,7 @@ License:  MIT
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define(factory);
+		define([], factory);
 	else if(typeof exports === 'object')
 		exports["Holder"] = factory();
 	else
@@ -325,14 +325,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var onDomReady = __webpack_require__(2);
 	var querystring = __webpack_require__(3);
 
-	var SceneGraph = __webpack_require__(4);
-	var utils = __webpack_require__(5);
-	var SVG = __webpack_require__(6);
-	var DOM = __webpack_require__(7);
-	var Color = __webpack_require__(8);
-	var constants = __webpack_require__(9);
+	var SceneGraph = __webpack_require__(6);
+	var utils = __webpack_require__(7);
+	var SVG = __webpack_require__(8);
+	var DOM = __webpack_require__(9);
+	var Color = __webpack_require__(10);
+	var constants = __webpack_require__(11);
 
-	var svgRenderer = __webpack_require__(10);
+	var svgRenderer = __webpack_require__(12);
+	var sgCanvasRenderer = __webpack_require__(15);
 
 	var extend = utils.extend;
 	var dimensionCheck = utils.dimensionCheck;
@@ -696,6 +697,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        theme = flags.theme;
 	    var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
 	    mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
+	    var holderTemplateRe = /holder_([a-z]+)/g;
+	    var dimensionsInText = false;
 
 	    if (flags.text != null) {
 	        theme.text = flags.text;
@@ -707,6 +710,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	                textLines[k] = utils.encodeHtmlEntity(textLines[k]);
 	            }
 	            theme.text = textLines.join('\\n');
+	        }
+	    }
+
+	    if (theme.text) {
+	        var holderTemplateMatches = theme.text.match(holderTemplateRe);
+
+	        if (holderTemplateMatches !== null) {
+	            //todo: optimize template replacement
+	            holderTemplateMatches.forEach(function (match) {
+	                if (match === 'holder_dimensions') {
+	                    theme.text = theme.text.replace(match, dimensionsCaption);
+	                }
+	            });
 	        }
 	    }
 
@@ -755,7 +771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (mode == 'image' || mode == 'fluid') {
 	        DOM.setAttr(el, {
-	            'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
+	            'alt': theme.text ? (dimensionsInText ? theme.text : theme.text + ' [' + dimensionsCaption + ']') : dimensionsCaption
 	        });
 	    }
 
@@ -884,9 +900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        } else if (el.nodeName.toLowerCase() === 'object') {
 	            DOM.setAttr(el, {
-	                'data': image
-	            });
-	            DOM.setAttr(el, {
+	                'data': image,
 	                'type': 'image/svg+xml'
 	            });
 	        }
@@ -903,9 +917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    });
 	                } else if (el.nodeName.toLowerCase() === 'object') {
 	                    DOM.setAttr(el, {
-	                        'data': image
-	                    });
-	                    DOM.setAttr(el, {
+	                        'data': image,
 	                        'type': 'image/svg+xml'
 	                    });
 	                }
@@ -1369,66 +1381,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	})();
 
-	var sgCanvasRenderer = (function() {
-	    var canvas = DOM.newEl('canvas');
-	    var ctx = null;
-
-	    return function(sceneGraph) {
-	        if (ctx == null) {
-	            ctx = canvas.getContext('2d');
-	        }
-	        var root = sceneGraph.root;
-	        canvas.width = App.dpr(root.properties.width);
-	        canvas.height = App.dpr(root.properties.height);
-	        ctx.textBaseline = 'middle';
-
-	        var bg = root.children.holderBg;
-	        var bgWidth = App.dpr(bg.width);
-	        var bgHeight = App.dpr(bg.height);
-	        //todo: parametrize outline width (e.g. in scene object)
-	        var outlineWidth = 2;
-	        var outlineOffsetWidth = outlineWidth / 2;
-
-	        ctx.fillStyle = bg.properties.fill;
-	        ctx.fillRect(0, 0, bgWidth, bgHeight);
-
-	        if (bg.properties.outline) {
-	            //todo: abstract this into a method
-	            ctx.strokeStyle = bg.properties.outline.fill;
-	            ctx.lineWidth = bg.properties.outline.width;
-	            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
-	            // TL, TR, BR, BL
-	            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
-	            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
-	            // Diagonals
-	            ctx.moveTo(0, outlineOffsetWidth);
-	            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
-	            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
-	            ctx.lineTo(bgWidth, outlineOffsetWidth);
-	            ctx.stroke();
-	        }
-
-	        var textGroup = root.children.holderTextGroup;
-	        ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
-	        ctx.fillStyle = textGroup.properties.fill;
-
-	        for (var lineKey in textGroup.children) {
-	            var line = textGroup.children[lineKey];
-	            for (var wordKey in line.children) {
-	                var word = line.children[wordKey];
-	                var x = App.dpr(textGroup.x + line.x + word.x);
-	                var y = App.dpr(textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
-
-	                ctx.fillText(word.properties.text, x, y);
-	            }
-	        }
-
-	        return canvas.toDataURL('image/png');
-	    };
-	})();
-
 	//Helpers
 
 	/**
@@ -1476,10 +1428,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    renderers: ['html', 'canvas', 'svg']
 	};
 
-	App.dpr = function(val) {
-	    return val * App.setup.ratio;
-	};
-
 	//Properties modified during runtime
 
 	App.vars = {
@@ -1495,26 +1443,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	//Pre-flight
 
 	(function() {
-	    var devicePixelRatio = 1,
-	        backingStoreRatio = 1;
-
 	    var canvas = DOM.newEl('canvas');
-	    var ctx = null;
 
 	    if (canvas.getContext) {
 	        if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
 	            App.setup.renderer = 'canvas';
-	            ctx = canvas.getContext('2d');
 	            App.setup.supportsCanvas = true;
 	        }
 	    }
-
-	    if (App.setup.supportsCanvas) {
-	        devicePixelRatio = global.devicePixelRatio || 1;
-	        backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-	    }
-
-	    App.setup.ratio = devicePixelRatio / backingStoreRatio;
 
 	    if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
 	        App.setup.renderer = 'svg';
@@ -1551,7 +1487,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	/*!
 	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
@@ -1723,8 +1659,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var encode = encodeURIComponent;
 	var decode = decodeURIComponent;
-	var trim = __webpack_require__(11);
-	var type = __webpack_require__(12);
+	var trim = __webpack_require__(4);
+	var type = __webpack_require__(5);
 
 	var arrayRegex = /(\w+)\[(\d+)\]/;
 	var objectRegex = /\w+\.\w+/;
@@ -1819,7 +1755,67 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	/**
+	 * toString ref.
+	 */
+
+	var toString = Object.prototype.toString;
+
+	/**
+	 * Return the type of `val`.
+	 *
+	 * @param {Mixed} val
+	 * @return {String}
+	 * @api public
+	 */
+
+	module.exports = function(val){
+	  switch (toString.call(val)) {
+	    case '[object Date]': return 'date';
+	    case '[object RegExp]': return 'regexp';
+	    case '[object Arguments]': return 'arguments';
+	    case '[object Array]': return 'array';
+	    case '[object Error]': return 'error';
+	  }
+
+	  if (val === null) return 'null';
+	  if (val === undefined) return 'undefined';
+	  if (val !== val) return 'nan';
+	  if (val && val.nodeType === 1) return 'element';
+
+	  val = val.valueOf
+	    ? val.valueOf()
+	    : Object.prototype.valueOf.apply(val)
+
+	  return typeof val;
+	};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
 
 	var SceneGraph = function(sceneProperties) {
 	    var nodeCount = 1;
@@ -1929,10 +1925,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/* 7 */
+/***/ function(module, exports) {
 
-	/**
+	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Shallow object clone and merge
 	 *
 	 * @param a Object A
@@ -2087,11 +2083,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return null;
 	};
 
+	/**
+	 * Provides the correct scaling ratio for canvas drawing operations on HiDPI screens (e.g. Retina displays)
+	 */
+	exports.canvasRatio = function () {
+	    var devicePixelRatio = 1;
+	    var backingStoreRatio = 1;
+
+	    if (global.document) {
+	        var canvas = global.document.createElement('canvas');
+	        if (canvas.getContext) {
+	            var ctx = canvas.getContext('2d');
+	            devicePixelRatio = global.devicePixelRatio || 1;
+	            backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+	        }
+	    }
+
+	    return devicePixelRatio / backingStoreRatio;
+	};
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(7);
+	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(9);
 
 	var SVG_NS = 'http://www.w3.org/2000/svg';
 	var NODE_TYPE_COMMENT = 8;
@@ -2204,8 +2220,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/* 9 */
+/***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Generic new DOM element function
@@ -2273,8 +2289,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/* 10 */
+/***/ function(module, exports) {
 
 	var Color = function(color, options) {
 	    //todo: support rgba, hsla, and rrggbbaa notation
@@ -2481,8 +2497,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/* 11 */
+/***/ function(module, exports) {
 
 	module.exports = {
 	  'version': '2.8.2',
@@ -2490,192 +2506,427 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var SVG = __webpack_require__(6);
-	var DOM = __webpack_require__(7);
-	var utils = __webpack_require__(5);
-	var constants = __webpack_require__(9);
+	var shaven = __webpack_require__(13);
+
+	var SVG = __webpack_require__(8);
+	var constants = __webpack_require__(11);
+	var utils = __webpack_require__(7);
 
 	var SVG_NS = constants.svg_ns;
 
-	var generatorComment = '\n' +
-	    'Created with Holder.js ' + constants.version + '.\n' +
-	    'Learn more at http://holderjs.com\n' +
-	    '(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
+	var templates = {
+	  'element': function (options) {
+	    var tag = options.tag;
+	    var content = options.content || '';
+	    delete options.tag;
+	    delete options.content;
+	    return  [tag, content, options];
+	  }
+	};
+
+	//todo: deprecate tag arg, infer tag from shape object
+	function convertShape (shape, tag) {
+	  return templates.element({
+	    'tag': tag,
+	    'width': shape.width,
+	    'height': shape.height,
+	    'fill': shape.properties.fill
+	  });
+	}
+
+	function textCss (properties) {
+	  return utils.cssProps({
+	    'fill': properties.fill,
+	    'font-weight': properties.font.weight,
+	    'font-family': properties.font.family + ', monospace',
+	    'font-size': properties.font.size + properties.font.units
+	  });
+	}
+
+	module.exports = function (sceneGraph, renderSettings) {
+	  var engineSettings = renderSettings.engineSettings;
+	  var stylesheets = engineSettings.stylesheets;
+	  var stylesheetXml = stylesheets.map(function (stylesheet) {
+	    return '<?xml-stylesheet rel="stylesheet" href="' + stylesheet + '"?>';
+	  }).join('\n');
+
+	  var holderId = 'holder_' + Number(new Date()).toString(16);
+
+	  var root = sceneGraph.root;
+	  var textGroup = root.children.holderTextGroup;
+
+	  var css = '#' + holderId + ' text { ' + textCss(textGroup.properties) + ' } ';
+
+	  // push text down to be equally vertically aligned with canvas renderer
+	  textGroup.y += textGroup.textPositionData.boundingBox.height * 0.8;
+
+	  var wordTags = [];
+
+	  Object.keys(textGroup.children).forEach(function (lineKey) {
+	    var line = textGroup.children[lineKey];
+
+	    Object.keys(line.children).forEach(function (wordKey) {
+	      var word = line.children[wordKey];
+	      var x = textGroup.x + line.x + word.x;
+	      var y = textGroup.y + line.y + word.y;
+
+	      var wordTag = templates.element({
+	        'tag': 'text',
+	        'content': word.properties.text,
+	        'x': x,
+	        'y': y
+	      });
+
+	      wordTags.push(wordTag);
+	    });
+	  });
+
+	  var text = templates.element({
+	    'tag': 'g',
+	    'content': wordTags
+	  });
+
+	  var bg = convertShape(root.children.holderBg, 'rect');
+
+	  var scene = templates.element({
+	    'tag': 'g',
+	    'id': holderId,
+	    'content': [bg, text]
+	  });
+
+	  var style = templates.element({
+	    'tag': 'style',
+	    //todo: figure out how to add CDATA directive
+	    'content': css,
+	    'type': 'text/css'
+	  });
+
+	  var defs = templates.element({
+	    'tag': 'defs',
+	    'content': style
+	  });
+
+	  var svg = templates.element({
+	    'tag': 'svg',
+	    'content': [defs, scene],
+	    'width': root.properties.width,
+	    'height': root.properties.height,
+	    'xmlns': SVG_NS,
+	    'viewBox': [0, 0, root.properties.width, root.properties.height].join(' '),
+	    'preserveAspectRatio': 'none'
+	  });
+
+	  var output = shaven(svg);
+	  
+	  output = stylesheetXml + output[0];
+
+	  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
+	  return svgString;
+	};
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var escape = __webpack_require__(14)
+
+	// TODO: remove namespace
+
+	module.exports = function shaven (array, namespace, returnObject) {
+
+		'use strict'
+
+		var i = 1,
+			doesEscape = true,
+			HTMLString,
+			attributeKey,
+			callback,
+			key
+
+
+		returnObject = returnObject || {}
+
+
+		function createElement (sugarString) {
+
+			var tags = sugarString.match(/^\w+/),
+				element = {
+					tag: tags ? tags[0] : 'div',
+					attr: {},
+					children: []
+				},
+				id = sugarString.match(/#([\w-]+)/),
+				reference = sugarString.match(/\$([\w-]+)/),
+				classNames = sugarString.match(/\.[\w-]+/g)
+
+
+			// Assign id if is set
+			if (id) {
+				element.attr.id = id[1]
+
+				// Add element to the return object
+				returnObject[id[1]] = element
+			}
+
+			if (reference)
+				returnObject[reference[1]] = element
+
+			if (classNames)
+				element.attr.class = classNames.join(' ').replace(/\./g, '')
+
+			if (sugarString.match(/&$/g))
+				doesEscape = false
+
+			return element
+		}
+
+		function replacer (key, value) {
+
+			if (value === null || value === false || value === undefined)
+				return
+
+			if (typeof value !== 'string' && typeof value !== 'object')
+				return String(value)
+
+			return value
+		}
+
+		function escapeAttribute (string) {
+			return String(string)
+				.replace(/&/g, '&amp;')
+				.replace(/"/g, '&quot;')
+		}
+
+		function escapeHTML (string) {
+			return String(string)
+				.replace(/&/g, '&amp;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&apos;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+		}
+
+
+		if (typeof array[0] === 'string')
+			array[0] = createElement(array[0])
+
+		else if (Array.isArray(array[0]))
+			i = 0
+
+		else
+			throw new Error(
+				'First element of array must be a string, ' +
+				'or an array and not ' + JSON.stringify(array[0])
+			)
+
+
+		for (; i < array.length; i++) {
+
+			// Don't render element if value is false or null
+			if (array[i] === false || array[i] === null) {
+				array[0] = false
+				break
+			}
+
+			// Continue with next array value if current value is undefined or true
+			else if (array[i] === undefined || array[i] === true) {
+				continue
+			}
+
+			else if (typeof array[i] === 'string') {
+				if (doesEscape)
+					array[i] = escapeHTML(array[i])
+
+				array[0].children.push(array[i])
+			}
+
+			else if (typeof array[i] === 'number') {
+
+				array[0].children.push(array[i])
+			}
+
+			else if (Array.isArray(array[i])) {
+
+				if (Array.isArray(array[i][0])) {
+					array[i].reverse().forEach(function (subArray) {
+						array.splice(i + 1, 0, subArray)
+					})
+
+					if (i !== 0)
+						continue
+					i++
+				}
+
+				shaven(array[i], namespace, returnObject)
+
+				if (array[i][0])
+					array[0].children.push(array[i][0])
+			}
+
+			else if (typeof array[i] === 'function')
+				callback = array[i]
+
+
+			else if (typeof array[i] === 'object') {
+				for (attributeKey in array[i])
+					if (array[i].hasOwnProperty(attributeKey))
+						if (array[i][attributeKey] !== null &&
+							array[i][attributeKey] !== false)
+							if (attributeKey === 'style' &&
+								typeof array[i][attributeKey] === 'object')
+								array[0].attr[attributeKey] = JSON
+									.stringify(array[i][attributeKey], replacer)
+									.slice(2, -2)
+									.replace(/","/g, ';')
+									.replace(/":"/g, ':')
+									.replace(/\\"/g, '\'')
+
+							else
+								array[0].attr[attributeKey] = array[i][attributeKey]
+			}
+
+			else
+				throw new TypeError('"' + array[i] + '" is not allowed as a value.')
+		}
+
+
+		if (array[0] !== false) {
+
+			HTMLString = '<' + array[0].tag
+
+			for (key in array[0].attr)
+				if (array[0].attr.hasOwnProperty(key))
+					HTMLString += ' ' + key + '="' +
+						escapeAttribute(array[0].attr[key] || '') + '"'
+
+			HTMLString += '>'
+
+			array[0].children.forEach(function (child) {
+				HTMLString += child
+			})
+
+			HTMLString += '</' + array[0].tag + '>'
+
+			array[0] = HTMLString
+		}
+
+		// Return root element on index 0
+		returnObject[0] = array[0]
+
+		if (callback)
+			callback(array[0])
+
+		// returns object containing all elements with an id and the root element
+		return returnObject
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	/*!
+	 * escape-html
+	 * Copyright(c) 2012-2013 TJ Holowaychuk
+	 * MIT Licensed
+	 */
+
+	/**
+	 * Module exports.
+	 * @public
+	 */
+
+	module.exports = escapeHtml;
+
+	/**
+	 * Escape special characters in the given string of html.
+	 *
+	 * @param  {string} str The string to escape for inserting into HTML
+	 * @return {string}
+	 * @public
+	 */
+
+	function escapeHtml(html) {
+	  return String(html)
+	    .replace(/&/g, '&amp;')
+	    .replace(/"/g, '&quot;')
+	    .replace(/'/g, '&#39;')
+	    .replace(/</g, '&lt;')
+	    .replace(/>/g, '&gt;');
+	}
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var DOM = __webpack_require__(9);
+	var utils = __webpack_require__(7);
 
 	module.exports = (function() {
-	    //Prevent IE <9 from initializing SVG renderer
-	    if (!global.XMLSerializer) return;
-	    var xml = DOM.createXML();
-	    var svg = SVG.initSVG(null, 0, 0);
-	    var bgEl = DOM.newEl('rect', SVG_NS);
-	    svg.appendChild(bgEl);
+	    var canvas = DOM.newEl('canvas');
+	    var ctx = null;
 
-	    //todo: create a reusable pool for textNodes, resize if more words present
+	    return function(sceneGraph) {
+	        if (ctx == null) {
+	            ctx = canvas.getContext('2d');
+	        }
 
-	    return function(sceneGraph, renderSettings) {
+	        var dpr = utils.canvasRatio();
 	        var root = sceneGraph.root;
+	        canvas.width = dpr * root.properties.width;
+	        canvas.height = dpr * root.properties.height ;
+	        ctx.textBaseline = 'middle';
 
-	        SVG.initSVG(svg, root.properties.width, root.properties.height);
-
-	        var groups = svg.querySelectorAll('g');
-
-	        for (var i = 0; i < groups.length; i++) {
-	            groups[i].parentNode.removeChild(groups[i]);
-	        }
-
-	        var holderURL = renderSettings.holderSettings.flags.holderURL;
-	        var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
-	        var sceneGroupEl = DOM.newEl('g', SVG_NS);
-	        var textGroup = root.children.holderTextGroup;
-	        var tgProps = textGroup.properties;
-	        var textGroupEl = DOM.newEl('g', SVG_NS);
-	        var tpdata = textGroup.textPositionData;
-	        var textCSSRule = '#' + holderId + ' text { ' +
-	            utils.cssProps({
-	                'fill': tgProps.fill,
-	                'font-weight': tgProps.font.weight,
-	                'font-family': tgProps.font.family + ', monospace',
-	                'font-size': tgProps.font.size + tgProps.font.units
-	            }) + ' } ';
-	        var commentNode = xml.createComment('\n' + 'Source URL: ' + holderURL + generatorComment);
-	        var holderCSS = xml.createCDATASection(textCSSRule);
-	        var styleEl = svg.querySelector('style');
 	        var bg = root.children.holderBg;
+	        var bgWidth = dpr * bg.width;
+	        var bgHeight = dpr * bg.height;
+	        //todo: parametrize outline width (e.g. in scene object)
+	        var outlineWidth = 2;
+	        var outlineOffsetWidth = outlineWidth / 2;
 
-	        DOM.setAttr(sceneGroupEl, {
-	            id: holderId
-	        });
+	        ctx.fillStyle = bg.properties.fill;
+	        ctx.fillRect(0, 0, bgWidth, bgHeight);
 
-	        svg.insertBefore(commentNode, svg.firstChild);
-	        styleEl.appendChild(holderCSS);
-
-	        sceneGroupEl.appendChild(bgEl);
-
-	        //todo: abstract this into a cross-browser SVG outline method
 	        if (bg.properties.outline) {
-	            var outlineEl = DOM.newEl('path', SVG_NS);
-	            var outlineWidth = bg.properties.outline.width;
-	            var outlineOffsetWidth = outlineWidth / 2;
-	            DOM.setAttr(outlineEl, {
-	                'd': [
-	                    'M', outlineOffsetWidth, outlineOffsetWidth,
-	                    'H', bg.width - outlineOffsetWidth,
-	                    'V', bg.height - outlineOffsetWidth,
-	                    'H', outlineOffsetWidth,
-	                    'V', 0,
-	                    'M', 0, outlineOffsetWidth,
-	                    'L', bg.width, bg.height - outlineOffsetWidth,
-	                    'M', 0, bg.height - outlineOffsetWidth,
-	                    'L', bg.width, outlineOffsetWidth
-	                ].join(' '),
-	                'stroke-width': bg.properties.outline.width,
-	                'stroke': bg.properties.outline.fill,
-	                'fill': 'none'
-	            });
-	            sceneGroupEl.appendChild(outlineEl);
+	            //todo: abstract this into a method
+	            ctx.strokeStyle = bg.properties.outline.fill;
+	            ctx.lineWidth = bg.properties.outline.width;
+	            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
+	            // TL, TR, BR, BL
+	            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
+	            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
+	            // Diagonals
+	            ctx.moveTo(0, outlineOffsetWidth);
+	            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
+	            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
+	            ctx.lineTo(bgWidth, outlineOffsetWidth);
+	            ctx.stroke();
 	        }
 
-	        sceneGroupEl.appendChild(textGroupEl);
-	        svg.appendChild(sceneGroupEl);
-
-	        DOM.setAttr(bgEl, {
-	            'width': bg.width,
-	            'height': bg.height,
-	            'fill': bg.properties.fill
-	        });
-
-	        textGroup.y += tpdata.boundingBox.height * 0.8;
+	        var textGroup = root.children.holderTextGroup;
+	        ctx.font = textGroup.properties.font.weight + ' ' + (dpr * textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
+	        ctx.fillStyle = textGroup.properties.fill;
 
 	        for (var lineKey in textGroup.children) {
 	            var line = textGroup.children[lineKey];
 	            for (var wordKey in line.children) {
 	                var word = line.children[wordKey];
-	                var x = textGroup.x + line.x + word.x;
-	                var y = textGroup.y + line.y + word.y;
+	                var x = dpr * (textGroup.x + line.x + word.x);
+	                var y = dpr * (textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
 
-	                var textEl = DOM.newEl('text', SVG_NS);
-	                var textNode = document.createTextNode(null);
-
-	                DOM.setAttr(textEl, {
-	                    'x': x,
-	                    'y': y
-	                });
-
-	                textNode.nodeValue = word.properties.text;
-	                textEl.appendChild(textNode);
-	                textGroupEl.appendChild(textEl);
+	                ctx.fillText(word.properties.text, x, y);
 	            }
 	        }
 
-	        //todo: factor the background check up the chain, perhaps only return reference
-	        var svgString = SVG.svgStringToDataURI(SVG.serializeSVG(svg, renderSettings.engineSettings), renderSettings.mode === 'background');
-	        return svgString;
+	        return canvas.toDataURL('image/png');
 	    };
 	})();
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	exports = module.exports = trim;
-
-	function trim(str){
-	  return str.replace(/^\s*|\s*$/g, '');
-	}
-
-	exports.left = function(str){
-	  return str.replace(/^\s*/, '');
-	};
-
-	exports.right = function(str){
-	  return str.replace(/\s*$/, '');
-	};
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * toString ref.
-	 */
-
-	var toString = Object.prototype.toString;
-
-	/**
-	 * Return the type of `val`.
-	 *
-	 * @param {Mixed} val
-	 * @return {String}
-	 * @api public
-	 */
-
-	module.exports = function(val){
-	  switch (toString.call(val)) {
-	    case '[object Date]': return 'date';
-	    case '[object RegExp]': return 'regexp';
-	    case '[object Arguments]': return 'arguments';
-	    case '[object Array]': return 'array';
-	    case '[object Error]': return 'error';
-	  }
-
-	  if (val === null) return 'null';
-	  if (val === undefined) return 'undefined';
-	  if (val !== val) return 'nan';
-	  if (val && val.nodeType === 1) return 'element';
-
-	  val = val.valueOf
-	    ? val.valueOf()
-	    : Object.prototype.valueOf.apply(val)
-
-	  return typeof val;
-	};
-
 
 /***/ }
 /******/ ])

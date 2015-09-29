@@ -14,7 +14,8 @@ var DOM = require('./dom');
 var Color = require('./color');
 var constants = require('./constants');
 
-var svgRenderer = require('./renderers/svg-dom');
+var svgRenderer = require('./renderers/svg-text');
+var sgCanvasRenderer = require('./renderers/canvas');
 
 var extend = utils.extend;
 var dimensionCheck = utils.dimensionCheck;
@@ -378,6 +379,8 @@ function prepareDOMElement(prepSettings) {
         theme = flags.theme;
     var dimensionsCaption = dimensions.width + 'x' + dimensions.height;
     mode = mode == null ? (flags.fluid ? 'fluid' : 'image') : mode;
+    var holderTemplateRe = /holder_([a-z]+)/g;
+    var dimensionsInText = false;
 
     if (flags.text != null) {
         theme.text = flags.text;
@@ -389,6 +392,19 @@ function prepareDOMElement(prepSettings) {
                 textLines[k] = utils.encodeHtmlEntity(textLines[k]);
             }
             theme.text = textLines.join('\\n');
+        }
+    }
+
+    if (theme.text) {
+        var holderTemplateMatches = theme.text.match(holderTemplateRe);
+
+        if (holderTemplateMatches !== null) {
+            //todo: optimize template replacement
+            holderTemplateMatches.forEach(function (match) {
+                if (match === 'holder_dimensions') {
+                    theme.text = theme.text.replace(match, dimensionsCaption);
+                }
+            });
         }
     }
 
@@ -437,7 +453,7 @@ function prepareDOMElement(prepSettings) {
 
     if (mode == 'image' || mode == 'fluid') {
         DOM.setAttr(el, {
-            'alt': (theme.text ? theme.text + ' [' + dimensionsCaption + ']' : dimensionsCaption)
+            'alt': theme.text ? (dimensionsInText ? theme.text : theme.text + ' [' + dimensionsCaption + ']') : dimensionsCaption
         });
     }
 
@@ -566,9 +582,7 @@ function render(renderSettings) {
             });
         } else if (el.nodeName.toLowerCase() === 'object') {
             DOM.setAttr(el, {
-                'data': image
-            });
-            DOM.setAttr(el, {
+                'data': image,
                 'type': 'image/svg+xml'
             });
         }
@@ -585,9 +599,7 @@ function render(renderSettings) {
                     });
                 } else if (el.nodeName.toLowerCase() === 'object') {
                     DOM.setAttr(el, {
-                        'data': image
-                    });
-                    DOM.setAttr(el, {
+                        'data': image,
                         'type': 'image/svg+xml'
                     });
                 }
@@ -1051,66 +1063,6 @@ var stagingRenderer = (function() {
     };
 })();
 
-var sgCanvasRenderer = (function() {
-    var canvas = DOM.newEl('canvas');
-    var ctx = null;
-
-    return function(sceneGraph) {
-        if (ctx == null) {
-            ctx = canvas.getContext('2d');
-        }
-        var root = sceneGraph.root;
-        canvas.width = App.dpr(root.properties.width);
-        canvas.height = App.dpr(root.properties.height);
-        ctx.textBaseline = 'middle';
-
-        var bg = root.children.holderBg;
-        var bgWidth = App.dpr(bg.width);
-        var bgHeight = App.dpr(bg.height);
-        //todo: parametrize outline width (e.g. in scene object)
-        var outlineWidth = 2;
-        var outlineOffsetWidth = outlineWidth / 2;
-
-        ctx.fillStyle = bg.properties.fill;
-        ctx.fillRect(0, 0, bgWidth, bgHeight);
-
-        if (bg.properties.outline) {
-            //todo: abstract this into a method
-            ctx.strokeStyle = bg.properties.outline.fill;
-            ctx.lineWidth = bg.properties.outline.width;
-            ctx.moveTo(outlineOffsetWidth, outlineOffsetWidth);
-            // TL, TR, BR, BL
-            ctx.lineTo(bgWidth - outlineOffsetWidth, outlineOffsetWidth);
-            ctx.lineTo(bgWidth - outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-            ctx.lineTo(outlineOffsetWidth, bgHeight - outlineOffsetWidth);
-            ctx.lineTo(outlineOffsetWidth, outlineOffsetWidth);
-            // Diagonals
-            ctx.moveTo(0, outlineOffsetWidth);
-            ctx.lineTo(bgWidth, bgHeight - outlineOffsetWidth);
-            ctx.moveTo(0, bgHeight - outlineOffsetWidth);
-            ctx.lineTo(bgWidth, outlineOffsetWidth);
-            ctx.stroke();
-        }
-
-        var textGroup = root.children.holderTextGroup;
-        ctx.font = textGroup.properties.font.weight + ' ' + App.dpr(textGroup.properties.font.size) + textGroup.properties.font.units + ' ' + textGroup.properties.font.family + ', monospace';
-        ctx.fillStyle = textGroup.properties.fill;
-
-        for (var lineKey in textGroup.children) {
-            var line = textGroup.children[lineKey];
-            for (var wordKey in line.children) {
-                var word = line.children[wordKey];
-                var x = App.dpr(textGroup.x + line.x + word.x);
-                var y = App.dpr(textGroup.y + line.y + word.y + (textGroup.properties.leading / 2));
-
-                ctx.fillText(word.properties.text, x, y);
-            }
-        }
-
-        return canvas.toDataURL('image/png');
-    };
-})();
-
 //Helpers
 
 /**
@@ -1158,10 +1110,6 @@ App.setup = {
     renderers: ['html', 'canvas', 'svg']
 };
 
-App.dpr = function(val) {
-    return val * App.setup.ratio;
-};
-
 //Properties modified during runtime
 
 App.vars = {
@@ -1177,26 +1125,14 @@ App.vars = {
 //Pre-flight
 
 (function() {
-    var devicePixelRatio = 1,
-        backingStoreRatio = 1;
-
     var canvas = DOM.newEl('canvas');
-    var ctx = null;
 
     if (canvas.getContext) {
         if (canvas.toDataURL('image/png').indexOf('data:image/png') != -1) {
             App.setup.renderer = 'canvas';
-            ctx = canvas.getContext('2d');
             App.setup.supportsCanvas = true;
         }
     }
-
-    if (App.setup.supportsCanvas) {
-        devicePixelRatio = global.devicePixelRatio || 1;
-        backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-    }
-
-    App.setup.ratio = devicePixelRatio / backingStoreRatio;
 
     if (!!document.createElementNS && !!document.createElementNS(SVG_NS, 'svg').createSVGRect) {
         App.setup.renderer = 'svg';

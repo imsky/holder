@@ -26,31 +26,70 @@ function convertShape (shape, tag) {
   });
 }
 
+function textCss (properties) {
+  return utils.cssProps({
+    'fill': properties.fill,
+    'font-weight': properties.font.weight,
+    'font-family': properties.font.family + ', monospace',
+    'font-size': properties.font.size + properties.font.units
+  });
+}
+
 module.exports = function (sceneGraph, renderSettings) {
-  var holderId = 'holder_' + (Number(new Date()) + 32768 + (0 | Math.random() * 32768)).toString(16);
+  var engineSettings = renderSettings.engineSettings;
+  var stylesheets = engineSettings.stylesheets;
+  var stylesheetXml = stylesheets.map(function (stylesheet) {
+    return '<?xml-stylesheet rel="stylesheet" href="' + stylesheet + '"?>';
+  }).join('\n');
+
+  var holderId = 'holder_' + Number(new Date()).toString(16);
 
   var root = sceneGraph.root;
   var textGroup = root.children.holderTextGroup;
-  var tgProps = textGroup.properties;
 
-  var css = '#' + holderId + ' text { ' + utils.cssProps({
-    'fill': tgProps.fill,
-    'font-weight': tgProps.font.weight,
-    'font-family': tgProps.font.family + ', monospace',
-    'font-size': tgProps.font.size + tgProps.font.units
-  }) + ' } ';
+  var css = '#' + holderId + ' text { ' + textCss(textGroup.properties) + ' } ';
+
+  // push text down to be equally vertically aligned with canvas renderer
+  textGroup.y += textGroup.textPositionData.boundingBox.height * 0.8;
+
+  var wordTags = [];
+
+  Object.keys(textGroup.children).forEach(function (lineKey) {
+    var line = textGroup.children[lineKey];
+
+    Object.keys(line.children).forEach(function (wordKey) {
+      var word = line.children[wordKey];
+      var x = textGroup.x + line.x + word.x;
+      var y = textGroup.y + line.y + word.y;
+
+      var wordTag = templates.element({
+        'tag': 'text',
+        'content': word.properties.text,
+        'x': x,
+        'y': y
+      });
+
+      wordTags.push(wordTag);
+    });
+  });
+
+  var text = templates.element({
+    'tag': 'g',
+    'content': wordTags
+  });
 
   var bg = convertShape(root.children.holderBg, 'rect');
 
   var scene = templates.element({
     'tag': 'g',
     'id': holderId,
-    'content': bg
+    'content': [bg, text]
   });
 
   var style = templates.element({
     'tag': 'style',
-    'content': '<![CDATA[' + css + ']]>',
+    //todo: figure out how to add CDATA directive
+    'content': css,
     'type': 'text/css'
   });
 
@@ -70,7 +109,9 @@ module.exports = function (sceneGraph, renderSettings) {
   });
 
   var output = shaven(svg);
+  
+  output = stylesheetXml + output[0];
 
-  var svgString = SVG.svgStringToDataURI(output[0], renderSettings.mode === 'background');
+  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
   return svgString;
 };

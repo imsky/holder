@@ -152,3 +152,22 @@ exports.parseColor = function(val) {
 
     return null;
 };
+
+/**
+ * Provides the correct scaling ratio for canvas drawing operations on HiDPI screens (e.g. Retina displays)
+ */
+exports.canvasRatio = function () {
+    var devicePixelRatio = 1;
+    var backingStoreRatio = 1;
+
+    if (global.document) {
+        var canvas = global.document.createElement('canvas');
+        if (canvas.getContext) {
+            var ctx = canvas.getContext('2d');
+            devicePixelRatio = global.devicePixelRatio || 1;
+            backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+        }
+    }
+
+    return devicePixelRatio / backingStoreRatio;
+};
