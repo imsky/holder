@@ -1,6 +1,6 @@
 Package.describe({
     summary: 'Holder uses SVG to render image placeholders entirely in browser.',
-    version: '2.8.2',
+    version: '2.9.0-pre',
     name: 'imsky:holder',
     git: 'https://github.com/imsky/holder',
 });

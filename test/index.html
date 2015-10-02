@@ -98,7 +98,7 @@
 	</div>
 </div>
 <div class="thumb">
-	<img data-src="holder.margin/300x200?theme=lava&text=The five boxing wizards jump quickly.&align=right">
+	<img data-src="holder.js/300x200?theme=lava&text=The five boxing wizards jump quickly.&align=right&lineWrap=0.5">
 	<div class="caption">
 		 Placeholder with right-aligned text and custom margin
 	</div>
@@ -299,11 +299,6 @@ Holder.run();
 Holder.addTheme("custom", {foreground: "#fff", background: "#000", size: 15}).run({
 	domain: "custom.holder",
 	renderer: "canvas"
-});
-
-Holder.run({
-	domain: 'holder.margin',
-	lineWrapRatio: 0.5
 });
 
 Holder.addImage("holder.js/300x200?theme=social&text=Added using addImage with a DOM node", document.querySelector('#holderAddImageDomTest')).run();

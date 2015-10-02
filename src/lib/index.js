@@ -86,7 +86,6 @@ var Holder = {
 
         App.vars.preempted = true;
         App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
-        App.vars.lineWrapRatio = options.lineWrapRatio || App.setup.lineWrapRatio;
 
         engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
         if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
@@ -344,6 +343,10 @@ function parseURL(url, instanceOptions) {
 
         if (options.align) {
             holder.align = options.align;
+        }
+
+        if (options.lineWrap) {
+            holder.lineWrap = options.lineWrap;
         }
 
         holder.nowrap = utils.truthy(options.nowrap);
@@ -651,6 +654,10 @@ function buildSceneGraph(scene) {
             break;
     }
 
+    var lineWrap = scene.flags.lineWrap || App.setup.lineWrapRatio;
+    var sceneMargin = scene.width * lineWrap;
+    var maxLineWidth = sceneMargin;
+
     var sceneGraph = new SceneGraph({
         width: scene.width,
         height: scene.height
@@ -712,9 +719,6 @@ function buildSceneGraph(scene) {
         parent.height += line.height;
     }
 
-    var sceneMargin = scene.width * App.vars.lineWrapRatio;
-    var maxLineWidth = sceneMargin;
-
     if (tpdata.lineCount > 1) {
         var offsetX = 0;
         var offsetY = 0;
@@ -724,7 +728,7 @@ function buildSceneGraph(scene) {
 
         //Double margin so that left/right-aligned next is not flush with edge of image
         if (scene.align === 'left' || scene.align === 'right') {
-            maxLineWidth = scene.width * (1 - (1 - (App.vars.lineWrapRatio)) * 2);
+            maxLineWidth = scene.width * (1 - (1 - lineWrap) * 2);
         }
 
         for (var i = 0; i < tpdata.words.length; i++) {
@@ -1019,7 +1023,7 @@ var stagingRenderer = (function() {
             var stagingTextBBox = stagingText.getBBox();
 
             //Get line count and split the string into words
-            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.vars.lineWrapRatio));
+            var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
             var words = htgProps.text.split(' ');
             var newlines = htgProps.text.match(/\\n/g);
             lineCount += newlines == null ? 0 : newlines.length;

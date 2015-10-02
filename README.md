@@ -65,6 +65,7 @@ Placeholder options are set through URL properties, e.g. `holder.js/300x200?x=y&
 * `font`: Custom text font. Example: `holder.js/300x200?font=Helvetica`
 * `align`: Custom text alignment (left, right). Example: `holder.js/300x200?align=left`
 * `outline`: Draw outline and diagonals for placeholder. Example: `holder.js/300x200?outline=yes`
+* `lineWrap`: Maximum line length to image width ratio. Example: `holder.js/300x200?lineWrap=0.5`
 
 ### Themes
 
@@ -258,7 +259,6 @@ Holder provides several options at runtime that affect the process of image gene
 * `objects`: The CSS selector used for finding `object` placeholders. Default value: `object`.
 * `bgnodes`: The CSS selector used for finding elements that have background palceholders. Default value: `body .holderjs`.
 * `stylenodes`: The CSS selector used for finding stylesheets to import into SVG placeholders. Default value: `head link.holderjs`.
-* `lineWrapRatio`: The ratio at which text will wrap from the edge of the image. Default value: `0.9`.
 
 ### Using custom settings on load
 

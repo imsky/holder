@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.8.2+d08qq
+Version 2.9.0-pre+e4zql
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -404,7 +404,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        App.vars.preempted = true;
 	        App.vars.dataAttr = options.dataAttr || App.setup.dataAttr;
-	        App.vars.lineWrapRatio = options.lineWrapRatio || App.setup.lineWrapRatio;
 
 	        engineSettings.renderer = options.renderer ? options.renderer : App.setup.renderer;
 	        if (App.setup.renderers.join(',').indexOf(engineSettings.renderer) === -1) {
@@ -662,6 +661,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (options.align) {
 	            holder.align = options.align;
+	        }
+
+	        if (options.lineWrap) {
+	            holder.lineWrap = options.lineWrap;
 	        }
 
 	        holder.nowrap = utils.truthy(options.nowrap);
@@ -969,6 +972,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            break;
 	    }
 
+	    var lineWrap = scene.flags.lineWrap || App.setup.lineWrapRatio;
+	    var sceneMargin = scene.width * lineWrap;
+	    var maxLineWidth = sceneMargin;
+
 	    var sceneGraph = new SceneGraph({
 	        width: scene.width,
 	        height: scene.height
@@ -1030,9 +1037,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        parent.height += line.height;
 	    }
 
-	    var sceneMargin = scene.width * App.vars.lineWrapRatio;
-	    var maxLineWidth = sceneMargin;
-
 	    if (tpdata.lineCount > 1) {
 	        var offsetX = 0;
 	        var offsetY = 0;
@@ -1042,7 +1046,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        //Double margin so that left/right-aligned next is not flush with edge of image
 	        if (scene.align === 'left' || scene.align === 'right') {
-	            maxLineWidth = scene.width * (1 - (1 - (App.vars.lineWrapRatio)) * 2);
+	            maxLineWidth = scene.width * (1 - (1 - lineWrap) * 2);
 	        }
 
 	        for (var i = 0; i < tpdata.words.length; i++) {
@@ -1337,7 +1341,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var stagingTextBBox = stagingText.getBBox();
 
 	            //Get line count and split the string into words
-	            var lineCount = Math.ceil(stagingTextBBox.width / (rootNode.properties.width * App.vars.lineWrapRatio));
+	            var lineCount = Math.ceil(stagingTextBBox.width / rootNode.properties.width);
 	            var words = htgProps.text.split(' ');
 	            var newlines = htgProps.text.match(/\\n/g);
 	            lineCount += newlines == null ? 0 : newlines.length;
@@ -2501,7 +2505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = {
-	  'version': '2.8.2',
+	  'version': '2.9.0-pre',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
@@ -2514,6 +2518,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var SVG = __webpack_require__(8);
 	var constants = __webpack_require__(11);
 	var utils = __webpack_require__(7);
+	/* WEBPACK VAR INJECTION */(function(global) {var SVG = __webpack_require__(8);
+	var DOM = __webpack_require__(9);
+	var utils = __webpack_require__(7);
+	var constants = __webpack_require__(11);
 
 	var SVG_NS = constants.svg_ns;
 
