@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.0-pre+e4zql
+Version 2.9.0-pre+e4zvo
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -2518,10 +2518,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var SVG = __webpack_require__(8);
 	var constants = __webpack_require__(11);
 	var utils = __webpack_require__(7);
-	/* WEBPACK VAR INJECTION */(function(global) {var SVG = __webpack_require__(8);
-	var DOM = __webpack_require__(9);
-	var utils = __webpack_require__(7);
-	var constants = __webpack_require__(11);
 
 	var SVG_NS = constants.svg_ns;
 
