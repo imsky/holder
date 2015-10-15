@@ -217,28 +217,28 @@ var App = {
         stylenodes: 'head link.holderjs',
         themes: {
             'gray': {
-                background: '#EEEEEE',
-                foreground: '#AAAAAA'
+                bg: '#EEEEEE',
+                fg: '#AAAAAA'
             },
             'social': {
-                background: '#3a5a97',
-                foreground: '#FFFFFF'
+                bg: '#3a5a97',
+                fg: '#FFFFFF'
             },
             'industrial': {
-                background: '#434A52',
-                foreground: '#C2F200'
+                bg: '#434A52',
+                fg: '#C2F200'
             },
             'sky': {
-                background: '#0D8FDB',
-                foreground: '#FFFFFF'
+                bg: '#0D8FDB',
+                fg: '#FFFFFF'
             },
             'vine': {
-                background: '#39DBAC',
-                foreground: '#1E292C'
+                bg: '#39DBAC',
+                fg: '#1E292C'
             },
             'lava': {
-                background: '#F8591A',
-                foreground: '#1C2846'
+                bg: '#F8591A',
+                fg: '#1C2846'
             }
         }
     },
@@ -307,11 +307,11 @@ function parseURL(url, instanceOptions) {
         // Colors
 
         if (options.bg) {
-            holder.theme.background = utils.parseColor(options.bg);
+            holder.theme.bg = utils.parseColor(options.bg);
         }
 
         if (options.fg) {
-            holder.theme.foreground = utils.parseColor(options.fg);
+            holder.theme.fg = utils.parseColor(options.fg);
         }
 
         //todo: add automatic foreground to themes without foreground
@@ -666,7 +666,7 @@ function buildSceneGraph(scene) {
     var Shape = sceneGraph.Shape;
 
     var holderBg = new Shape.Rect('holderBg', {
-        fill: scene.theme.background
+        fill: scene.theme.bg
     });
 
     holderBg.resize(scene.width, scene.height);
@@ -681,7 +681,7 @@ function buildSceneGraph(scene) {
         };
     }
 
-    var holderTextColor = scene.theme.foreground;
+    var holderTextColor = scene.theme.fg;
 
     if (scene.flags.autoFg) {
         var holderBgColor = new Color(holderBg.properties.fill);
