@@ -35,6 +35,22 @@ function textCss (properties) {
   });
 }
 
+function outlinePath (bgWidth, bgHeight, outlineWidth) {
+  var outlineOffsetWidth = outlineWidth / 2;
+
+  return [
+    'M', outlineOffsetWidth, outlineOffsetWidth,
+    'H', bgWidth - outlineOffsetWidth,
+    'V', bgHeight - outlineOffsetWidth,
+    'H', outlineOffsetWidth,
+    'V', 0,
+    'M', 0, outlineOffsetWidth,
+    'L', bgWidth, bgHeight - outlineOffsetWidth,
+    'M', 0, bgHeight - outlineOffsetWidth,
+    'L', bgWidth, outlineOffsetWidth
+  ].join(' ');
+}
+
 module.exports = function (sceneGraph, renderSettings) {
   var engineSettings = renderSettings.engineSettings;
   var stylesheets = engineSettings.stylesheets;
@@ -78,12 +94,33 @@ module.exports = function (sceneGraph, renderSettings) {
     'content': wordTags
   });
 
+  var outline = null;
+
+  if (root.children.holderBg.properties.outline) {
+    var outlineProperties = root.children.holderBg.properties.outline;
+    outline = templates.element({
+      'tag': 'path',
+      'd': outlinePath(root.children.holderBg.width, root.children.holderBg.height, outlineProperties.width),
+      'stroke-width': outlineProperties.width,
+      'stroke': outlineProperties.fill,
+      'fill': 'none'
+    });
+  }
+
   var bg = convertShape(root.children.holderBg, 'rect');
+
+  var sceneContent = [];
+
+  sceneContent.push(bg);
+  if (outlineProperties) {
+    sceneContent.push(outline);
+  }
+  sceneContent.push(text);
 
   var scene = templates.element({
     'tag': 'g',
     'id': holderId,
-    'content': [bg, text]
+    'content': sceneContent
   });
 
   var style = templates.element({

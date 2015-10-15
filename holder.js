@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.0-pre+e4zvo
+Version 2.9.0-pre+etaxz
 © 2015 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -535,28 +535,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        stylenodes: 'head link.holderjs',
 	        themes: {
 	            'gray': {
-	                background: '#EEEEEE',
-	                foreground: '#AAAAAA'
+	                bg: '#EEEEEE',
+	                fg: '#AAAAAA'
 	            },
 	            'social': {
-	                background: '#3a5a97',
-	                foreground: '#FFFFFF'
+	                bg: '#3a5a97',
+	                fg: '#FFFFFF'
 	            },
 	            'industrial': {
-	                background: '#434A52',
-	                foreground: '#C2F200'
+	                bg: '#434A52',
+	                fg: '#C2F200'
 	            },
 	            'sky': {
-	                background: '#0D8FDB',
-	                foreground: '#FFFFFF'
+	                bg: '#0D8FDB',
+	                fg: '#FFFFFF'
 	            },
 	            'vine': {
-	                background: '#39DBAC',
-	                foreground: '#1E292C'
+	                bg: '#39DBAC',
+	                fg: '#1E292C'
 	            },
 	            'lava': {
-	                background: '#F8591A',
-	                foreground: '#1C2846'
+	                bg: '#F8591A',
+	                fg: '#1C2846'
 	            }
 	        }
 	    },
@@ -625,11 +625,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        // Colors
 
 	        if (options.bg) {
-	            holder.theme.background = utils.parseColor(options.bg);
+	            holder.theme.bg = utils.parseColor(options.bg);
 	        }
 
 	        if (options.fg) {
-	            holder.theme.foreground = utils.parseColor(options.fg);
+	            holder.theme.fg = utils.parseColor(options.fg);
 	        }
 
 	        //todo: add automatic foreground to themes without foreground
@@ -984,7 +984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var Shape = sceneGraph.Shape;
 
 	    var holderBg = new Shape.Rect('holderBg', {
-	        fill: scene.theme.background
+	        fill: scene.theme.bg
 	    });
 
 	    holderBg.resize(scene.width, scene.height);
@@ -999,7 +999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }
 
-	    var holderTextColor = scene.theme.foreground;
+	    var holderTextColor = scene.theme.fg;
 
 	    if (scene.flags.autoFg) {
 	        var holderBgColor = new Color(holderBg.properties.fill);
@@ -2550,6 +2550,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
+	function outlinePath (bgWidth, bgHeight, outlineWidth) {
+	  var outlineOffsetWidth = outlineWidth / 2;
+
+	  return [
+	    'M', outlineOffsetWidth, outlineOffsetWidth,
+	    'H', bgWidth - outlineOffsetWidth,
+	    'V', bgHeight - outlineOffsetWidth,
+	    'H', outlineOffsetWidth,
+	    'V', 0,
+	    'M', 0, outlineOffsetWidth,
+	    'L', bgWidth, bgHeight - outlineOffsetWidth,
+	    'M', 0, bgHeight - outlineOffsetWidth,
+	    'L', bgWidth, outlineOffsetWidth
+	  ].join(' ');
+	}
+
 	module.exports = function (sceneGraph, renderSettings) {
 	  var engineSettings = renderSettings.engineSettings;
 	  var stylesheets = engineSettings.stylesheets;
@@ -2593,12 +2609,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'content': wordTags
 	  });
 
+	  var outline = null;
+
+	  if (root.children.holderBg.properties.outline) {
+	    var outlineProperties = root.children.holderBg.properties.outline;
+	    outline = templates.element({
+	      'tag': 'path',
+	      'd': outlinePath(root.children.holderBg.width, root.children.holderBg.height, outlineProperties.width),
+	      'stroke-width': outlineProperties.width,
+	      'stroke': outlineProperties.fill,
+	      'fill': 'none'
+	    });
+	  }
+
 	  var bg = convertShape(root.children.holderBg, 'rect');
+
+	  var sceneContent = [];
+
+	  sceneContent.push(bg);
+	  if (outlineProperties) {
+	    sceneContent.push(outline);
+	  }
+	  sceneContent.push(text);
 
 	  var scene = templates.element({
 	    'tag': 'g',
 	    'id': holderId,
-	    'content': [bg, text]
+	    'content': sceneContent
 	  });
 
 	  var style = templates.element({
