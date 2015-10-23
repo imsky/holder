@@ -6,7 +6,7 @@ var jshint = require('gulp-jshint');
 var todo = require('gulp-todo');
 var gulputil = require('gulp-util');
 var replace = require('gulp-replace');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 var beautify = require('gulp-jsbeautifier');
 var rename = require('gulp-rename');
 
