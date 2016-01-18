@@ -199,36 +199,32 @@
 
   //requestAnimationFrame polyfill for older Firefox/Chrome versions
   if (!window.requestAnimationFrame) {
-    if (window.webkitRequestAnimationFrame) {
+    if (window.webkitRequestAnimationFrame && window.webkitCancelAnimationFrame) {
     //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
     (function (global) {
-      // window.requestAnimationFrame
       global.requestAnimationFrame = function (callback) {
         return webkitRequestAnimationFrame(function () {
           callback(global.performance.now());
         });
       };
 
-      // window.cancelAnimationFrame
-      global.cancelAnimationFrame = webkitCancelAnimationFrame;
+      global.cancelAnimationFrame = global.webkitCancelAnimationFrame;
     }(window));
-    } else if (window.mozRequestAnimationFrame) {
+    } else if (window.mozRequestAnimationFrame && window.mozCancelAnimationFrame) {
       //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
     (function (global) {
-      // window.requestAnimationFrame
       global.requestAnimationFrame = function (callback) {
         return mozRequestAnimationFrame(function () {
           callback(global.performance.now());
         });
       };
 
-      // window.cancelAnimationFrame
-      global.cancelAnimationFrame = mozCancelAnimationFrame;
+      global.cancelAnimationFrame = global.mozCancelAnimationFrame;
     }(window));
     } else {
     (function (global) {
       global.requestAnimationFrame = function (callback) {
-      return global.setTimeout(callback, 1000 / 60);
+        return global.setTimeout(callback, 1000 / 60);
       };
 
       global.cancelAnimationFrame = global.clearTimeout;
