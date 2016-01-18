@@ -1,3 +1,4 @@
+.versions
 node_modules/
 todo.md
 npm-debug.log
