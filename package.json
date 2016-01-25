@@ -49,6 +49,6 @@
     "test": "node test/index"
   },
   "dependencies": {
-    "shaven": "^0.7.3"
+    "shaven": "^0.8.1"
   }
 }
