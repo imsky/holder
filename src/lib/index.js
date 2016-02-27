@@ -672,7 +672,7 @@ function buildSceneGraph(scene) {
     var Shape = sceneGraph.Shape;
 
     var holderBg = new Shape.Rect('holderBg', {
-        fill: scene.theme.bg
+        fill: scene.theme.background
     });
 
     holderBg.resize(scene.width, scene.height);

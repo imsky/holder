@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.1+ygdp
+Version 2.9.2+30pzl
 © 2016 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -986,7 +986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var Shape = sceneGraph.Shape;
 
 	    var holderBg = new Shape.Rect('holderBg', {
-	        fill: scene.theme.bg
+	        fill: scene.theme.background
 	    });
 
 	    holderBg.resize(scene.width, scene.height);
@@ -4320,7 +4320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.1',
+	  'version': '2.9.2',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
@@ -4495,12 +4495,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		'use strict'
 
-		var i = 1,
-			doesEscape = true,
-			HTMLString,
-			attributeKey,
-			callback,
-			key
+		var i = 1
+		var doesEscape = true
+		var HTMLString
+		var attributeKey
+		var callback
+		var key
 
 
 		returnObject = returnObject || {}
@@ -4508,15 +4508,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		function createElement (sugarString) {
 
-			var tags = sugarString.match(/^\w+/),
-				element = {
-					tag: tags ? tags[0] : 'div',
-					attr: {},
-					children: []
-				},
-				id = sugarString.match(/#([\w-]+)/),
-				reference = sugarString.match(/\$([\w-]+)/),
-				classNames = sugarString.match(/\.[\w-]+/g)
+			var tags = sugarString.match(/^[\w-]+/)
+			var element = {
+				tag: tags ? tags[0] : 'div',
+				attr: {},
+				children: []
+			}
+			var id = sugarString.match(/#([\w-]+)/)
+			var reference = sugarString.match(/\$([\w-]+)/)
+			var classNames = sugarString.match(/\.[\w-]+/g)
 
 
 			// Assign id if is set
@@ -4551,9 +4551,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 
 		function escapeAttribute (string) {
-			return String(string)
-				.replace(/&/g, '&amp;')
-				.replace(/"/g, '&quot;')
+			return (string || string === 0) ?
+				String(string)
+					.replace(/&/g, '&amp;')
+					.replace(/"/g, '&quot;') :
+				''
 		}
 
 		function escapeHTML (string) {
@@ -4656,7 +4658,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			for (key in array[0].attr)
 				if (array[0].attr.hasOwnProperty(key))
 					HTMLString += ' ' + key + '="' +
-						escapeAttribute(array[0].attr[key] || '') + '"'
+						escapeAttribute(array[0].attr[key]) + '"'
 
 			HTMLString += '>'
 
