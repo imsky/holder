@@ -484,7 +484,7 @@ function prepareDOMElement(prepSettings) {
         }
 
         if (engineSettings.renderer == 'html') {
-            el.style.backgroundColor = theme.background;
+            el.style.backgroundColor = theme.bg;
         } else {
             render(renderSettings);
 
@@ -516,7 +516,7 @@ function prepareDOMElement(prepSettings) {
         setInitialDimensions(el);
 
         if (engineSettings.renderer == 'html') {
-            el.style.backgroundColor = theme.background;
+            el.style.backgroundColor = theme.bg;
         } else {
             App.vars.resizableImages.push(el);
             updateResizableElements(el);
@@ -672,7 +672,7 @@ function buildSceneGraph(scene) {
     var Shape = sceneGraph.Shape;
 
     var holderBg = new Shape.Rect('holderBg', {
-        fill: scene.theme.background
+        fill: scene.theme.bg
     });
 
     holderBg.resize(scene.width, scene.height);

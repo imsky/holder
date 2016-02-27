@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.2+30pzl
+Version 2.9.2+30qun
 © 2016 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -798,7 +798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.background;
+	            el.style.backgroundColor = theme.bg;
 	        } else {
 	            render(renderSettings);
 
@@ -830,7 +830,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        setInitialDimensions(el);
 
 	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.background;
+	            el.style.backgroundColor = theme.bg;
 	        } else {
 	            App.vars.resizableImages.push(el);
 	            updateResizableElements(el);
@@ -986,7 +986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var Shape = sceneGraph.Shape;
 
 	    var holderBg = new Shape.Rect('holderBg', {
-	        fill: scene.theme.background
+	        fill: scene.theme.bg
 	    });
 
 	    holderBg.resize(scene.width, scene.height);
