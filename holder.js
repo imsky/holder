@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.2+30qun
+Version 2.9.3+30r6c
 © 2016 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -4320,7 +4320,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.2',
+	  'version': '2.9.3',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
