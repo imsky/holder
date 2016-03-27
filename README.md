@@ -286,6 +286,11 @@ Because Meteor includes scripts at the top of the document by default, the DOM m
 * Opera 12+
 * Android (with fallback)
 
+## Source
+
+* GitHub: <https://github.com/imsky/holder>
+* GitLab: <https://gitlab.com/imsky/holder>
+
 ## License
 
 Holder is provided under the [MIT License](http://opensource.org/licenses/MIT).
