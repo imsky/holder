@@ -1,6 +1,6 @@
 /*
 Holder.js - client side image placeholders
-(c) 2012-2015 Ivan Malopinsky - http://imsky.co
+(c) 2012-2016 Ivan Malopinsky - http://imsky.co
 */
 
 //Libraries and functions
@@ -99,7 +99,8 @@ var Holder = {
 
         engineSettings.stylesheets = [];
         engineSettings.svgXMLStylesheet = true;
-        engineSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
+        engineSettings.noFontFallback = !!options.noFontFallback;
+        engineSettings.noBackgroundSize = !!options.noBackgroundSize;
 
         stylenodes.forEach(function (styleNode) {
             if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
@@ -583,7 +584,10 @@ function render(renderSettings) {
     //todo: add <object> canvas rendering
     if (mode == 'background') {
         el.style.backgroundImage = 'url(' + image + ')';
-        el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+
+        if (!engineSettings.noBackgroundSize) {
+            el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+        }
     } else {
         if (el.nodeName.toLowerCase() === 'img') {
             DOM.setAttr(el, {
