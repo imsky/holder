@@ -140,6 +140,14 @@
 		<code>&lt;div&gt;</code> with background placeholder
 	</div>
 </div>
+
+<div class="thumb">
+	<div class="holderjs" data-background-src="?no-bg-size/300x200" style="width:300px;height:200px"></div>
+	<div class="caption">
+		<code>&lt;div&gt;</code> with manually-sized background placeholder
+	</div>
+</div>
+
 <div class="thumb">
 	<div class="holderjs" style="width:300px;height:200px" data-background-src="?holder.js/300x200?bg=ff8362&fg=5e422e"></div>
 	<div class="caption">
@@ -318,6 +326,11 @@ Holder.addImage("holder.js/300x200?theme=social&text=Added using addImage with a
 Holder.run({
 	domain: "holder.canvas",
 	renderer: "canvas"
+});
+
+Holder.run({
+	domain: "no-bg-size",
+	noBackgroundSize: true
 });
 
 $(function () {

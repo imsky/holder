@@ -259,6 +259,8 @@ Holder provides several options at runtime that affect the process of image gene
 * `objects`: The CSS selector used for finding `object` placeholders. Default value: `object`.
 * `bgnodes`: The CSS selector used for finding elements that have background palceholders. Default value: `body .holderjs`.
 * `stylenodes`: The CSS selector used for finding stylesheets to import into SVG placeholders. Default value: `head link.holderjs`.
+* `noFontFallback`: Do not fall back to canvas if using custom fonts.
+* `noBackgroundSize`: Do not set `background-size` for background placeholders.
 
 ### Using custom settings on load
 
