@@ -15,6 +15,9 @@
 	.autosize img {width:100%}
 	.float-holder { overflow:hidden; }
 	.float-holder img { float: left; }
+	.no-bg-size {
+		background-image: url('?no-bg-size/300x200');
+	}
 	#holder1 {background:url('?holder.js/300x200?text=Background%20placeholder&bg=000&fg=fff');width:300px;height:200px}
 </style>
 </head>
@@ -145,6 +148,13 @@
 	<div class="holderjs" data-background-src="?no-bg-size/300x200" style="width:300px;height:200px"></div>
 	<div class="caption">
 		<code>&lt;div&gt;</code> with manually-sized background placeholder
+	</div>
+</div>
+
+<div class="thumb">
+	<div class="holderjs no-bg-size" style="width:300px;height:200px"></div>
+	<div class="caption">
+		<code>&lt;div&gt;</code> with manually-sized background placeholder with CSS
 	</div>
 </div>
 

@@ -137,7 +137,7 @@ var Holder = {
                 }
             }
 
-            if (holderURL != null) {
+            if (holderURL) {
                 var holderFlags = parseURL(holderURL, options);
                 if (holderFlags) {
                     prepareDOMElement({
