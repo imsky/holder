@@ -311,6 +311,22 @@ function parseURL(url, instanceOptions) {
     if (parts.length === 2) {
         var options = querystring.parse(parts[1]);
 
+        // Dimensions
+
+        if (utils.truthy(options.ratio)) {
+            holder.fluid = true;
+            var ratioWidth = parseFloat(holder.dimensions.width.replace('%', ''));
+            var ratioHeight = parseFloat(holder.dimensions.height.replace('%', ''));
+
+            ratioHeight = Math.floor(100 * (ratioHeight / ratioWidth));
+            ratioWidth = 100;
+
+            holder.dimensions.width = ratioWidth + '%';
+            holder.dimensions.height = ratioHeight + '%';
+        }
+
+        holder.auto = utils.truthy(options.auto);
+
         // Colors
 
         if (options.bg) {
@@ -359,8 +375,6 @@ function parseURL(url, instanceOptions) {
         holder.nowrap = utils.truthy(options.nowrap);
 
         // Miscellaneous
-
-        holder.auto = utils.truthy(options.auto);
 
         holder.outline = utils.truthy(options.outline);
 
