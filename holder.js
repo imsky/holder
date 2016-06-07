@@ -2748,7 +2748,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				returnObject[reference[1]] = element
 
 			if (classNames)
-				element.attr.class = classNames.join(' ').replace(/\./g, '')
+				element.attr['class'] = classNames.join(' ').replace(/\./g, '')
 
 			if (sugarString.match(/&$/g))
 				doesEscape = false
