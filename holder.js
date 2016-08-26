@@ -1,7 +1,7 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.3+5wm99
+Version 2.9.4+cabil
 © 2016 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
@@ -2537,7 +2537,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.3',
+	  'version': '2.9.4',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
@@ -2748,7 +2748,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				returnObject[reference[1]] = element
 
 			if (classNames)
-				element.attr['class'] = classNames.join(' ').replace(/\./g, '')
+				element.attr.class = classNames.join(' ').replace(/\./g, '')
 
 			if (sugarString.match(/&$/g))
 				doesEscape = false
