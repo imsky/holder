@@ -356,8 +356,8 @@ function parseURL(url, instanceOptions) {
             holder.textmode = options.textmode;
         }
 
-        if (options.size) {
-            holder.size = options.size;
+        if (options.size && parseFloat(options.size)) {
+            holder.size = parseFloat(options.size);
         }
 
         if (options.font) {
