@@ -6,9 +6,9 @@ Holder renders image placeholders on the client side using SVG.
 
 Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop) [other](http://libscore.com/#Holder) sites.
 
-[![Build Status](https://travis-ci.org/imsky/holder.svg?branch=master)](https://travis-ci.org/imsky/holder)
-
-[![Package Quality](http://npm.packagequality.com/badge/holderjs.png)](http://packagequality.com/#?package=holderjs)
+[![npm](https://img.shields.io/npm/v/holderjs.svg)](https://www.npmjs.com/package/holderjs)
+[![Travis Build Status](https://img.shields.io/travis/imsky/holder.svg)](https://travis-ci.org/imsky/holder)
+[![Package Quality](http://npm.packagequality.com/shield/holderjs.svg)](http://packagequality.com/#?package=holderjs)
 
 ## Installing
 
