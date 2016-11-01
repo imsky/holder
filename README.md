@@ -273,7 +273,7 @@ Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-wi
 
 ## Using with Angular.js
 
-You can use Holder in Angular projects with [ng-holder](https://github.com/joshvillbrandt/ng-holder).
+You can use Holder in Angular projects with [ng-holder](https://github.com/joshvillbrandt/ng-holder) or with [angular-2-holderjs](https://github.com/aogriffiths/angular-2-holderjs) for Angular 2 projects.
 
 ## Using with Meteor
 
