@@ -952,6 +952,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        'data-holder-rendered': true
 	    });
 	}
+	if (ctx.webkitBackingStorePixelRatio && ctx.webkitBackingStorePixelRatio > 1) {
+		ratio = 1;
+	}
 
 	/**
 	 * Core function that takes a Holder scene description and builds a scene graph
