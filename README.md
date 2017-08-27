@@ -9,6 +9,8 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 [![npm](https://img.shields.io/npm/v/holderjs.svg)](https://www.npmjs.com/package/holderjs)
 [![Travis Build Status](https://img.shields.io/travis/imsky/holder.svg)](https://travis-ci.org/imsky/holder)
 [![Package Quality](http://npm.packagequality.com/shield/holderjs.svg)](http://packagequality.com/#?package=holderjs)
+[![NerdyData Popularity](https://nerdydata.com/badge/holder.js)](https://nerdydata.com/search?query=holder.js)
+
 
 ## Installing
 
