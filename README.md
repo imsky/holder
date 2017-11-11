@@ -274,6 +274,10 @@ You can prevent Holder from running its default configuration by executing ``Hol
 
 Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
 
+## Using with Vue
+
+You can use Holder in Vue 2+ projects with [vue-holderjs](https://github.com/boogermann/vue-holderjs).
+
 ## Using with Angular.js
 
 You can use Holder in Angular projects with [ng-holder](https://github.com/joshvillbrandt/ng-holder) or with [angular-2-holderjs](https://github.com/aogriffiths/angular-2-holderjs) for Angular 2 projects.
@@ -281,6 +285,20 @@ You can use Holder in Angular projects with [ng-holder](https://github.com/joshv
 ## Using with Meteor
 
 Because Meteor includes scripts at the top of the document by default, the DOM may not be fully available when Holder is called. For this reason, place Holder-related code in a "DOM ready" event listener.
+
+## Using with Webpack
+
+If you're using `ProvidePlugin` in your Webpack config, make sure to configure it as follows:
+
+```js
+plugins: [
+  new webpack.ProvidePlugin({
+    'Holder': 'holderjs',
+    'holder': 'holderjs',
+    'window.Holder': 'holderjs'
+  })
+]
+```
 
 ## Browser support
 
