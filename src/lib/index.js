@@ -1042,8 +1042,12 @@ var stagingRenderer = (function() {
                 })
             });
 
+            //Unescape HTML entities to get approximately the right width
+            var txt = DOM.newEl('textarea');
+            txt.innerHTML = htgProps.text;
+            stagingTextNode.nodeValue = txt.value;
+
             //Get bounding box for the whole string (total width and height)
-            stagingTextNode.nodeValue = htgProps.text;
             var stagingTextBBox = stagingText.getBBox();
 
             //Get line count and split the string into words
