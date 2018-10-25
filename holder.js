@@ -1,8 +1,8 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.4+cabil
-© 2016 Ivan Malopinsky - http://imsky.co
+Version 2.9.5+fblwy
+© 2018 Ivan Malopinsky - http://imsky.co
 
 Site:     http://holderjs.com
 Issues:   https://github.com/imsky/holder/issues
@@ -298,7 +298,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/*
 	Holder.js - client side image placeholders
@@ -308,9 +308,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = __webpack_require__(1);
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*
 	Holder.js - client side image placeholders
@@ -670,8 +670,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            holder.textmode = options.textmode;
 	        }
 
-	        if (options.size) {
-	            holder.size = options.size;
+	        if (options.size && parseFloat(options.size)) {
+	            holder.size = parseFloat(options.size);
 	        }
 
 	        if (options.font) {
@@ -1356,8 +1356,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                })
 	            });
 
+	            //Unescape HTML entities to get approximately the right width
+	            var txt = DOM.newEl('textarea');
+	            txt.innerHTML = htgProps.text;
+	            stagingTextNode.nodeValue = txt.value;
+
 	            //Get bounding box for the whole string (total width and height)
-	            stagingTextNode.nodeValue = htgProps.text;
 	            var stagingTextBBox = stagingText.getBBox();
 
 	            //Get line count and split the string into words
@@ -1509,9 +1513,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*!
 	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
@@ -1669,9 +1673,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = typeof window !== "undefined" && _onDomReady(window);
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	//Modified version of component/querystring
 	//Changes: updated dependencies, dot notation parsing, JSHint fixes
@@ -1777,9 +1781,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	
 	exports = module.exports = trim;
@@ -1797,9 +1801,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/**
 	 * toString ref.
@@ -1849,9 +1853,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var SceneGraph = function(sceneProperties) {
 	    var nodeCount = 1;
@@ -1960,9 +1964,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = SceneGraph;
 
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Shallow object clone and merge
@@ -2139,9 +2143,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(9);
 
@@ -2255,9 +2259,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Generic new DOM element function
@@ -2324,9 +2328,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var Color = function(color, options) {
 	    //todo: support rgba, hsla, and rrggbbaa notation
@@ -2532,18 +2536,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Color;
 
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.4',
+	  'version': '2.9.5',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
-/***/ },
+/***/ }),
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var shaven = __webpack_require__(13);
 
@@ -2624,7 +2628,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var word = line.children[wordKey];
 	      var x = textGroup.x + line.x + word.x;
 	      var y = textGroup.y + line.y + word.y;
-
 	      var wordTag = templates.element({
 	        'tag': 'text',
 	        'content': word.properties.text,
@@ -2693,6 +2696,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 
 	  var output = shaven(svg);
+
+	  if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
+	    output[0] = output[0].replace(/&amp;#/gm, '&#');
+	  }
 	  
 	  output = stylesheetXml + output[0];
 
@@ -2700,9 +2707,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return svgString;
 	};
 
-/***/ },
+/***/ }),
 /* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var escape = __webpack_require__(14)
 
@@ -2899,9 +2906,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 14 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*!
 	 * escape-html
@@ -2983,9 +2990,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 
-/***/ },
+/***/ }),
 /* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var DOM = __webpack_require__(9);
 	var utils = __webpack_require__(7);
@@ -3052,7 +3059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	})();
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;
