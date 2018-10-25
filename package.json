@@ -28,22 +28,22 @@
     "url": "https://github.com/imsky/holder/issues"
   },
   "devDependencies": {
-    "component-type": "^1.1.0",
-    "gulp": "^3.9.0",
-    "gulp-concat": "^2.2.0",
-    "gulp-header": "^1.0.2",
+    "component-type": "1.1.0",
+    "gulp": "3.9.0",
+    "gulp-concat": "2.2.0",
+    "gulp-header": "1.0.5",
     "gulp-jsbeautifier": "0.0.5",
-    "gulp-jshint": "^1.6.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.5.3",
-    "gulp-todo": "^0.3.8",
-    "gulp-uglify": "^1.2.0",
-    "gulp-util": "~3",
-    "moment": "^2.6.0",
-    "node-http-server": "^3.0.0",
+    "gulp-jshint": "1.6.1",
+    "gulp-rename": "1.2.2",
+    "gulp-replace": "0.5.3",
+    "gulp-todo": "0.3.8",
+    "gulp-uglify": "1.2.0",
+    "gulp-util": "3.0.8",
+    "moment": "2.6.0",
+    "node-http-server": "3.0.0",
     "trim": "0.0.1",
-    "webdriverio": "^2.4.5",
-    "webpack-stream": "^2.1.1"
+    "webdriverio": "2.4.5",
+    "webpack-stream": "2.1.1"
   },
   "scripts": {
     "test": "node test/index"

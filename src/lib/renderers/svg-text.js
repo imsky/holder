@@ -77,7 +77,6 @@ module.exports = function (sceneGraph, renderSettings) {
       var word = line.children[wordKey];
       var x = textGroup.x + line.x + word.x;
       var y = textGroup.y + line.y + word.y;
-
       var wordTag = templates.element({
         'tag': 'text',
         'content': word.properties.text,
@@ -146,6 +145,10 @@ module.exports = function (sceneGraph, renderSettings) {
   });
 
   var output = shaven(svg);
+
+  if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
+    output[0] = output[0].replace(/&amp;#/gm, '&#');
+  }
   
   output = stylesheetXml + output[0];
 
