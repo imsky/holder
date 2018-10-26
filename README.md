@@ -16,6 +16,7 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 ## Installing
 
 * [npm](http://npmjs.com/): `npm install holderjs`
+* [yarn](http://yarnpkg.com/): `yarn add holderjs`
 * [Bower](http://bower.io/): `bower install holderjs`
 * [RawGit](http://rawgit.com): <https://cdn.rawgit.com/imsky/holder/master/holder.js>
 * [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
