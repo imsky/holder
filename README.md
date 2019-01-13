@@ -4,12 +4,12 @@
 
 Holder renders image placeholders on the client side using SVG.
 
-Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many](https://search.nerdydata.com/search/#!/searchTerm=holder.js/searchPage=1/sort=pop) [other](http://libscore.com/#Holder) sites.
+Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9) [other](http://libscore.com/#Holder) sites.
 
 [![npm](https://img.shields.io/npm/v/holderjs.svg)](https://www.npmjs.com/package/holderjs)
 [![Travis Build Status](https://img.shields.io/travis/imsky/holder.svg)](https://travis-ci.org/imsky/holder)
 [![Package Quality](http://npm.packagequality.com/shield/holderjs.svg)](http://packagequality.com/#?package=holderjs)
-[![NerdyData Popularity](https://nerdydata.com/badge/holder.js)](https://nerdydata.com/search?query=holder.js)
+[![NerdyData Popularity](https://badges.nerdydata.com/1cf03fe7-0e02-40ef-be69-f00ca9547fc9)](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9)
 [![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/holderjs/badge?style=rounded)](https://www.jsdelivr.com/package/npm/holderjs)
 
 
