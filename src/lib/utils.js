@@ -146,8 +146,8 @@ exports.parseColor = function(val) {
     match = val.match(rgbare);
 
     if (match !== null) {
-        const fixAlpha = a => `0.${a.split('.')[1]}`
-        const fixedMatch = match.slice(1).map((e, i) => (i === 3) ? fixAlpha(e) : e)
+        const normalizeAlpha = a => `0.${a.split('.')[1]}`
+        const fixedMatch = match.slice(1).map((e, i) => (i === 3) ? normalizeAlpha(e) : e)
         retval = 'rgba(' + fixedMatch.join(',') + ')';
         return retval;
     }
