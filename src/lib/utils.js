@@ -122,7 +122,7 @@ exports.truthy = function(val) {
 exports.parseColor = function(val) {
     var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
     var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
-    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0*\.\d{1,}|1)\)$/;
 
     var match = val.match(hexre);
     var retval;
@@ -146,7 +146,9 @@ exports.parseColor = function(val) {
     match = val.match(rgbare);
 
     if (match !== null) {
-        retval = 'rgba(' + match.slice(1).join(',') + ')';
+        const normalizeAlpha = a => `0.${a.split('.')[1]}`
+        const fixedMatch = match.slice(1).map((e, i) => (i === 3) ? normalizeAlpha(e) : e)
+        retval = 'rgba(' + fixedMatch.join(',') + ')';
         return retval;
     }
 
