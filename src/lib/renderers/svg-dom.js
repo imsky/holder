@@ -8,7 +8,7 @@ var SVG_NS = constants.svg_ns;
 var generatorComment = '\n' +
     'Created with Holder.js ' + constants.version + '.\n' +
     'Learn more at http://holderjs.com\n' +
-    '(c) 2012-2015 Ivan Malopinsky - http://imsky.co\n';
+    '(c) 2012-2020 Ivan Malopinsky - http://imsky.co\n';
 
 module.exports = (function() {
     //Prevent IE <9 from initializing SVG renderer

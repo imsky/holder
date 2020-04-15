@@ -1,8 +1,8 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.6+fblyy
-© 2018 Ivan Malopinsky - http://imsky.co
+Version 2.9.7+5g5ho
+© 2020 Ivan Malopinsky - https://imsky.co
 
 Site:     http://holderjs.com
 Issues:   https://github.com/imsky/holder/issues
@@ -302,7 +302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*
 	Holder.js - client side image placeholders
-	(c) 2012-2015 Ivan Malopinsky - http://imsky.co
+	(c) 2012-2020 Ivan Malopinsky - https://imsky.co
 	*/
 
 	module.exports = __webpack_require__(1);
@@ -314,7 +314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*
 	Holder.js - client side image placeholders
-	(c) 2012-2016 Ivan Malopinsky - http://imsky.co
+	(c) 2012-2020 Ivan Malopinsky - http://imsky.co
 	*/
 
 	//Libraries and functions
@@ -1833,24 +1833,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (val !== val) return 'nan';
 	  if (val && val.nodeType === 1) return 'element';
 
-	  if (isBuffer(val)) return 'buffer';
-
 	  val = val.valueOf
 	    ? val.valueOf()
-	    : Object.prototype.valueOf.apply(val);
+	    : Object.prototype.valueOf.apply(val)
 
 	  return typeof val;
 	};
-
-	// code borrowed from https://github.com/feross/is-buffer/blob/master/index.js
-	function isBuffer(obj) {
-	  return !!(obj != null &&
-	    (obj._isBuffer || // For Safari 5-7 (missing Object.prototype.constructor)
-	      (obj.constructor &&
-	      typeof obj.constructor.isBuffer === 'function' &&
-	      obj.constructor.isBuffer(obj))
-	    ))
-	}
 
 
 /***/ }),
@@ -2092,7 +2080,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.parseColor = function(val) {
 	    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
 	    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
-	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0*\.\d{1,}|1)\)$/;
 
 	    var match = val.match(hexre);
 	    var retval;
@@ -2116,7 +2104,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    match = val.match(rgbare);
 
 	    if (match !== null) {
-	        retval = 'rgba(' + match.slice(1).join(',') + ')';
+	        const normalizeAlpha = function (a) { return '0.' + a.split('.')[1]; };
+	        const fixedMatch = match.slice(1).map(function (e, i) {
+	            return (i === 3) ? normalizeAlpha(e) : e;
+	        });
+	        retval = 'rgba(' + fixedMatch.join(',') + ')';
 	        return retval;
 	    }
 
@@ -2141,6 +2133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return devicePixelRatio / backingStoreRatio;
 	};
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
@@ -2541,7 +2534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.6',
+	  'version': '2.9.7',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 

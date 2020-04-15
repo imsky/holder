@@ -1,6 +1,6 @@
 /*
 Holder.js - client side image placeholders
-(c) 2012-2016 Ivan Malopinsky - http://imsky.co
+(c) 2012-2020 Ivan Malopinsky - http://imsky.co
 */
 
 //Libraries and functions

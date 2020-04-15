@@ -1,12 +1,12 @@
 {
   "name": "holderjs",
   "officialName": "Holder",
-  "version": "2.9.6",
+  "version": "2.9.7",
   "summary": "client side image placeholders",
   "description": "Holder uses SVG to render image placeholders entirely in browser.",
   "author": {
     "name": "Ivan Malopinsky",
-    "url": "http://imsky.co"
+    "url": "https://imsky.co"
   },
   "homepage": "http://holderjs.com",
   "license": "MIT",
@@ -46,6 +46,7 @@
     "webpack-stream": "2.1.1"
   },
   "scripts": {
+    "build": "gulp",
     "test": "node test/index"
   },
   "dependencies": {

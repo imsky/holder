@@ -108,7 +108,7 @@ gulp.task('watch', function() {
     gulp.watch('src/*.js', ['default']);
 });
 
-gulp.task('default', ['todo', 'bundle', 'minify', 'banner', 'meteor'], function() {
+gulp.task('default', ['bundle', 'minify', 'banner', 'meteor'], function() {
     gulputil.log('Finished build ' + build);
     build = generateBuild();
 });
