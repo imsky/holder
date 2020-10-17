@@ -359,6 +359,10 @@ function parseURL(url, instanceOptions) {
         if (options.size && parseFloat(options.size)) {
             holder.size = parseFloat(options.size);
         }
+        
+        if (options.fixedSize != null) {
+            holder.fixedSize = utils.truthy(options.fixedSize);
+        }
 
         if (options.font) {
             holder.font = options.font;
@@ -649,6 +653,7 @@ function render(renderSettings) {
 //todo: merge app defaults and setup properties into the scene argument
 function buildSceneGraph(scene) {
     var fontSize = App.defaults.size;
+    var fixedSize = scene.flags.fixedSize != null ? scene.flags.fixedSize : scene.theme.fixedSize;
     if (parseFloat(scene.theme.size)) {
         fontSize = scene.theme.size;
     } else if (parseFloat(scene.flags.size)) {
@@ -657,7 +662,7 @@ function buildSceneGraph(scene) {
 
     scene.font = {
         family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
+        size: fixedSize ? fontSize : textSize(scene.width, scene.height, fontSize, App.defaults.scale),
         units: scene.theme.units ? scene.theme.units : App.defaults.units,
         weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
     };
