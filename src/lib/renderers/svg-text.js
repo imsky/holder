@@ -1,4 +1,4 @@
-var shaven = require('shaven');
+var shaven = require('shaven').default;
 
 var SVG = require('../svg');
 var constants = require('../constants');
@@ -144,14 +144,15 @@ module.exports = function (sceneGraph, renderSettings) {
     'preserveAspectRatio': 'none'
   });
 
-  var output = shaven(svg);
+  var output = String(shaven(svg));
 
   if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
-    output[0] = output[0].replace(/&amp;#/gm, '&#');
+    output = output.replace(/&amp;#/gm, '&#');
   }
-  
-  output = stylesheetXml + output[0];
+
+  output = stylesheetXml + output;
 
   var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
+
   return svgString;
 };
