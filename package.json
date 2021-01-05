@@ -50,6 +50,6 @@
     "test": "node test/index"
   },
   "dependencies": {
-    "shaven": "^2.0.0"
+    "shaven": "1.3.0"
   }
 }
