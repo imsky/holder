@@ -1,8 +1,8 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.7+5g5ho
-© 2020 Ivan Malopinsky - https://imsky.co
+Version 2.9.8+942z
+© 2021 Ivan Malopinsky - https://imsky.co
 
 Site:     http://holderjs.com
 Issues:   https://github.com/imsky/holder/issues
@@ -329,7 +329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var constants = __webpack_require__(11);
 
 	var svgRenderer = __webpack_require__(12);
-	var sgCanvasRenderer = __webpack_require__(15);
+	var sgCanvasRenderer = __webpack_require__(20);
 
 	var extend = utils.extend;
 	var dimensionCheck = utils.dimensionCheck;
@@ -673,6 +673,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (options.size && parseFloat(options.size)) {
 	            holder.size = parseFloat(options.size);
 	        }
+	        
+	        if (options.fixedSize != null) {
+	            holder.fixedSize = utils.truthy(options.fixedSize);
+	        }
 
 	        if (options.font) {
 	            holder.font = options.font;
@@ -963,6 +967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//todo: merge app defaults and setup properties into the scene argument
 	function buildSceneGraph(scene) {
 	    var fontSize = App.defaults.size;
+	    var fixedSize = scene.flags.fixedSize != null ? scene.flags.fixedSize : scene.theme.fixedSize;
 	    if (parseFloat(scene.theme.size)) {
 	        fontSize = scene.theme.size;
 	    } else if (parseFloat(scene.flags.size)) {
@@ -971,7 +976,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    scene.font = {
 	        family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-	        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
+	        size: fixedSize ? fontSize : textSize(scene.width, scene.height, fontSize, App.defaults.scale),
 	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
 	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 	    };
@@ -2534,7 +2539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.7',
+	  'version': '2.9.8',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
@@ -2542,7 +2547,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var shaven = __webpack_require__(13);
+	var shaven = __webpack_require__(13).default;
 
 	var SVG = __webpack_require__(8);
 	var constants = __webpack_require__(11);
@@ -2688,303 +2693,392 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'preserveAspectRatio': 'none'
 	  });
 
-	  var output = shaven(svg);
+	  var output = String(shaven(svg));
 
 	  if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
-	    output[0] = output[0].replace(/&amp;#/gm, '&#');
+	    output = output.replace(/&amp;#/gm, '&#');
 	  }
-	  
-	  output = stylesheetXml + output[0];
+
+	  output = stylesheetXml + output;
 
 	  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
+
 	  return svgString;
 	};
+
 
 /***/ }),
 /* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var escape = __webpack_require__(14)
+	'use strict';
 
-	// TODO: remove namespace
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
-	module.exports = function shaven (array, namespace, returnObject) {
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; /* eslint-disable no-console */
 
-		'use strict'
+	exports.default = shaven;
 
-		var i = 1
-		var doesEscape = true
-		var HTMLString
-		var attributeKey
-		var callback
-		var key
+	var _parseSugarString = __webpack_require__(14);
 
+	var _parseSugarString2 = _interopRequireDefault(_parseSugarString);
 
-		returnObject = returnObject || {}
+	var _defaults = __webpack_require__(15);
 
+	var _defaults2 = _interopRequireDefault(_defaults);
 
-		function createElement (sugarString) {
+	var _namespaceToURL = __webpack_require__(16);
 
-			var tags = sugarString.match(/^[\w-]+/)
-			var element = {
-				tag: tags ? tags[0] : 'div',
-				attr: {},
-				children: []
-			}
-			var id = sugarString.match(/#([\w-]+)/)
-			var reference = sugarString.match(/\$([\w-]+)/)
-			var classNames = sugarString.match(/\.[\w-]+/g)
+	var _namespaceToURL2 = _interopRequireDefault(_namespaceToURL);
 
+	var _mapAttributeValue = __webpack_require__(17);
 
-			// Assign id if is set
-			if (id) {
-				element.attr.id = id[1]
+	var _mapAttributeValue2 = _interopRequireDefault(_mapAttributeValue);
 
-				// Add element to the return object
-				returnObject[id[1]] = element
-			}
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-			if (reference)
-				returnObject[reference[1]] = element
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-			if (classNames)
-				element.attr.class = classNames.join(' ').replace(/\./g, '')
+	function shaven(arrayOrObject) {
+	  var isArray = Array.isArray(arrayOrObject);
+	  var objType = typeof arrayOrObject === 'undefined' ? 'undefined' : _typeof(arrayOrObject);
 
-			if (sugarString.match(/&$/g))
-				doesEscape = false
+	  if (!isArray && objType !== 'object') {
+	    throw new Error('Argument must be either an array or an object ' + 'and not ' + JSON.stringify(arrayOrObject));
+	  }
 
-			return element
-		}
+	  if (isArray && arrayOrObject.length === 0) {
+	    // Ignore empty arrays
+	    return {};
+	  }
 
-		function replacer (key, value) {
+	  var config = {};
+	  var elementArray = void 0;
 
-			if (value === null || value === false || value === undefined)
-				return
+	  if (Array.isArray(arrayOrObject)) {
+	    elementArray = arrayOrObject;
+	  } else {
+	    elementArray = arrayOrObject.elementArray;
+	    delete arrayOrObject.elementArray;
+	    Object.assign(config, arrayOrObject);
+	  }
 
-			if (typeof value !== 'string' && typeof value !== 'object')
-				return String(value)
+	  config = Object.assign({}, _defaults2.default, config, {
+	    returnObject: { // Shaven object to return at last
+	      ids: {},
+	      references: {}
+	    }
+	  });
 
-			return value
-		}
-
-		function escapeAttribute (string) {
-			return (string || string === 0) ?
-				String(string)
-					.replace(/&/g, '&amp;')
-					.replace(/"/g, '&quot;') :
-				''
-		}
-
-		function escapeHTML (string) {
-			return String(string)
-				.replace(/&/g, '&amp;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&apos;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-		}
+	  config.nsStack = [config.namespace]; // Stack with current namespaces
 
 
-		if (typeof array[0] === 'string')
-			array[0] = createElement(array[0])
+	  function createElement(sugarString) {
+	    var properties = (0, _parseSugarString2.default)(sugarString);
+	    var currentNs = config.nsStack[config.nsStack.length - 1];
 
-		else if (Array.isArray(array[0]))
-			i = 0
+	    if (properties.tag === 'svg') {
+	      config.nsStack.push('svg');
+	    } else if (properties.tag === 'math') {
+	      config.nsStack.push('mathml');
+	    } else if (properties.tag === 'html') {
+	      config.nsStack.push('xhtml');
+	    } else {
+	      // Keep current namespace
+	      config.nsStack.push(currentNs);
+	    }
 
-		else
-			throw new Error(
-				'First element of array must be a string, ' +
-				'or an array and not ' + JSON.stringify(array[0])
-			)
+	    var namespace = config.nsStack[config.nsStack.length - 1];
+	    var element = document.createElementNS(_namespaceToURL2.default[namespace] ? _namespaceToURL2.default[namespace] : namespace, properties.tag);
 
+	    if (properties.id) {
+	      element.id = properties.id;
+	      console.assert(!config.returnObject.ids.hasOwnProperty(properties.id), 'Ids must be unique and "' + properties.id + '" is already assigned');
+	      config.returnObject.ids[properties.id] = element;
+	    }
+	    if (properties.class) {
+	      var _element$classList;
 
-		for (; i < array.length; i++) {
+	      (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray(properties.class.split(' ')));
+	    }
+	    if (properties.reference) {
+	      console.assert(!config.returnObject.ids.hasOwnProperty(properties.reference), 'References must be unique and "' + properties.id + '" is already assigned');
+	      config.returnObject.references[properties.reference] = element;
+	    }
 
-			// Don't render element if value is false or null
-			if (array[i] === false || array[i] === null) {
-				array[0] = false
-				break
-			}
+	    config.escapeHTML = properties.escapeHTML != null ? properties.escapeHTML : config.escapeHTML;
 
-			// Continue with next array value if current value is undefined or true
-			else if (array[i] === undefined || array[i] === true) {
-				continue
-			}
+	    return element;
+	  }
 
-			else if (typeof array[i] === 'string') {
-				if (doesEscape)
-					array[i] = escapeHTML(array[i])
+	  function buildDom(array) {
+	    if (Array.isArray(array) && array.length === 0) {
+	      // Ignore empty arrays
+	      return {};
+	    }
 
-				array[0].children.push(array[i])
-			}
+	    var index = 1;
+	    var createdCallback = void 0;
 
-			else if (typeof array[i] === 'number') {
+	    if (typeof array[0] === 'string') {
+	      array[0] = createElement(array[0]);
+	    } else if (Array.isArray(array[0])) {
+	      index = 0;
+	    } else if (!(array[0] instanceof Element)) {
+	      throw new Error('First element of array must be either a string, ' + 'an array or a DOM element and not ' + JSON.stringify(array[0]));
+	    }
 
-				array[0].children.push(array[i])
-			}
+	    // For each in the element array (except the first)
+	    for (; index < array.length; index++) {
 
-			else if (Array.isArray(array[i])) {
+	      // Don't render element if value is false or null
+	      if (array[index] === false || array[index] === null) {
+	        array[0] = false;
+	        break;
+	      }
 
-				if (Array.isArray(array[i][0])) {
-					array[i].reverse().forEach(function (subArray) {
-						array.splice(i + 1, 0, subArray)
-					})
+	      // Continue with next array value if current is undefined or true
+	      else if (array[index] === undefined || array[index] === true) {
+	          continue;
+	        }
 
-					if (i !== 0)
-						continue
-					i++
-				}
+	        // If is string has to be content so set it
+	        else if (typeof array[index] === 'string' || typeof array[index] === 'number') {
+	            if (config.escapeHTML) {
+	              array[0].appendChild(document.createTextNode(array[index]));
+	            } else {
+	              array[0].innerHTML = array[index];
+	            }
+	          }
 
-				shaven(array[i], namespace, returnObject)
+	          // If is array has to be child element
+	          else if (Array.isArray(array[index])) {
+	              // If is actually a sub-array, flatten it
+	              if (Array.isArray(array[index][0])) {
+	                array[index].reverse().forEach(function (subArray) {
+	                  // eslint-disable-line no-loop-func
+	                  array.splice(index + 1, 0, subArray);
+	                });
 
-				if (array[i][0])
-					array[0].children.push(array[i][0])
-			}
+	                if (index !== 0) continue;
+	                index++;
+	              }
 
-			else if (typeof array[i] === 'function')
-				callback = array[i]
+	              // Build dom recursively for all child elements
+	              buildDom(array[index]);
 
+	              // Append the element to its parent element
+	              if (array[index][0]) {
+	                array[0].appendChild(array[index][0]);
+	              }
+	            } else if (typeof array[index] === 'function') {
+	              createdCallback = array[index];
+	            }
 
-			else if (typeof array[i] === 'object') {
-				for (attributeKey in array[i])
-					if (array[i].hasOwnProperty(attributeKey))
-						if (array[i][attributeKey] !== null &&
-							array[i][attributeKey] !== false)
-							if (attributeKey === 'style' &&
-								typeof array[i][attributeKey] === 'object')
-								array[0].attr[attributeKey] = JSON
-									.stringify(array[i][attributeKey], replacer)
-									.slice(2, -2)
-									.replace(/","/g, ';')
-									.replace(/":"/g, ':')
-									.replace(/\\"/g, '\'')
+	            // If it is an element append it
+	            else if (array[index] instanceof Element) {
+	                array[0].appendChild(array[index]);
+	              }
 
-							else
-								array[0].attr[attributeKey] = array[i][attributeKey]
-			}
+	              // Else must be an object with attributes
+	              else if (_typeof(array[index]) === 'object') {
+	                  // For each attribute
+	                  for (var attributeKey in array[index]) {
+	                    if (!array[index].hasOwnProperty(attributeKey)) continue;
 
-			else
-				throw new TypeError('"' + array[i] + '" is not allowed as a value.')
-		}
+	                    var attributeValue = array[index][attributeKey];
 
+	                    if (array[index].hasOwnProperty(attributeKey) && attributeValue !== null && attributeValue !== false) {
+	                      array[0].setAttribute(attributeKey, (0, _mapAttributeValue2.default)(attributeKey, attributeValue, config));
+	                    }
+	                  }
+	                } else {
+	                  throw new TypeError('"' + array[index] + '" is not allowed as a value');
+	                }
+	    }
 
-		if (array[0] !== false) {
+	    config.nsStack.pop();
 
-			HTMLString = '<' + array[0].tag
+	    // Return root element on index 0
+	    config.returnObject[0] = array[0];
+	    config.returnObject.rootElement = array[0];
 
-			for (key in array[0].attr)
-				if (array[0].attr.hasOwnProperty(key))
-					HTMLString += ' ' + key + '="' +
-						escapeAttribute(array[0].attr[key]) + '"'
+	    config.returnObject.toString = function () {
+	      return array[0].outerHTML;
+	    };
 
-			HTMLString += '>'
+	    if (createdCallback) createdCallback(array[0]);
+	  }
 
-			array[0].children.forEach(function (child) {
-				HTMLString += child
-			})
+	  buildDom(elementArray);
 
-			HTMLString += '</' + array[0].tag + '>'
-
-			array[0] = HTMLString
-		}
-
-		// Return root element on index 0
-		returnObject[0] = array[0]
-
-		if (callback)
-			callback(array[0])
-
-		// returns object containing all elements with an id and the root element
-		return returnObject
+	  return config.returnObject;
 	}
 
+	shaven.setDefaults = function (object) {
+	  Object.assign(_defaults2.default, object);
+	  return shaven;
+	};
 
 /***/ }),
 /* 14 */
 /***/ (function(module, exports) {
 
-	/*!
-	 * escape-html
-	 * Copyright(c) 2012-2013 TJ Holowaychuk
-	 * Copyright(c) 2015 Andreas Lubbe
-	 * Copyright(c) 2015 Tiancheng "Timothy" Gu
-	 * MIT Licensed
-	 */
-
 	'use strict';
 
-	/**
-	 * Module variables.
-	 * @private
-	 */
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
-	var matchHtmlRegExp = /["'&<>]/;
+	exports.default = function (sugarString) {
+	  var tags = sugarString.match(/^[\w-]+/);
+	  var properties = {
+	    tag: tags ? tags[0] : 'div'
+	  };
+	  var ids = sugarString.match(/#([\w-]+)/);
+	  var classes = sugarString.match(/\.[\w-]+/g);
+	  var references = sugarString.match(/\$([\w-]+)/);
 
-	/**
-	 * Module exports.
-	 * @public
-	 */
+	  if (ids) properties.id = ids[1];
 
-	module.exports = escapeHtml;
-
-	/**
-	 * Escape special characters in the given string of html.
-	 *
-	 * @param  {string} string The string to escape for inserting into HTML
-	 * @return {string}
-	 * @public
-	 */
-
-	function escapeHtml(string) {
-	  var str = '' + string;
-	  var match = matchHtmlRegExp.exec(str);
-
-	  if (!match) {
-	    return str;
+	  if (classes) {
+	    properties.class = classes.join(' ').replace(/\./g, '');
 	  }
 
-	  var escape;
-	  var html = '';
-	  var index = 0;
-	  var lastIndex = 0;
+	  if (references) properties.reference = references[1];
 
-	  for (index = match.index; index < str.length; index++) {
-	    switch (str.charCodeAt(index)) {
-	      case 34: // "
-	        escape = '&quot;';
-	        break;
-	      case 38: // &
-	        escape = '&amp;';
-	        break;
-	      case 39: // '
-	        escape = '&#39;';
-	        break;
-	      case 60: // <
-	        escape = '&lt;';
-	        break;
-	      case 62: // >
-	        escape = '&gt;';
-	        break;
-	      default:
-	        continue;
-	    }
-
-	    if (lastIndex !== index) {
-	      html += str.substring(lastIndex, index);
-	    }
-
-	    lastIndex = index + 1;
-	    html += escape;
+	  if (sugarString.endsWith('&') || sugarString.endsWith('!')) {
+	    properties.escapeHTML = false;
 	  }
 
-	  return lastIndex !== index
-	    ? html + str.substring(lastIndex, index)
-	    : html;
-	}
-
+	  return properties;
+	};
 
 /***/ }),
 /* 15 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  namespace: 'xhtml',
+	  autoNamespacing: true,
+	  escapeHTML: true,
+	  quotationMark: '"',
+	  quoteAttributes: true,
+	  convertTransformArray: true
+	};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  mathml: 'http://www.w3.org/1998/Math/MathML',
+	  svg: 'http://www.w3.org/2000/svg',
+	  xhtml: 'http://www.w3.org/1999/xhtml'
+	};
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _buildTransformString = __webpack_require__(18);
+
+	var _buildTransformString2 = _interopRequireDefault(_buildTransformString);
+
+	var _stringifyStyleObject = __webpack_require__(19);
+
+	var _stringifyStyleObject2 = _interopRequireDefault(_stringifyStyleObject);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = function (key, value) {
+	  if (value === undefined) {
+	    return '';
+	  }
+
+	  if (key === 'style' && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+	    return (0, _stringifyStyleObject2.default)(value);
+	  }
+
+	  if (key === 'transform' && Array.isArray(value)) {
+	    return (0, _buildTransformString2.default)(value);
+	  }
+
+	  return value;
+	};
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	// Create transform string from list transform objects
+
+	exports.default = function (transformObjects) {
+
+	  return transformObjects.map(function (transformation) {
+	    var values = [];
+
+	    if (transformation.type === 'rotate' && transformation.degrees) {
+	      values.push(transformation.degrees);
+	    }
+	    if (transformation.x) values.push(transformation.x);
+	    if (transformation.y) values.push(transformation.y);
+
+	    return transformation.type + '(' + values + ')';
+	  }).join(' ');
+	};
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	function sanitizeProperties(key, value) {
+	  if (value === null || value === false || value === undefined) return;
+	  if (typeof value === 'string' || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') return value;
+
+	  return String(value);
+	}
+
+	exports.default = function (styleObject) {
+	  return JSON.stringify(styleObject, sanitizeProperties).slice(2, -2).replace(/","/g, ';').replace(/":"/g, ':').replace(/\\"/g, '\'');
+	};
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var DOM = __webpack_require__(9);
