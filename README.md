@@ -2,9 +2,11 @@
 
 ![](http://imsky.github.io/holder/images/header.png)
 
-Holder renders image placeholders on the client side using SVG.
+Holder renders image placeholders in browser using SVG.
 
-Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults), and [many](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9) [other](http://libscore.com/#Holder) sites.
+Used by thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults) (including [Bootstrap v3](https://getbootstrap.com)) and [many](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9) [other](http://libscore.com/#Holder) sites.
+
+Zero extra requests, small bundle size, highly customizable.
 
 [![npm](https://img.shields.io/npm/v/holderjs.svg)](https://www.npmjs.com/package/holderjs)
 [![Travis Build Status](https://img.shields.io/travis/imsky/holder.svg)](https://travis-ci.org/imsky/holder)
@@ -15,16 +17,16 @@ Used by [Bootstrap](http://getbootstrap.com), thousands of [open source projects
 
 ## Installing
 
-* [npm](http://npmjs.com/): `npm install holderjs`
-* [yarn](http://yarnpkg.com/): `yarn add holderjs`
-* [Bower](http://bower.io/): `bower install holderjs`
-* [RawGit](http://rawgit.com): <https://cdn.rawgit.com/imsky/holder/master/holder.js>
-* [cdnjs](http://cdnjs.com/): <http://cdnjs.com/libraries/holder>
-* [jsDelivr](http://www.jsdelivr.com): <http://www.jsdelivr.com/#!holder>
+* [npm](https://npmjs.com/): `npm install holderjs`
+* [yarn](https://yarnpkg.com/): `yarn add holderjs`
+* [unpkg](https://unpkg.com/): <https://unpkg.com/holderjs>
+* [cdnjs](http://cdnjs.com/): <https://cdnjs.com/libraries/holder>
+* [jsDelivr](https://www.jsdelivr.com): <https://www.jsdelivr.com/package/npm/holderjs>
+* [Bower](https://bower.io/): `bower install holderjs`
 * [Rails Assets](https://rails-assets.org): `gem 'rails-assets-holderjs'`
-* [Meteor](http://atmospherejs.com/): `meteor add imsky:holder`
+* [Meteor](https://atmospherejs.com/): `meteor add imsky:holder`
 * [Composer](https://packagist.org/): `php composer.phar update imsky/holder`
-* [NuGet](http://www.nuget.org/): `Install-Package Holder.js`
+* [NuGet](https://www.nuget.org/): `Install-Package Holder.js`
 
 ## Usage
 
@@ -173,7 +175,7 @@ If you would like to disable line wrapping, set the `nowrap` option to `true`:
 <img data-src="holder.js/300x200?text=Add \n line breaks \n anywhere.&amp;nowrap=true">
 ```
 
-When using the `text` option, the image dimesions are not shown. To reinsert the dimension into the text, simple use the special `holder_dimensions` placeholder. 
+When using the `text` option, the image dimesions are not shown. To reinsert the dimension into the text, simple use the special `holder_dimensions` placeholder.
 
 ```html
 <img data-src="holder.js/90px80p?theme=sky&text=Placeholder dimensions: holder_dimensions">
