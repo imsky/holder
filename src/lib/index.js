@@ -129,7 +129,7 @@ var Holder = {
             } else if (holderStringIndex === 1 && rawURL[0] === '?') {
                 holderURL = rawURL.slice(1);
             } else {
-                var fragment = rawURL.substr(holderStringIndex).match(/([^\"]*)"?\)/);
+                var fragment = rawURL.substr(holderStringIndex).match(/([^"]*)"?\)/);
                 if (fragment !== null) {
                     holderURL = fragment[1];
                 } else if (rawURL.indexOf('url(') === 0) {
@@ -156,7 +156,9 @@ var Holder = {
             try {
                 objectAttr.data = object.getAttribute('data');
                 objectAttr.dataSrc = object.getAttribute(App.vars.dataAttr);
-            } catch (e) {}
+            } catch (e) {
+              objectAttr.error = e;
+            }
 
             var objectHasSrcURL = objectAttr.data != null && objectAttr.data.indexOf(options.domain) === 0;
             var objectHasDataSrcURL = objectAttr.dataSrc != null && objectAttr.dataSrc.indexOf(options.domain) === 0;
@@ -175,7 +177,9 @@ var Holder = {
                 imageAttr.src = image.getAttribute('src');
                 imageAttr.dataSrc = image.getAttribute(App.vars.dataAttr);
                 imageAttr.rendered = image.getAttribute('data-holder-rendered');
-            } catch (e) {}
+            } catch (e) {
+              imageAttr.error = e;
+            }
 
             var imageHasSrc = imageAttr.src != null;
             var imageHasDataSrcURL = imageAttr.dataSrc != null && imageAttr.dataSrc.indexOf(options.domain) === 0;
@@ -342,7 +346,7 @@ function parseURL(url, instanceOptions) {
             holder.autoFg = true;
         }
 
-        if (options.theme && holder.instanceOptions.themes.hasOwnProperty(options.theme)) {
+        if (options.theme && Object.prototype.hasOwnProperty.call(holder.instanceOptions.themes, options.theme)) {
             holder.theme = extend(holder.instanceOptions.themes[options.theme], null);
         }
 
@@ -359,7 +363,7 @@ function parseURL(url, instanceOptions) {
         if (options.size && parseFloat(options.size)) {
             holder.size = parseFloat(options.size);
         }
-        
+
         if (options.fixedSize != null) {
             holder.fixedSize = utils.truthy(options.fixedSize);
         }
@@ -1128,7 +1132,7 @@ function resizeEvent() {
 //Set up flags
 
 for (var flag in App.flags) {
-    if (!App.flags.hasOwnProperty(flag)) continue;
+    if (!Object.prototype.hasOwnProperty.call(App.flags, flag)) continue;
     App.flags[flag].match = function(val) {
         return val.match(this.regex);
     };

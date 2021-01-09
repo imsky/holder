@@ -1,14 +1,14 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var header = require('gulp-header');
-var jshint = require('gulp-jshint');
-var todo = require('gulp-todo');
-var gulputil = require('gulp-util');
-var replace = require('gulp-replace');
-var webpack = require('webpack-stream');
 var beautify = require('gulp-jsbeautifier');
+var concat = require('gulp-concat');
+var eslint = require('gulp-eslint');
+var gulp = require('gulp');
+var gulputil = require('gulp-util');
+var header = require('gulp-header');
 var rename = require('gulp-rename');
+var replace = require('gulp-replace');
+var todo = require('gulp-todo');
+var uglify = require('gulp-uglify');
+var webpack = require('webpack-stream');
 
 var moment = require('moment');
 var pkg = require('./package.json');
@@ -29,15 +29,16 @@ function generateBuild() {
 
 var build = generateBuild();
 
-gulp.task('jshint', function() {
-    return gulp.src([
-        'src/lib/*.js',
-        'src/lib/renderers/*.js',
-        'src/renderers/*.js',
-        'src/index.js'
-        ])
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'));
+gulp.task('lint', function() {
+  return gulp.src([
+    'src/lib/*.js',
+    'src/lib/renderers/*.js',
+    'src/renderers/*.js',
+    'src/index.js'
+  ])
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
 
 gulp.task('todo', function() {
@@ -51,7 +52,7 @@ gulp.task('todo', function() {
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('build', ['jshint'], function() {
+gulp.task('build', ['lint'], function() {
     return gulp.src('src/index.js')
         .pipe(webpack({
             output: {

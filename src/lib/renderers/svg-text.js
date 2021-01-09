@@ -146,7 +146,7 @@ module.exports = function (sceneGraph, renderSettings) {
 
   var output = String(shaven(svg));
 
-  if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
+  if (/&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
     output = output.replace(/&amp;#/gm, '&#');
   }
 

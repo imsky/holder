@@ -8,13 +8,13 @@
 exports.extend = function(a, b) {
     var c = {};
     for (var x in a) {
-        if (a.hasOwnProperty(x)) {
+        if (Object.prototype.hasOwnProperty.call(a,x)) {
             c[x] = a[x];
         }
     }
     if (b != null) {
         for (var y in b) {
-            if (b.hasOwnProperty(y)) {
+            if (Object.prototype.hasOwnProperty.call(b, y)) {
                 c[y] = b[y];
             }
         }
@@ -30,7 +30,7 @@ exports.extend = function(a, b) {
 exports.cssProps = function(props) {
     var ret = [];
     for (var p in props) {
-        if (props.hasOwnProperty(p)) {
+        if (Object.prototype.hasOwnProperty.call(props, p)) {
             ret.push(p + ':' + props[p]);
         }
     }
@@ -146,8 +146,8 @@ exports.parseColor = function(val) {
     match = val.match(rgbare);
 
     if (match !== null) {
-        const normalizeAlpha = function (a) { return '0.' + a.split('.')[1]; };
-        const fixedMatch = match.slice(1).map(function (e, i) {
+        var normalizeAlpha = function (a) { return '0.' + a.split('.')[1]; };
+        var fixedMatch = match.slice(1).map(function (e, i) {
             return (i === 3) ? normalizeAlpha(e) : e;
         });
         retval = 'rgba(' + fixedMatch.join(',') + ')';

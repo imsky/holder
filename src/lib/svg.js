@@ -104,6 +104,6 @@ exports.serializeSVG = function(svg, engineSettings) {
     }
 
     var svgText = serializer.serializeToString(svg);
-    svgText = svgText.replace(/\&amp;(\#[0-9]{2,}\;)/g, '&$1');
+    svgText = svgText.replace(/&amp;(#[0-9]{2,};)/g, '&$1');
     return svgCSS + svgText;
 };
