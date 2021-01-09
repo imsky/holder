@@ -1,5 +1,64 @@
-.versions
+# Gitignore from Quickstart
+# qkst.io/dotfiles/gitignore
+
+# Sensitive files
+*.key
+*.pem
+
+# JavaScript
 node_modules/
-todo.md
+bower_components/
 npm-debug.log
-.fuse_hidden*
+
+# Executables
+*.out
+*.exe
+*.app
+
+# Logs
+*.log
+logs
+
+# Archives
+*.[7gx]z
+*.[tr]ar
+*.zip
+*.dmg
+*.deb
+*.rpm
+*.xpi
+*.msi
+
+# Linux
+*~
+.Trash-*
+
+# OS X
+._*
+.fuse_*
+.Spotlight-*
+.DS_Store
+
+# Windows
+*.tmp
+*.bak
+*.lnk
+Thumbs.db
+
+# Ansible
+*.retry
+
+# Vagrant
+.vagrant
+
+# IDEA
+.idea/*
+
+# Other VCS
+.hg
+.bzr
+.svn
+
+# Other temporary files
+*.dump
+*.swp
