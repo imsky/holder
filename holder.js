@@ -1,8 +1,8 @@
 /*!
 
 Holder - client side image placeholders
-Version 2.9.0+f2dkw
-© 2015 Ivan Malopinsky - http://imsky.co
+Version 2.9.8+942z
+© 2021 Ivan Malopinsky - https://imsky.co
 
 Site:     http://holderjs.com
 Issues:   https://github.com/imsky/holder/issues
@@ -210,36 +210,32 @@ License:  MIT
 
   //requestAnimationFrame polyfill for older Firefox/Chrome versions
   if (!window.requestAnimationFrame) {
-    if (window.webkitRequestAnimationFrame) {
+    if (window.webkitRequestAnimationFrame && window.webkitCancelAnimationFrame) {
     //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-webkit.js
     (function (global) {
-      // window.requestAnimationFrame
       global.requestAnimationFrame = function (callback) {
         return webkitRequestAnimationFrame(function () {
           callback(global.performance.now());
         });
       };
 
-      // window.cancelAnimationFrame
-      global.cancelAnimationFrame = webkitCancelAnimationFrame;
+      global.cancelAnimationFrame = global.webkitCancelAnimationFrame;
     }(window));
-    } else if (window.mozRequestAnimationFrame) {
+    } else if (window.mozRequestAnimationFrame && window.mozCancelAnimationFrame) {
       //https://github.com/Financial-Times/polyfill-service/blob/master/polyfills/requestAnimationFrame/polyfill-moz.js
     (function (global) {
-      // window.requestAnimationFrame
       global.requestAnimationFrame = function (callback) {
         return mozRequestAnimationFrame(function () {
           callback(global.performance.now());
         });
       };
 
-      // window.cancelAnimationFrame
-      global.cancelAnimationFrame = mozCancelAnimationFrame;
+      global.cancelAnimationFrame = global.mozCancelAnimationFrame;
     }(window));
     } else {
     (function (global) {
       global.requestAnimationFrame = function (callback) {
-      return global.setTimeout(callback, 1000 / 60);
+        return global.setTimeout(callback, 1000 / 60);
       };
 
       global.cancelAnimationFrame = global.clearTimeout;
@@ -302,23 +298,23 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/*
 	Holder.js - client side image placeholders
-	(c) 2012-2015 Ivan Malopinsky - http://imsky.co
+	(c) 2012-2020 Ivan Malopinsky - https://imsky.co
 	*/
 
 	module.exports = __webpack_require__(1);
 
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*
 	Holder.js - client side image placeholders
-	(c) 2012-2015 Ivan Malopinsky - http://imsky.co
+	(c) 2012-2020 Ivan Malopinsky - http://imsky.co
 	*/
 
 	//Libraries and functions
@@ -333,7 +329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var constants = __webpack_require__(11);
 
 	var svgRenderer = __webpack_require__(12);
-	var sgCanvasRenderer = __webpack_require__(15);
+	var sgCanvasRenderer = __webpack_require__(20);
 
 	var extend = utils.extend;
 	var dimensionCheck = utils.dimensionCheck;
@@ -417,7 +413,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        engineSettings.stylesheets = [];
 	        engineSettings.svgXMLStylesheet = true;
-	        engineSettings.noFontFallback = options.noFontFallback ? options.noFontFallback : false;
+	        engineSettings.noFontFallback = !!options.noFontFallback;
+	        engineSettings.noBackgroundSize = !!options.noBackgroundSize;
 
 	        stylenodes.forEach(function (styleNode) {
 	            if (styleNode.attributes.rel && styleNode.attributes.href && styleNode.attributes.rel.value == 'stylesheet') {
@@ -454,7 +451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 
-	            if (holderURL != null) {
+	            if (holderURL) {
 	                var holderFlags = parseURL(holderURL, options);
 	                if (holderFlags) {
 	                    prepareDOMElement({
@@ -602,7 +599,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        instanceOptions: instanceOptions
 	    };
 
-	    var parts = url.split('?');
+	    var firstQuestionMark = url.indexOf('?');
+	    var parts = [url];
+
+	    if (firstQuestionMark !== -1) {
+	        parts = [url.slice(0, firstQuestionMark), url.slice(firstQuestionMark + 1)];
+	    }
+
 	    var basics = parts[0].split('/');
 
 	    holder.holderURL = url;
@@ -621,6 +624,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (parts.length === 2) {
 	        var options = querystring.parse(parts[1]);
+
+	        // Dimensions
+
+	        if (utils.truthy(options.ratio)) {
+	            holder.fluid = true;
+	            var ratioWidth = parseFloat(holder.dimensions.width.replace('%', ''));
+	            var ratioHeight = parseFloat(holder.dimensions.height.replace('%', ''));
+
+	            ratioHeight = Math.floor(100 * (ratioHeight / ratioWidth));
+	            ratioWidth = 100;
+
+	            holder.dimensions.width = ratioWidth + '%';
+	            holder.dimensions.height = ratioHeight + '%';
+	        }
+
+	        holder.auto = utils.truthy(options.auto);
 
 	        // Colors
 
@@ -651,8 +670,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            holder.textmode = options.textmode;
 	        }
 
-	        if (options.size) {
-	            holder.size = options.size;
+	        if (options.size && parseFloat(options.size)) {
+	            holder.size = parseFloat(options.size);
+	        }
+	        
+	        if (options.fixedSize != null) {
+	            holder.fixedSize = utils.truthy(options.fixedSize);
 	        }
 
 	        if (options.font) {
@@ -670,8 +693,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        holder.nowrap = utils.truthy(options.nowrap);
 
 	        // Miscellaneous
-
-	        holder.auto = utils.truthy(options.auto);
 
 	        holder.outline = utils.truthy(options.outline);
 
@@ -796,7 +817,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.background;
+	            el.style.backgroundColor = theme.bg;
 	        } else {
 	            render(renderSettings);
 
@@ -828,7 +849,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        setInitialDimensions(el);
 
 	        if (engineSettings.renderer == 'html') {
-	            el.style.backgroundColor = theme.background;
+	            el.style.backgroundColor = theme.bg;
 	        } else {
 	            App.vars.resizableImages.push(el);
 	            updateResizableElements(el);
@@ -895,7 +916,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    //todo: add <object> canvas rendering
 	    if (mode == 'background') {
 	        el.style.backgroundImage = 'url(' + image + ')';
-	        el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+
+	        if (!engineSettings.noBackgroundSize) {
+	            el.style.backgroundSize = scene.width + 'px ' + scene.height + 'px';
+	        }
 	    } else {
 	        if (el.nodeName.toLowerCase() === 'img') {
 	            DOM.setAttr(el, {
@@ -943,6 +967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//todo: merge app defaults and setup properties into the scene argument
 	function buildSceneGraph(scene) {
 	    var fontSize = App.defaults.size;
+	    var fixedSize = scene.flags.fixedSize != null ? scene.flags.fixedSize : scene.theme.fixedSize;
 	    if (parseFloat(scene.theme.size)) {
 	        fontSize = scene.theme.size;
 	    } else if (parseFloat(scene.flags.size)) {
@@ -951,7 +976,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    scene.font = {
 	        family: scene.theme.font ? scene.theme.font : 'Arial, Helvetica, Open Sans, sans-serif',
-	        size: textSize(scene.width, scene.height, fontSize, App.defaults.scale),
+	        size: fixedSize ? fontSize : textSize(scene.width, scene.height, fontSize, App.defaults.scale),
 	        units: scene.theme.units ? scene.theme.units : App.defaults.units,
 	        weight: scene.theme.fontweight ? scene.theme.fontweight : 'bold'
 	    };
@@ -1336,8 +1361,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                })
 	            });
 
+	            //Unescape HTML entities to get approximately the right width
+	            var txt = DOM.newEl('textarea');
+	            txt.innerHTML = htgProps.text;
+	            stagingTextNode.nodeValue = txt.value;
+
 	            //Get bounding box for the whole string (total width and height)
-	            stagingTextNode.nodeValue = htgProps.text;
 	            var stagingTextBBox = stagingText.getBBox();
 
 	            //Get line count and split the string into words
@@ -1489,9 +1518,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/*!
 	 * onDomReady.js 1.4.0 (c) 2013 Tubal Martin - MIT license
@@ -1649,9 +1678,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = typeof window !== "undefined" && _onDomReady(window);
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	//Modified version of component/querystring
 	//Changes: updated dependencies, dot notation parsing, JSHint fixes
@@ -1757,9 +1786,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	
 	exports = module.exports = trim;
@@ -1777,9 +1806,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/**
 	 * toString ref.
@@ -1817,9 +1846,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var SceneGraph = function(sceneProperties) {
 	    var nodeCount = 1;
@@ -1928,9 +1957,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = SceneGraph;
 
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Shallow object clone and merge
@@ -2056,7 +2085,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.parseColor = function(val) {
 	    var hexre = /(^(?:#?)[0-9a-f]{6}$)|(^(?:#?)[0-9a-f]{3}$)/i;
 	    var rgbre = /^rgb\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/;
-	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0\.\d{1,}|1)\)$/;
+	    var rgbare = /^rgba\((\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0*\.\d{1,}|1)\)$/;
 
 	    var match = val.match(hexre);
 	    var retval;
@@ -2080,7 +2109,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    match = val.match(rgbare);
 
 	    if (match !== null) {
-	        retval = 'rgba(' + match.slice(1).join(',') + ')';
+	        const normalizeAlpha = function (a) { return '0.' + a.split('.')[1]; };
+	        const fixedMatch = match.slice(1).map(function (e, i) {
+	            return (i === 3) ? normalizeAlpha(e) : e;
+	        });
+	        retval = 'rgba(' + fixedMatch.join(',') + ')';
 	        return retval;
 	    }
 
@@ -2105,11 +2138,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    return devicePixelRatio / backingStoreRatio;
 	};
+
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var DOM = __webpack_require__(9);
 
@@ -2223,9 +2257,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Generic new DOM element function
@@ -2292,9 +2326,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	var Color = function(color, options) {
 	    //todo: support rgba, hsla, and rrggbbaa notation
@@ -2500,20 +2534,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Color;
 
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = {
-	  'version': '2.9.0',
+	  'version': '2.9.8',
 	  'svg_ns': 'http://www.w3.org/2000/svg'
 	};
 
-/***/ },
+/***/ }),
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	var shaven = __webpack_require__(13);
+	var shaven = __webpack_require__(13).default;
 
 	var SVG = __webpack_require__(8);
 	var constants = __webpack_require__(11);
@@ -2592,7 +2626,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var word = line.children[wordKey];
 	      var x = textGroup.x + line.x + word.x;
 	      var y = textGroup.y + line.y + word.y;
-
 	      var wordTag = templates.element({
 	        'tag': 'text',
 	        'content': word.properties.text,
@@ -2660,249 +2693,393 @@ return /******/ (function(modules) { // webpackBootstrap
 	    'preserveAspectRatio': 'none'
 	  });
 
-	  var output = shaven(svg);
-	  
-	  output = stylesheetXml + output[0];
+	  var output = String(shaven(svg));
+
+	  if (/\&amp;(x)?#[0-9A-Fa-f]/.test(output[0])) {
+	    output = output.replace(/&amp;#/gm, '&#');
+	  }
+
+	  output = stylesheetXml + output;
 
 	  var svgString = SVG.svgStringToDataURI(output, renderSettings.mode === 'background');
+
 	  return svgString;
 	};
 
-/***/ },
+
+/***/ }),
 /* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	var escape = __webpack_require__(14)
+	'use strict';
 
-	// TODO: remove namespace
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
-	module.exports = function shaven (array, namespace, returnObject) {
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; /* eslint-disable no-console */
 
-		'use strict'
+	exports.default = shaven;
 
-		var i = 1,
-			doesEscape = true,
-			HTMLString,
-			attributeKey,
-			callback,
-			key
+	var _parseSugarString = __webpack_require__(14);
 
+	var _parseSugarString2 = _interopRequireDefault(_parseSugarString);
 
-		returnObject = returnObject || {}
+	var _defaults = __webpack_require__(15);
 
+	var _defaults2 = _interopRequireDefault(_defaults);
 
-		function createElement (sugarString) {
+	var _namespaceToURL = __webpack_require__(16);
 
-			var tags = sugarString.match(/^\w+/),
-				element = {
-					tag: tags ? tags[0] : 'div',
-					attr: {},
-					children: []
-				},
-				id = sugarString.match(/#([\w-]+)/),
-				reference = sugarString.match(/\$([\w-]+)/),
-				classNames = sugarString.match(/\.[\w-]+/g)
+	var _namespaceToURL2 = _interopRequireDefault(_namespaceToURL);
 
+	var _mapAttributeValue = __webpack_require__(17);
 
-			// Assign id if is set
-			if (id) {
-				element.attr.id = id[1]
+	var _mapAttributeValue2 = _interopRequireDefault(_mapAttributeValue);
 
-				// Add element to the return object
-				returnObject[id[1]] = element
-			}
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-			if (reference)
-				returnObject[reference[1]] = element
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-			if (classNames)
-				element.attr.class = classNames.join(' ').replace(/\./g, '')
+	function shaven(arrayOrObject) {
+	  var isArray = Array.isArray(arrayOrObject);
+	  var objType = typeof arrayOrObject === 'undefined' ? 'undefined' : _typeof(arrayOrObject);
 
-			if (sugarString.match(/&$/g))
-				doesEscape = false
+	  if (!isArray && objType !== 'object') {
+	    throw new Error('Argument must be either an array or an object ' + 'and not ' + JSON.stringify(arrayOrObject));
+	  }
 
-			return element
-		}
+	  if (isArray && arrayOrObject.length === 0) {
+	    // Ignore empty arrays
+	    return {};
+	  }
 
-		function replacer (key, value) {
+	  var config = {};
+	  var elementArray = void 0;
 
-			if (value === null || value === false || value === undefined)
-				return
+	  if (Array.isArray(arrayOrObject)) {
+	    elementArray = arrayOrObject;
+	  } else {
+	    elementArray = arrayOrObject.elementArray;
+	    delete arrayOrObject.elementArray;
+	    Object.assign(config, arrayOrObject);
+	  }
 
-			if (typeof value !== 'string' && typeof value !== 'object')
-				return String(value)
+	  config = Object.assign({}, _defaults2.default, config, {
+	    returnObject: { // Shaven object to return at last
+	      ids: {},
+	      references: {}
+	    }
+	  });
 
-			return value
-		}
-
-		function escapeAttribute (string) {
-			return String(string)
-				.replace(/&/g, '&amp;')
-				.replace(/"/g, '&quot;')
-		}
-
-		function escapeHTML (string) {
-			return String(string)
-				.replace(/&/g, '&amp;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&apos;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-		}
+	  config.nsStack = [config.namespace]; // Stack with current namespaces
 
 
-		if (typeof array[0] === 'string')
-			array[0] = createElement(array[0])
+	  function createElement(sugarString) {
+	    var properties = (0, _parseSugarString2.default)(sugarString);
+	    var currentNs = config.nsStack[config.nsStack.length - 1];
 
-		else if (Array.isArray(array[0]))
-			i = 0
+	    if (properties.tag === 'svg') {
+	      config.nsStack.push('svg');
+	    } else if (properties.tag === 'math') {
+	      config.nsStack.push('mathml');
+	    } else if (properties.tag === 'html') {
+	      config.nsStack.push('xhtml');
+	    } else {
+	      // Keep current namespace
+	      config.nsStack.push(currentNs);
+	    }
 
-		else
-			throw new Error(
-				'First element of array must be a string, ' +
-				'or an array and not ' + JSON.stringify(array[0])
-			)
+	    var namespace = config.nsStack[config.nsStack.length - 1];
+	    var element = document.createElementNS(_namespaceToURL2.default[namespace] ? _namespaceToURL2.default[namespace] : namespace, properties.tag);
 
+	    if (properties.id) {
+	      element.id = properties.id;
+	      console.assert(!config.returnObject.ids.hasOwnProperty(properties.id), 'Ids must be unique and "' + properties.id + '" is already assigned');
+	      config.returnObject.ids[properties.id] = element;
+	    }
+	    if (properties.class) {
+	      var _element$classList;
 
-		for (; i < array.length; i++) {
+	      (_element$classList = element.classList).add.apply(_element$classList, _toConsumableArray(properties.class.split(' ')));
+	    }
+	    if (properties.reference) {
+	      console.assert(!config.returnObject.ids.hasOwnProperty(properties.reference), 'References must be unique and "' + properties.id + '" is already assigned');
+	      config.returnObject.references[properties.reference] = element;
+	    }
 
-			// Don't render element if value is false or null
-			if (array[i] === false || array[i] === null) {
-				array[0] = false
-				break
-			}
+	    config.escapeHTML = properties.escapeHTML != null ? properties.escapeHTML : config.escapeHTML;
 
-			// Continue with next array value if current value is undefined or true
-			else if (array[i] === undefined || array[i] === true) {
-				continue
-			}
+	    return element;
+	  }
 
-			else if (typeof array[i] === 'string') {
-				if (doesEscape)
-					array[i] = escapeHTML(array[i])
+	  function buildDom(array) {
+	    if (Array.isArray(array) && array.length === 0) {
+	      // Ignore empty arrays
+	      return {};
+	    }
 
-				array[0].children.push(array[i])
-			}
+	    var index = 1;
+	    var createdCallback = void 0;
 
-			else if (typeof array[i] === 'number') {
+	    if (typeof array[0] === 'string') {
+	      array[0] = createElement(array[0]);
+	    } else if (Array.isArray(array[0])) {
+	      index = 0;
+	    } else if (!(array[0] instanceof Element)) {
+	      throw new Error('First element of array must be either a string, ' + 'an array or a DOM element and not ' + JSON.stringify(array[0]));
+	    }
 
-				array[0].children.push(array[i])
-			}
+	    // For each in the element array (except the first)
+	    for (; index < array.length; index++) {
 
-			else if (Array.isArray(array[i])) {
+	      // Don't render element if value is false or null
+	      if (array[index] === false || array[index] === null) {
+	        array[0] = false;
+	        break;
+	      }
 
-				if (Array.isArray(array[i][0])) {
-					array[i].reverse().forEach(function (subArray) {
-						array.splice(i + 1, 0, subArray)
-					})
+	      // Continue with next array value if current is undefined or true
+	      else if (array[index] === undefined || array[index] === true) {
+	          continue;
+	        }
 
-					if (i !== 0)
-						continue
-					i++
-				}
+	        // If is string has to be content so set it
+	        else if (typeof array[index] === 'string' || typeof array[index] === 'number') {
+	            if (config.escapeHTML) {
+	              array[0].appendChild(document.createTextNode(array[index]));
+	            } else {
+	              array[0].innerHTML = array[index];
+	            }
+	          }
 
-				shaven(array[i], namespace, returnObject)
+	          // If is array has to be child element
+	          else if (Array.isArray(array[index])) {
+	              // If is actually a sub-array, flatten it
+	              if (Array.isArray(array[index][0])) {
+	                array[index].reverse().forEach(function (subArray) {
+	                  // eslint-disable-line no-loop-func
+	                  array.splice(index + 1, 0, subArray);
+	                });
 
-				if (array[i][0])
-					array[0].children.push(array[i][0])
-			}
+	                if (index !== 0) continue;
+	                index++;
+	              }
 
-			else if (typeof array[i] === 'function')
-				callback = array[i]
+	              // Build dom recursively for all child elements
+	              buildDom(array[index]);
 
+	              // Append the element to its parent element
+	              if (array[index][0]) {
+	                array[0].appendChild(array[index][0]);
+	              }
+	            } else if (typeof array[index] === 'function') {
+	              createdCallback = array[index];
+	            }
 
-			else if (typeof array[i] === 'object') {
-				for (attributeKey in array[i])
-					if (array[i].hasOwnProperty(attributeKey))
-						if (array[i][attributeKey] !== null &&
-							array[i][attributeKey] !== false)
-							if (attributeKey === 'style' &&
-								typeof array[i][attributeKey] === 'object')
-								array[0].attr[attributeKey] = JSON
-									.stringify(array[i][attributeKey], replacer)
-									.slice(2, -2)
-									.replace(/","/g, ';')
-									.replace(/":"/g, ':')
-									.replace(/\\"/g, '\'')
+	            // If it is an element append it
+	            else if (array[index] instanceof Element) {
+	                array[0].appendChild(array[index]);
+	              }
 
-							else
-								array[0].attr[attributeKey] = array[i][attributeKey]
-			}
+	              // Else must be an object with attributes
+	              else if (_typeof(array[index]) === 'object') {
+	                  // For each attribute
+	                  for (var attributeKey in array[index]) {
+	                    if (!array[index].hasOwnProperty(attributeKey)) continue;
 
-			else
-				throw new TypeError('"' + array[i] + '" is not allowed as a value.')
-		}
+	                    var attributeValue = array[index][attributeKey];
 
+	                    if (array[index].hasOwnProperty(attributeKey) && attributeValue !== null && attributeValue !== false) {
+	                      array[0].setAttribute(attributeKey, (0, _mapAttributeValue2.default)(attributeKey, attributeValue, config));
+	                    }
+	                  }
+	                } else {
+	                  throw new TypeError('"' + array[index] + '" is not allowed as a value');
+	                }
+	    }
 
-		if (array[0] !== false) {
+	    config.nsStack.pop();
 
-			HTMLString = '<' + array[0].tag
+	    // Return root element on index 0
+	    config.returnObject[0] = array[0];
+	    config.returnObject.rootElement = array[0];
 
-			for (key in array[0].attr)
-				if (array[0].attr.hasOwnProperty(key))
-					HTMLString += ' ' + key + '="' +
-						escapeAttribute(array[0].attr[key] || '') + '"'
+	    config.returnObject.toString = function () {
+	      return array[0].outerHTML;
+	    };
 
-			HTMLString += '>'
+	    if (createdCallback) createdCallback(array[0]);
+	  }
 
-			array[0].children.forEach(function (child) {
-				HTMLString += child
-			})
+	  buildDom(elementArray);
 
-			HTMLString += '</' + array[0].tag + '>'
-
-			array[0] = HTMLString
-		}
-
-		// Return root element on index 0
-		returnObject[0] = array[0]
-
-		if (callback)
-			callback(array[0])
-
-		// returns object containing all elements with an id and the root element
-		return returnObject
+	  return config.returnObject;
 	}
 
+	shaven.setDefaults = function (object) {
+	  Object.assign(_defaults2.default, object);
+	  return shaven;
+	};
 
-/***/ },
+/***/ }),
 /* 14 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
-	/*!
-	 * escape-html
-	 * Copyright(c) 2012-2013 TJ Holowaychuk
-	 * MIT Licensed
-	 */
+	'use strict';
 
-	/**
-	 * Module exports.
-	 * @public
-	 */
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
 
-	module.exports = escapeHtml;
+	exports.default = function (sugarString) {
+	  var tags = sugarString.match(/^[\w-]+/);
+	  var properties = {
+	    tag: tags ? tags[0] : 'div'
+	  };
+	  var ids = sugarString.match(/#([\w-]+)/);
+	  var classes = sugarString.match(/\.[\w-]+/g);
+	  var references = sugarString.match(/\$([\w-]+)/);
 
-	/**
-	 * Escape special characters in the given string of html.
-	 *
-	 * @param  {string} str The string to escape for inserting into HTML
-	 * @return {string}
-	 * @public
-	 */
+	  if (ids) properties.id = ids[1];
 
-	function escapeHtml(html) {
-	  return String(html)
-	    .replace(/&/g, '&amp;')
-	    .replace(/"/g, '&quot;')
-	    .replace(/'/g, '&#39;')
-	    .replace(/</g, '&lt;')
-	    .replace(/>/g, '&gt;');
+	  if (classes) {
+	    properties.class = classes.join(' ').replace(/\./g, '');
+	  }
+
+	  if (references) properties.reference = references[1];
+
+	  if (sugarString.endsWith('&') || sugarString.endsWith('!')) {
+	    properties.escapeHTML = false;
+	  }
+
+	  return properties;
+	};
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  namespace: 'xhtml',
+	  autoNamespacing: true,
+	  escapeHTML: true,
+	  quotationMark: '"',
+	  quoteAttributes: true,
+	  convertTransformArray: true
+	};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = {
+	  mathml: 'http://www.w3.org/1998/Math/MathML',
+	  svg: 'http://www.w3.org/2000/svg',
+	  xhtml: 'http://www.w3.org/1999/xhtml'
+	};
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var _buildTransformString = __webpack_require__(18);
+
+	var _buildTransformString2 = _interopRequireDefault(_buildTransformString);
+
+	var _stringifyStyleObject = __webpack_require__(19);
+
+	var _stringifyStyleObject2 = _interopRequireDefault(_stringifyStyleObject);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	exports.default = function (key, value) {
+	  if (value === undefined) {
+	    return '';
+	  }
+
+	  if (key === 'style' && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+	    return (0, _stringifyStyleObject2.default)(value);
+	  }
+
+	  if (key === 'transform' && Array.isArray(value)) {
+	    return (0, _buildTransformString2.default)(value);
+	  }
+
+	  return value;
+	};
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	// Create transform string from list transform objects
+
+	exports.default = function (transformObjects) {
+
+	  return transformObjects.map(function (transformation) {
+	    var values = [];
+
+	    if (transformation.type === 'rotate' && transformation.degrees) {
+	      values.push(transformation.degrees);
+	    }
+	    if (transformation.x) values.push(transformation.x);
+	    if (transformation.y) values.push(transformation.y);
+
+	    return transformation.type + '(' + values + ')';
+	  }).join(' ');
+	};
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	function sanitizeProperties(key, value) {
+	  if (value === null || value === false || value === undefined) return;
+	  if (typeof value === 'string' || (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') return value;
+
+	  return String(value);
 	}
 
+	exports.default = function (styleObject) {
+	  return JSON.stringify(styleObject, sanitizeProperties).slice(2, -2).replace(/","/g, ';').replace(/":"/g, ':').replace(/\\"/g, '\'');
+	};
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	var DOM = __webpack_require__(9);
 	var utils = __webpack_require__(7);
@@ -2969,7 +3146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	})();
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;
