@@ -1,4 +1,4 @@
-var shaven = require('shaven').default;
+var shaven = require('../vendor/shaven').default;
 
 var SVG = require('../svg');
 var constants = require('../constants');
