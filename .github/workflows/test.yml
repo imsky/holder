@@ -5,5 +5,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
-      - uses: microsoft/playwright-github-actions@v1
+      - uses: microsoft/playwright-github-action@v1
       - run: npm install
