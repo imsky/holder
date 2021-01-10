@@ -14,7 +14,6 @@ No extra requests, small bundle size, highly customizable.
 [![NerdyData Popularity](https://badges.nerdydata.com/1cf03fe7-0e02-40ef-be69-f00ca9547fc9)](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9)
 [![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/holderjs/badge?style=rounded)](https://www.jsdelivr.com/package/npm/holderjs)
 
-
 ## Installing
 
 * [npm](https://npmjs.com/): `npm install holderjs`

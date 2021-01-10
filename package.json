@@ -39,7 +39,7 @@
     "gulp-todo": "0.3.8",
     "gulp-uglify": "1.2.0",
     "gulp-util": "3.0.8",
-    "moment": "2.6.0",
+    "moment": "2.29.1",
     "node-http-server": "3.0.0",
     "trim": "0.0.1",
     "webdriverio": "2.4.5",
