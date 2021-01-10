@@ -6,7 +6,7 @@ Holder renders image placeholders in browser using SVG.
 
 Used by thousands of [open source projects](https://github.com/search?q=holder.js+in%3Apath&type=Code&ref=searchresults) (including [Bootstrap v3](https://getbootstrap.com)) and [many](https://nerdydata.com/technology-reports/Holder.js/1cf03fe7-0e02-40ef-be69-f00ca9547fc9) [other](http://libscore.com/#Holder) sites.
 
-Zero extra requests, small bundle size, highly customizable.
+No extra requests, small bundle size, highly customizable.
 
 [![npm](https://img.shields.io/npm/v/holderjs.svg)](https://www.npmjs.com/package/holderjs)
 [![Travis Build Status](https://img.shields.io/travis/imsky/holder.svg)](https://travis-ci.org/imsky/holder)
@@ -282,6 +282,10 @@ You can prevent Holder from running its default configuration by executing ``Hol
 
 
 Holder is compatible with ``lazyload.js`` and works with both fluid and fixed-width images. For best results, run `.lazyload({skip_invisible:false})`.
+
+## Using with React
+
+When using Holder in a React component, execute `Holder.run` in `componentDidMount` to enable rendering after state changes. See [this issue](https://github.com/imsky/holder/issues/225) for more details.
 
 ## Using with Vue
 
