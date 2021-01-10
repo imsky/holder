@@ -1,19 +1,29 @@
-var runner = require('./runner');
-var server = require('node-http-server');
+var path = require('path');
 
-server.deploy({
-    'port': 8000,
-    'root': __dirname
-});
+var playwright = require('playwright');
 
-runner({
-    'browserName': 'chrome'
-}, function (err, retval) {
-    console.log('Test result: ', retval);
+var chromium = playwright.chromium;
 
-    if (!retval) {
-        process.exitCode = -1;
-    }
+var browser;
+var ctx;
+var page;
 
-    process.exit();
-});
+chromium.launch()
+  .then(function (_browser) {
+    browser = _browser;
+    return browser.newContext();
+  })
+  .then(function (context) {
+    ctx = context;
+    return ctx.newPage();
+  })
+  .then(function (_page) {
+    page = _page;
+    return page.goto('file:' + path.join(__dirname, 'index.html'), { waitUntil: 'domcontentloaded' });
+  })
+  .then(function () {
+    return page.screenshot({ path: 'screenshot.png' });
+  })
+  .finally(function () {
+    return browser.close();
+  });
