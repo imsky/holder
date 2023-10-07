@@ -41,7 +41,7 @@
     "gulp-util": "3.0.8",
     "moment": "2.29.1",
     "node-http-server": "3.0.0",
-    "trim": "0.0.1",
+    "trim": "0.0.3",
     "webdriverio": "2.4.5",
     "webpack-stream": "2.1.1"
   },
